@@ -5,17 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>RSS Widget</title>
 
+  <script src="components/webcomponentsjs/webcomponents.min.js"></script>
+  <link rel="import" href="components/web-component-rise-rss/rise-rss.html">
+
   <link rel="stylesheet" href="css/rss.min.css"/>
 
 </head>
 <body>
 
-<div id="rssContainer"></div>
+  <rise-rss id="rss"></rise-rss>
 
-<script src="//rvashow2.appspot.com/gadgets/gadgets.min.js"></script>
+  <div id="rssContainer"></div>
 
+  <script src="//rvashow2.appspot.com/gadgets/gadgets.min.js"></script>
+  
 
-<script src="js/widget.min.js"></script>
+  <script src="js/widget.min.js"></script>
 
 </body>
 </html>

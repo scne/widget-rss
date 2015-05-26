@@ -1,0 +1,97 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<script src="//rvashow2.appspot.com/gadgets/gadgets.min.js"></script>
+
+<script src="modules.js"></script>
+
+<polymer-element name="rise-rss" attributes="url entries refresh">
+
+  <script>
+    /* global Polymer, gadgets, RiseVision */
+    /*jshint newcap: false */
+
+    (function() {
+
+      // Private or static variables
+
+      Polymer("rise-rss", {
+        /**
+         * Fired when a response is received.
+         *
+         * @event rise-rss-response
+         */
+
+        /**
+         * Fired when an error is received.
+         *
+         * @event rise-rss-error
+         */
+
+        /**
+         * The URL of the RSS feed.
+         *
+         * @attribute url
+         * @type string
+         * @default ""
+         */
+        url: "",
+
+        /**
+         * The number of entries to return in the data.
+         *
+         * @attribute entries
+         * @type number
+         * @default 0 (return all entries)
+         */
+        entries: 0,
+
+        /**
+         * The number of minutes before another request will be made.
+         *
+         * @attribute refresh
+         * @type number
+         * @default 0 (no refresh)
+         */
+        refresh: 0,
+
+        /************************************** INITIALIZATION **************************************/
+
+        /**
+         * Polymer has finished its initialization. This is the entry point.
+         */
+        ready: function() {
+
+
+        },
+
+        /****************************************** COMMON ******************************************/
+
+        /**
+         * Performs a request using gadgets.io.makeRequest.
+         */
+        go: function() {
+          // TODO: below is proof of concept using makeRequest and feedme.js. Further commits will refactor go()
+          var params = {};
+
+          params[gadgets.io.RequestParameters.CONTENT_TYPE] = gadgets.io.ContentType.TEXT;
+
+          gadgets.io.makeRequest(this.url, function(feed) {
+            var parser = new RiseVision.ModuleExports.FeedMe(true),
+              feedJSON;
+
+            // pass the XML string from the response
+            parser.write(feed.text);
+
+            // store the JSON parsed object of the feed
+            feedJSON = parser.done();
+
+            console.dir(feedJSON);
+
+          }, params);
+        }
+
+      });
+    })();
+
+  </script>
+</polymer-element>

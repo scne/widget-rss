@@ -23,14 +23,21 @@
 
   }
 
-  if (id && id !== "") {
-    gadgets.rpc.register("rscmd_play_" + id, play);
-    gadgets.rpc.register("rscmd_pause_" + id, pause);
-    gadgets.rpc.register("rscmd_stop_" + id, stop);
+  function polymerReady() {
+    window.removeEventListener("polymer-ready", polymerReady);
 
-    gadgets.rpc.register("rsparam_set_" + id, RiseVision.RSS.setAdditionalParams);
-    gadgets.rpc.call("", "rsparam_get", null, id, ["additionalParams"]);
+    if (id && id !== "") {
+      gadgets.rpc.register("rscmd_play_" + id, play);
+      gadgets.rpc.register("rscmd_pause_" + id, pause);
+      gadgets.rpc.register("rscmd_stop_" + id, stop);
+
+      gadgets.rpc.register("rsparam_set_" + id, RiseVision.RSS.setAdditionalParams);
+      gadgets.rpc.call("", "rsparam_get", null, id, ["additionalParams"]);
+    }
   }
+
+  window.addEventListener("polymer-ready", polymerReady);
+
 
 })(window, gadgets);
 
