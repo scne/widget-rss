@@ -20,7 +20,8 @@ RiseVision.RSS = (function (gadgets) {
 
   var _additionalParams;
 
-  var _prefs = null;
+  var _prefs = null,
+    _component = null;
 
   /*
    *  Private Methods
@@ -28,6 +29,11 @@ RiseVision.RSS = (function (gadgets) {
   function _ready() {
     gadgets.rpc.call("", "rsevent_ready", null, _prefs.getString("id"),
       true, true, true, true, false);
+  }
+
+  function onComponentInit() {
+    //TODO: temporary ready call, more logic to come
+    _ready();
   }
 
   /*
@@ -45,7 +51,9 @@ RiseVision.RSS = (function (gadgets) {
 
         document.getElementById("rssContainer").style.height = _prefs.getInt("rsH") + "px";
 
-        _ready();
+        // create and initialize the Storage module instance
+        _component = new RiseVision.RSS.Component(_additionalParams);
+        _component.init();
       }
     }
   }
@@ -53,6 +61,7 @@ RiseVision.RSS = (function (gadgets) {
   function stop() {}
 
   return {
+    "onComponentInit": onComponentInit,
     "pause": pause,
     "play": play,
     "setAdditionalParams": setAdditionalParams,
@@ -60,6 +69,39 @@ RiseVision.RSS = (function (gadgets) {
   };
 
 })(gadgets);
+
+var RiseVision = RiseVision || {};
+RiseVision.RSS = RiseVision.RSS || {};
+
+RiseVision.RSS.Component = function (data) {
+  "use strict";
+
+  /*
+   *  Public Methods
+   */
+  function init() {
+    var rss = document.getElementById("rss");
+
+    if (!rss) {
+      return;
+    }
+
+    rss.addEventListener("rise-rss-response", function() {
+      //TODO: handle response
+    });
+
+    rss.setAttribute("url", data.url);
+
+    rss.go();
+
+    //TODO: temporary until handler function is complete
+    RiseVision.RSS.onComponentInit();
+  }
+
+  return {
+    "init": init
+  };
+};
 
 /* global gadgets, RiseVision */
 
@@ -86,14 +128,21 @@ RiseVision.RSS = (function (gadgets) {
 
   }
 
-  if (id && id !== "") {
-    gadgets.rpc.register("rscmd_play_" + id, play);
-    gadgets.rpc.register("rscmd_pause_" + id, pause);
-    gadgets.rpc.register("rscmd_stop_" + id, stop);
+  function polymerReady() {
+    window.removeEventListener("polymer-ready", polymerReady);
 
-    gadgets.rpc.register("rsparam_set_" + id, RiseVision.RSS.setAdditionalParams);
-    gadgets.rpc.call("", "rsparam_get", null, id, ["additionalParams"]);
+    if (id && id !== "") {
+      gadgets.rpc.register("rscmd_play_" + id, play);
+      gadgets.rpc.register("rscmd_pause_" + id, pause);
+      gadgets.rpc.register("rscmd_stop_" + id, stop);
+
+      gadgets.rpc.register("rsparam_set_" + id, RiseVision.RSS.setAdditionalParams);
+      gadgets.rpc.call("", "rsparam_get", null, id, ["additionalParams"]);
+    }
   }
+
+  window.addEventListener("polymer-ready", polymerReady);
+
 
 })(window, gadgets);
 

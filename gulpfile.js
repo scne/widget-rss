@@ -86,6 +86,16 @@
       .pipe(gulp.dest("dist/locales"));
   });
 
+  gulp.task("rise-rss", function() {
+    return gulp.src([
+      "src/components/webcomponentsjs/webcomponents*.js",
+      "src/components/web-component-rise-rss/rise-rss.html",
+      "src/components/web-component-rise-rss/modules.js",
+      "src/components/polymer/*.*{html,js}"
+    ], {base: "./src/"})
+      .pipe(gulp.dest("dist/"));
+  });
+
   gulp.task("webdriver_update", factory.webdriveUpdate());
 
   // ***** e2e Testing ***** //
@@ -115,7 +125,7 @@
   });
 
   gulp.task("build", function (cb) {
-    runSequence(["clean", "config"], ["source", "fonts", "images", "i18n"], ["unminify"], cb);
+    runSequence(["clean", "config"], ["source", "fonts", "images", "i18n", "rise-rss"], ["unminify"], cb);
   });
 
   gulp.task("bump", function(){

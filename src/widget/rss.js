@@ -8,7 +8,8 @@ RiseVision.RSS = (function (gadgets) {
 
   var _additionalParams;
 
-  var _prefs = null;
+  var _prefs = null,
+    _component = null;
 
   /*
    *  Private Methods
@@ -16,6 +17,11 @@ RiseVision.RSS = (function (gadgets) {
   function _ready() {
     gadgets.rpc.call("", "rsevent_ready", null, _prefs.getString("id"),
       true, true, true, true, false);
+  }
+
+  function onComponentInit() {
+    //TODO: temporary ready call, more logic to come
+    _ready();
   }
 
   /*
@@ -33,7 +39,9 @@ RiseVision.RSS = (function (gadgets) {
 
         document.getElementById("rssContainer").style.height = _prefs.getInt("rsH") + "px";
 
-        _ready();
+        // create and initialize the Component module instance
+        _component = new RiseVision.RSS.Component(_additionalParams);
+        _component.init();
       }
     }
   }
@@ -41,6 +49,7 @@ RiseVision.RSS = (function (gadgets) {
   function stop() {}
 
   return {
+    "onComponentInit": onComponentInit,
     "pause": pause,
     "play": play,
     "setAdditionalParams": setAdditionalParams,
