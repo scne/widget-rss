@@ -51,7 +51,12 @@
   });
 
   gulp.task("source", ["lint"], function () {
-    return gulp.src(['./src/settings.html', './src/widget.html'])
+    return gulp.src([
+      './src/settings.html',
+      './src/layout-4x1.html',
+      './src/layout-2x1.html',
+      './src/layout-1x2.html'
+    ])
       .pipe(usemin({
         css: [minifyCSS()],
         js: [sourcemaps.init(), uglify(), sourcemaps.write()]
@@ -60,7 +65,12 @@
   });
 
   gulp.task("unminify", function () {
-    return gulp.src(['./src/settings.html', './src/widget.html'])
+    return gulp.src([
+      './src/settings.html',
+      './src/layout-4x1.html',
+      './src/layout-2x1.html',
+      './src/layout-1x2.html'
+    ])
       .pipe(usemin({
         css: [rename(function (path) {
           path.basename = path.basename.substring(0, path.basename.indexOf(".min"))
@@ -77,7 +87,10 @@
   });
 
   gulp.task("images", function() {
-    gulp.src("src/components/rv-bootstrap-formhelpers/img/bootstrap-formhelpers-googlefonts.png")
+    gulp.src([
+      "src/components/rv-bootstrap-formhelpers/img/bootstrap-formhelpers-googlefonts.png",
+      "src/img/**/*"
+    ])
       .pipe(gulp.dest("dist/img"));
   });
 
@@ -91,7 +104,8 @@
       "src/components/webcomponentsjs/webcomponents*.js",
       "src/components/web-component-rise-rss/rise-rss.html",
       "src/components/web-component-rise-rss/modules.js",
-      "src/components/polymer/*.*{html,js}"
+      "src/components/underscore/underscore.js",
+      "src/components/polymer/**/*"
     ], {base: "./src/"})
       .pipe(gulp.dest("dist/"));
   });

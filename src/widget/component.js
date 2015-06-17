@@ -4,6 +4,8 @@ RiseVision.RSS = RiseVision.RSS || {};
 RiseVision.RSS.Component = function (data) {
   "use strict";
 
+  var _initialLoad = true;
+
   /*
    *  Public Methods
    */
@@ -14,8 +16,28 @@ RiseVision.RSS.Component = function (data) {
       return;
     }
 
-    rss.addEventListener("rise-rss-response", function() {
-      //TODO: handle response
+    rss.addEventListener("rise-rss-response", function(e) {
+      console.log("rise-rss-response handler");
+
+      if (e.detail && e.detail.feed) {
+        if (_initialLoad) {
+          _initialLoad = false;
+
+          RiseVision.RSS.onComponentInit(e.detail.feed);
+
+        } else {
+          RiseVision.RSS.onComponentRefresh(e.detail.feed);
+        }
+      }
+    });
+
+    rss.addEventListener("rise-rss-error", function (e) {
+      console.log("rise-rss-error handler");
+
+      if (e.detail) {
+        console.log(e.detail);
+      }
+
     });
 
     rss.setAttribute("url", data.url);
@@ -23,8 +45,6 @@ RiseVision.RSS.Component = function (data) {
     // retrieve the JSON formatted RSS data
     rss.go();
 
-    //TODO: temporary until handler function is complete
-    RiseVision.RSS.onComponentInit();
   }
 
   return {
