@@ -1,97 +1,257 @@
 <link rel="import" href="../polymer/polymer.html">
 
-<script src="//rvashow2.appspot.com/gadgets/gadgets.min.js"></script>
-
 <script src="modules.js"></script>
 
-<polymer-element name="rise-rss" attributes="url entries refresh">
+<script src="../underscore/underscore.js"></script>
 
-  <script>
-    /* global Polymer, gadgets, RiseVision */
-    /*jshint newcap: false */
+<script>
+  (function() {
+    /* global Polymer, gadgets, RiseVision, _ */
+    /* jshint newcap: false */
 
-    (function() {
+    "use strict";
 
-      // Private or static variables
+    var OFFLINE_REGISTRATION = "register.chrome.app.window";
 
-      Polymer("rise-rss", {
-        /**
-         * Fired when a response is received.
-         *
-         * @event rise-rss-response
-         */
+    var OFFLINE_MESSAGE_TYPE = "bypasscors";
 
-        /**
-         * Fired when an error is received.
-         *
-         * @event rise-rss-error
-         */
+    var LOCAL_STORAGE_NAME = "riserss";
+
+    var offlineWindow, offlineOrigin;
+
+    function supportsLocalStorage() {
+      try {
+        return "localStorage" in window && window.localStorage !== null;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    Polymer({
+      is: "rise-rss",
+
+      /**
+       * Fired when a response is received.
+       *
+       * @param {object} feed javascript object representation of feed
+       * @event rise-rss-response
+       */
+
+      /**
+       * Fired when an error is received.
+       *
+       * @event rise-rss-error
+       */
+
+      properties: {
 
         /**
          * The URL of the RSS feed.
-         *
-         * @attribute url
-         * @type string
-         * @default ""
          */
-        url: "",
+        url: {
+          type: String,
+          value: ""
+        },
 
         /**
          * The number of entries to return in the data.
-         *
-         * @attribute entries
-         * @type number
-         * @default 0 (return all entries)
          */
-        entries: 0,
+        entries: {
+          type: Number,
+          value: 0
+        },
 
         /**
          * The number of minutes before another request will be made.
-         *
-         * @attribute refresh
-         * @type number
-         * @default 0 (no refresh)
          */
-        refresh: 0,
+        refresh: {
+          type: Number,
+          value: 0
+        }
+      },
 
-        /************************************** INITIALIZATION **************************************/
+      _prepareResponse: function(feed) {
+        var response = {},
+          limit;
 
-        /**
-         * Polymer has finished its initialization. This is the entry point.
-         */
-        ready: function() {
+        response.feed = _.clone(feed);
 
+        this.entries = parseInt(this.entries, 10);
 
-        },
+        // limit the entries to provide in response
+        if (!isNaN(this.entries) && this.entries > 0) {
+          // ensure feed.items exists
+          if (feed.items && feed.items.length) {
+            // determine value to use for how many items to limit to
+            limit = (feed.items.length >= this.entries) ? this.entries : feed.items.length;
 
-        /****************************************** COMMON ******************************************/
-
-        /**
-         * Performs a request using gadgets.io.makeRequest.
-         */
-        go: function() {
-          // TODO: below is proof of concept using makeRequest and feedme.js. Further commits will refactor go()
-          var params = {};
-
-          params[gadgets.io.RequestParameters.CONTENT_TYPE] = gadgets.io.ContentType.TEXT;
-
-          gadgets.io.makeRequest(this.url, function(feed) {
-            var parser = new RiseVision.ModuleExports.FeedMe(true),
-              feedJSON;
-
-            // pass the XML string from the response
-            parser.write(feed.text);
-
-            // store the JSON parsed object of the feed
-            feedJSON = parser.done();
-
-            console.dir(feedJSON);
-
-          }, params);
+            // revise to include only required entries
+            response.feed.items = _.first(feed.items, limit);
+          }
         }
 
-      });
-    })();
+        return response;
+      },
 
-  </script>
-</polymer-element>
+      _parseToJSON: function (xml) {
+        var parser = new RiseVision.ModuleExports.FeedMe(true);
+
+        // pass the XML string from the response
+        parser.write(xml);
+
+        // return the JSON parsed object
+        return parser.done();
+      },
+
+      _startTimer: function() {
+        var refreshFn = (offlineWindow) ? this._postMessage : this._makeRequest,
+          self = this;
+
+        this.refresh = parseInt(this.refresh, 10);
+
+        if (!isNaN(this.refresh) && this.refresh !== 0) {
+          this.refresh = (this.refresh < 1) ? 1 : this.refresh;
+
+          this.debounce("refresh", function () {
+            refreshFn.call(self);
+          }, this.refresh * 60000);
+        }
+      },
+
+      _handleRequestError: function (errors) {
+        this._startTimer();
+        this.fire("rise-rss-error", errors);
+      },
+
+      _handleRequestSuccess: function (xml) {
+        var feedJSON = this._parseToJSON(xml),
+          responseData = this._prepareResponse(feedJSON);
+
+        // cache data in local storage if localStorage is supported and component running in Offline Player
+        if (offlineWindow && supportsLocalStorage()) {
+          localStorage.setItem(LOCAL_STORAGE_NAME, JSON.stringify(responseData));
+        }
+
+        this._startTimer();
+        this.fire("rise-rss-response", responseData);
+      },
+
+      _validateResponse: function(data) {
+        // ensure for actual XML as the data
+        if (typeof data === "string" && data.indexOf('<?xml version="1.0"') !== -1) { // jshint ignore:line
+          this._handleRequestSuccess(data);
+        }
+        else {
+          // the request didn't respond with RSS XML
+          this._handleRequestError("Request response is not XML");
+        }
+      },
+
+      _handleOfflineError: function (error) {
+        var cachedData;
+
+        if (supportsLocalStorage()) {
+          // retrieve any rss data cached and parse back to an object
+          cachedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_NAME));
+
+          if (cachedData) {
+            // start refresh timer and fire the event using the cached data
+            this._startTimer();
+            this.fire("rise-rss-response", cachedData);
+            return;
+          }
+        }
+
+        // no cached data available, process the error
+        this._handleRequestError(error);
+      },
+
+      _handleOfflineMessage: function (evt) {
+        if (evt.data === OFFLINE_REGISTRATION) {
+          // store the main window of the offline player
+          offlineWindow = evt.source;
+
+          // store the origin for future "postMessage" calls on the offlineWindow
+          offlineOrigin = evt.origin;
+
+          return;
+        }
+
+        if (offlineWindow) {
+          // check if "error" property was included
+          if (evt.data.hasOwnProperty("error") && typeof evt.data.error !== "undefined" && evt.data.error !== "") {
+            this._handleOfflineError(evt.data.error);
+            return;
+          }
+
+          // check if "response" property included
+          if (evt.data.hasOwnProperty("response")) {
+            // successful response provided so bypass localStorage retrieval and process the response
+            this._validateResponse(evt.data.response);
+          }
+        }
+
+      },
+
+      _makeRequest: function () {
+        var params = {},
+          self = this;
+
+        try {
+          params[gadgets.io.RequestParameters.CONTENT_TYPE] = gadgets.io.ContentType.TEXT;
+
+          gadgets.io.makeRequest(this.url, function(response) {
+            if (response.errors.length > 0) {
+              self._handleRequestError(response.errors);
+            }
+            else {
+              self._validateResponse(response.data);
+            }
+
+          }, params);
+        } catch (e) {
+          console.error("gadgets.io.makeRequest failure", e.message);
+        }
+
+      },
+
+      _postMessage: function () {
+        var message = {
+          type: OFFLINE_MESSAGE_TYPE,
+          url: this.url
+        };
+
+        offlineWindow.postMessage(message, offlineOrigin);
+      },
+
+      /**
+       * Lifecycle callback
+       *
+       * @method ready
+       */
+      ready: function () {
+        var self = this;
+
+        // listen for message event on window which will be heard if running in Offline Player
+        window.addEventListener("message", function (evt) {
+          self._handleOfflineMessage(evt);
+        });
+      },
+
+      /**
+       * Performs a request to obtain the RSS feed
+       *
+       * @method go
+       */
+      go: function() {
+        if (offlineWindow) {
+          // running in Offline Player
+          this._postMessage();
+        } else {
+          this._makeRequest();
+        }
+      }
+
+    });
+  })();
+</script>

@@ -19,9 +19,15 @@ RiseVision.RSS = (function (gadgets) {
       true, true, true, true, false);
   }
 
-  function onComponentInit() {
+  function onComponentInit(feedObj) {
+    console.dir(feedObj);
     //TODO: temporary ready call, more logic to come
     _ready();
+  }
+
+  function onComponentRefresh(feedObj) {
+    //TODO: logic to come
+    console.dir(feedObj);
   }
 
   /*
@@ -50,6 +56,7 @@ RiseVision.RSS = (function (gadgets) {
 
   return {
     "onComponentInit": onComponentInit,
+    "onComponentRefresh": onComponentRefresh,
     "pause": pause,
     "play": play,
     "setAdditionalParams": setAdditionalParams,

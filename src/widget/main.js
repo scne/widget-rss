@@ -23,8 +23,8 @@
 
   }
 
-  function polymerReady() {
-    window.removeEventListener("polymer-ready", polymerReady);
+  function webComponentsReady() {
+    window.removeEventListener("WebComponentsReady", webComponentsReady);
 
     if (id && id !== "") {
       gadgets.rpc.register("rscmd_play_" + id, play);
@@ -36,7 +36,7 @@
     }
   }
 
-  window.addEventListener("polymer-ready", polymerReady);
+  window.addEventListener("WebComponentsReady", webComponentsReady);
 
 
 })(window, gadgets);

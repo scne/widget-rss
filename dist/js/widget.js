@@ -4,6 +4,11 @@ if (typeof config === "undefined") {
   var config = {};
 
   if (typeof angular !== "undefined") {
+    angular.module("risevision.widget.rss.config", [])
+      .value("layout4x1", "https://s3.amazonaws.com/widget-rss/1.0.0/dist/layout-4x1.html")
+      .value("layout2x1", "https://s3.amazonaws.com/widget-rss/1.0.0/dist/layout-2x1.html")
+      .value("layout1x2", "https://s3.amazonaws.com/widget-rss/1.0.0/dist/layout-1x2.html");
+
     angular.module("risevision.common.i18n.config", [])
       .constant("LOCALES_PREFIX", "locales/translation_")
       .constant("LOCALES_SUFIX", ".json");
@@ -31,9 +36,15 @@ RiseVision.RSS = (function (gadgets) {
       true, true, true, true, false);
   }
 
-  function onComponentInit() {
+  function onComponentInit(feedObj) {
+    console.dir(feedObj);
     //TODO: temporary ready call, more logic to come
     _ready();
+  }
+
+  function onComponentRefresh(feedObj) {
+    //TODO: logic to come
+    console.dir(feedObj);
   }
 
   /*
@@ -51,7 +62,7 @@ RiseVision.RSS = (function (gadgets) {
 
         document.getElementById("rssContainer").style.height = _prefs.getInt("rsH") + "px";
 
-        // create and initialize the Storage module instance
+        // create and initialize the Component module instance
         _component = new RiseVision.RSS.Component(_additionalParams);
         _component.init();
       }
@@ -62,6 +73,7 @@ RiseVision.RSS = (function (gadgets) {
 
   return {
     "onComponentInit": onComponentInit,
+    "onComponentRefresh": onComponentRefresh,
     "pause": pause,
     "play": play,
     "setAdditionalParams": setAdditionalParams,
@@ -76,6 +88,8 @@ RiseVision.RSS = RiseVision.RSS || {};
 RiseVision.RSS.Component = function (data) {
   "use strict";
 
+  var _initialLoad = true;
+
   /*
    *  Public Methods
    */
@@ -86,16 +100,35 @@ RiseVision.RSS.Component = function (data) {
       return;
     }
 
-    rss.addEventListener("rise-rss-response", function() {
-      //TODO: handle response
+    rss.addEventListener("rise-rss-response", function(e) {
+      console.log("rise-rss-response handler");
+
+      if (e.detail && e.detail.feed) {
+        if (_initialLoad) {
+          _initialLoad = false;
+
+          RiseVision.RSS.onComponentInit(e.detail.feed);
+
+        } else {
+          RiseVision.RSS.onComponentRefresh(e.detail.feed);
+        }
+      }
+    });
+
+    rss.addEventListener("rise-rss-error", function (e) {
+      console.log("rise-rss-error handler");
+
+      if (e.detail) {
+        console.log(e.detail);
+      }
+
     });
 
     rss.setAttribute("url", data.url);
 
+    // retrieve the JSON formatted RSS data
     rss.go();
 
-    //TODO: temporary until handler function is complete
-    RiseVision.RSS.onComponentInit();
   }
 
   return {
@@ -128,8 +161,8 @@ RiseVision.RSS.Component = function (data) {
 
   }
 
-  function polymerReady() {
-    window.removeEventListener("polymer-ready", polymerReady);
+  function webComponentsReady() {
+    window.removeEventListener("WebComponentsReady", webComponentsReady);
 
     if (id && id !== "") {
       gadgets.rpc.register("rscmd_play_" + id, play);
@@ -141,7 +174,7 @@ RiseVision.RSS.Component = function (data) {
     }
   }
 
-  window.addEventListener("polymer-ready", polymerReady);
+  window.addEventListener("WebComponentsReady", webComponentsReady);
 
 
 })(window, gadgets);
