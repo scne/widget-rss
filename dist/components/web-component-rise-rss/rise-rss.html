@@ -4,6 +4,28 @@
 
 <script src="../underscore/underscore.js"></script>
 
+<!--
+Example usage with Polymer data binding
+<template is="dom-bind">
+  <rise-rss id="rss" url="http://example-feed.xml" entries="10" results="{{result}}"></rise-rss>
+  <div>
+    <h2>{{result.title}}</h2>
+
+    <template is="dom-repeat" items="{{result.items}}" as="entry">
+      <div class="story">
+        <div>
+          <span class="title">{{entry.title}}</span><br>
+          <span>{{entry.pubdate}}</span><br>
+          <p>{{entry.description}}</p>
+        </div>
+      </div>
+    </template>
+  </div>
+
+</template>
+@demo
+-->
+
 <script>
   (function() {
     /* global Polymer, gadgets, RiseVision, _ */
@@ -67,6 +89,15 @@
         refresh: {
           type: Number,
           value: 0
+        },
+
+        /**
+         * Result of RSS feed url
+         */
+        results: {
+          type: Object,
+          value: function() { return {}; },
+          notify: true
         }
       },
 
@@ -119,6 +150,7 @@
       },
 
       _handleRequestError: function (errors) {
+        this.results = {};
         this._startTimer();
         this.fire("rise-rss-error", errors);
       },
@@ -132,6 +164,7 @@
           localStorage.setItem(LOCAL_STORAGE_NAME, JSON.stringify(responseData));
         }
 
+        this.results = responseData.feed;
         this._startTimer();
         this.fire("rise-rss-response", responseData);
       },
@@ -155,6 +188,7 @@
           cachedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_NAME));
 
           if (cachedData) {
+            this.results = cachedData.feed;
             // start refresh timer and fire the event using the cached data
             this._startTimer();
             this.fire("rise-rss-response", cachedData);

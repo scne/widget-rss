@@ -14,7 +14,8 @@
   describe("RSS Settings - e2e Testing", function() {
 
     var validUrl = "http://rss.cbc.ca/lineup/topstories.xml",
-      invalidUrl = "http://w";
+      invalidUrl = "http://w",
+      customUrl = "http://test.com";
 
     beforeEach(function () {
       browser.get("/src/settings-e2e.html");
@@ -46,6 +47,9 @@
 
       // Queue
       expect(element(by.model("settings.additionalParams.queue")).getAttribute("value")).to.eventually.equal("5");
+
+      // Transition
+      expect(element(by.model("settings.additionalParams.transition")).getAttribute("value")).to.eventually.equal("10");
 
       // Refresh
       expect(element(by.model("settings.additionalParams.refresh")).getAttribute("value")).to.eventually.equal("5");
@@ -81,6 +85,36 @@
 
       // form should be invalid due to invalid URL
       expect(element(by.css("form[name='settingsForm'].ng-invalid")).isPresent()).to.eventually.be.true;
+    });
+
+    it("Should hide Title font setting when title checkbox deselected", function () {
+      expect(element(by.css("font-setting[font-data='settings.additionalParams.headingFont']")).isDisplayed())
+        .to.eventually.be.true;
+
+      element(by.css("input[name='title']")).click();
+
+      expect(element(by.css("font-setting[font-data='settings.additionalParams.headingFont']")).isDisplayed())
+        .to.eventually.be.false;
+    });
+
+    it("Should hide Date font setting when Date checkbox deselected", function () {
+      expect(element(by.css("font-setting[font-data='settings.additionalParams.dateFont']")).isDisplayed())
+        .to.eventually.be.true;
+
+      element(by.css("input[name='date']")).click();
+
+      expect(element(by.css("font-setting[font-data='settings.additionalParams.dateFont']")).isDisplayed())
+        .to.eventually.be.false;
+    });
+
+    it("Should hide Author font setting when Author checkbox deselected", function () {
+      expect(element(by.css("font-setting[font-data='settings.additionalParams.authorFont']")).isDisplayed())
+        .to.eventually.be.true;
+
+      element(by.css("input[name='author']")).click();
+
+      expect(element(by.css("font-setting[font-data='settings.additionalParams.authorFont']")).isDisplayed())
+        .to.eventually.be.false;
     });
 
     it("Should show URL entry for a custom layout", function () {
@@ -124,6 +158,7 @@
           url: validUrl,
           stories: 2,
           queue: 5,
+          transition: 10,
           refresh: 5,
           scroll: {
             by: "none",
@@ -137,6 +172,34 @@
             author: true
           },
           headingFont: {
+            font: {
+              type: "standard",
+              name: "Verdana",
+              family: "Verdana"
+            },
+            size: "20",
+            bold: false,
+            italic: false,
+            underline: false,
+            color:"black",
+            highlightColor:"transparent",
+            align: "left"
+          },
+          dateFont: {
+            font: {
+              type: "standard",
+              name: "Verdana",
+              family: "Verdana"
+            },
+            size: "20",
+            bold: false,
+            italic: false,
+            underline: false,
+            color:"black",
+            highlightColor:"transparent",
+            align: "left"
+          },
+          authorFont: {
             font: {
               type: "standard",
               name: "Verdana",
@@ -164,14 +227,22 @@
             highlightColor:"transparent",
             align: "left"
           },
-          layout: "4x1",
-          customLayout: ""
+          layout: "custom",
+          customLayout: customUrl
         }
       };
 
       element(by.css("url-field[name='rssUrl'] input[name=url]")).sendKeys(validUrl);
 
-      // need to scroll down to where element is visible
+      // need to scroll down to where custom layout is visible
+      browser.executeScript('arguments[0].scrollIntoView()', element(by.id("layout-custom")));
+
+      element(by.id("layout-custom")).click();
+
+      // entering a custom layout url
+      element(by.css("url-field[name='layoutUrl'] input[name=url]")).sendKeys(customUrl);
+
+      // need to scroll down to where save button is visible
       browser.executeScript('arguments[0].scrollIntoView()', element(by.id("save")));
 
       element(by.id("save")).click();
@@ -179,7 +250,7 @@
       expect(browser.executeScript("return window.result")).to.eventually.deep.equal(
         {
           'additionalParams': JSON.stringify(settings.additionalParams),
-          'params': "https://s3.amazonaws.com/widget-rss-test/1.0.0/dist/layout-4x1.html?"
+          'params': customUrl + "?"
         });
     });
 

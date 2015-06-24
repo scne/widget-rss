@@ -32185,6 +32185,7 @@ angular.module("risevision.widget.rss.settings")
       url: "",
       stories: 2,
       queue: 5,
+      transition: 10,
       refresh: 5,
       scroll: {},
       selection: {
@@ -32194,6 +32195,8 @@ angular.module("risevision.widget.rss.settings")
         author: true
       },
       headingFont: {},
+      dateFont: {},
+      authorFont: {},
       storyFont: {},
       layout: "4x1",
       customLayout: ""
