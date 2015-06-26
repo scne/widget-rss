@@ -10,15 +10,28 @@
 
   <link rel="stylesheet" href="css/rss.min.css"/>
 
+  <!-- TODO: inline styles for this layout -->
+
 </head>
 <body>
 
-<!-- TODO: temporary, will be replaced by rise-rss-display -->
-<rise-rss id="rss" entries="10"></rise-rss>
+<rise-rss id="rss"></rise-rss>
 
-<div id="rssContainer">
-  <!-- TODO: content -->
+<div id="scrollContainer">
+  <section class="page"></section>
+
+  <!-- TODO: template layout -->
 </div>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/gsap/1.11.7/TweenLite.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/gsap/1.11.7/plugins/CSSPlugin.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/gsap/1.11.7/utils/Draggable.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/gsap/1.11.7/plugins/ScrollToPlugin.min.js"></script>
+
+<!-- Club GreenSock Members Only Plugin, subject to its own license: http://greensock.com/club/ -->
+<script src="//s3.amazonaws.com/rise-common/scripts/greensock/ThrowPropsPlugin.min.js"></script>
 
 <!-- build:e2egadgets -->
 <script src="//rvashow2.appspot.com/gadgets/gadgets.min.js"></script>

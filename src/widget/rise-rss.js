@@ -1,7 +1,7 @@
 var RiseVision = RiseVision || {};
 RiseVision.RSS = RiseVision.RSS || {};
 
-RiseVision.RSS.Component = function (data) {
+RiseVision.RSS.RiseRSS = function (data) {
   "use strict";
 
   var _initialLoad = true;
@@ -17,16 +17,14 @@ RiseVision.RSS.Component = function (data) {
     }
 
     rss.addEventListener("rise-rss-response", function(e) {
-      console.log("rise-rss-response handler");
-
       if (e.detail && e.detail.feed) {
         if (_initialLoad) {
           _initialLoad = false;
 
-          RiseVision.RSS.onComponentInit(e.detail.feed);
+          RiseVision.RSS.onRiseRSSInit(e.detail.feed);
 
         } else {
-          RiseVision.RSS.onComponentRefresh(e.detail.feed);
+          RiseVision.RSS.onRiseRSSRefresh(e.detail.feed);
         }
       }
     });
@@ -41,6 +39,8 @@ RiseVision.RSS.Component = function (data) {
     });
 
     rss.setAttribute("url", data.url);
+    rss.setAttribute("entries", data.queue);
+    rss.setAttribute("refresh", data.refresh);
 
     // retrieve the JSON formatted RSS data
     rss.go();

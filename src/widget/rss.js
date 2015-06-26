@@ -1,4 +1,4 @@
-/* global gadgets */
+/* global gadgets, _ */
 
 var RiseVision = RiseVision || {};
 RiseVision.RSS = {};
@@ -9,33 +9,56 @@ RiseVision.RSS = (function (gadgets) {
   var _additionalParams;
 
   var _prefs = null,
-    _component = null;
+    _riserss = null,
+    _content = null;
+
+  var _currentFeed = null;
 
   /*
    *  Private Methods
    */
   function _ready() {
-    gadgets.rpc.call("", "rsevent_ready", null, _prefs.getString("id"),
-      true, true, true, true, false);
+    gadgets.rpc.call("", "rsevent_ready", null, _prefs.getString("id"), true, true, true, true, true);
   }
 
-  function onComponentInit(feedObj) {
-    console.dir(feedObj);
-    //TODO: temporary ready call, more logic to come
-    _ready();
+  function _done() {
+    gadgets.rpc.call("", "rsevent_done", null, _prefs.getString("id"));
   }
 
-  function onComponentRefresh(feedObj) {
-    //TODO: logic to come
-    console.dir(feedObj);
+  function _loadFonts() {
+    // TODO: load fonts and inject any other css into the document head
   }
 
   /*
    *  Public Methods
    */
-  function pause() {}
+  function onContentDone() {
+    _done();
+  }
 
-  function play() {}
+  function onContentReady() {
+    _ready();
+  }
+
+  function onRiseRSSInit(feed) {
+    _currentFeed = _.clone(feed);
+
+    _content = new RiseVision.RSS.ContentRSS(_prefs, _additionalParams);
+    _content.build(_currentFeed);
+  }
+
+  function onRiseRSSRefresh(feed) {
+    //TODO: logic to come
+    console.dir(feed);
+  }
+
+  function pause() {
+    _content.scrollPause();
+  }
+
+  function play() {
+    _content.scrollPlay();
+  }
 
   function setAdditionalParams(names, values) {
     if (Array.isArray(names) && names.length > 0 && names[0] === "additionalParams") {
@@ -43,11 +66,11 @@ RiseVision.RSS = (function (gadgets) {
         _additionalParams = JSON.parse(values[0]);
         _prefs = new gadgets.Prefs();
 
-        document.getElementById("rssContainer").style.height = _prefs.getInt("rsH") + "px";
+        _loadFonts();
 
         // create and initialize the Component module instance
-        _component = new RiseVision.RSS.Component(_additionalParams);
-        _component.init();
+        _riserss = new RiseVision.RSS.RiseRSS(_additionalParams);
+        _riserss.init();
       }
     }
   }
@@ -55,8 +78,10 @@ RiseVision.RSS = (function (gadgets) {
   function stop() {}
 
   return {
-    "onComponentInit": onComponentInit,
-    "onComponentRefresh": onComponentRefresh,
+    "onContentDone": onContentDone,
+    "onContentReady": onContentReady,
+    "onRiseRSSInit": onRiseRSSInit,
+    "onRiseRSSRefresh": onRiseRSSRefresh,
     "pause": pause,
     "play": play,
     "setAdditionalParams": setAdditionalParams,

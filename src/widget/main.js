@@ -12,15 +12,15 @@
   };
 
   function play() {
-
+    RiseVision.RSS.play();
   }
 
   function pause() {
-
+    RiseVision.RSS.pause();
   }
 
   function stop() {
-
+    RiseVision.RSS.pause();
   }
 
   function webComponentsReady() {

@@ -12,15 +12,28 @@
   <link rel="stylesheet" type="text/css" href="widget/css/rss.css">
   <!-- endbuild -->
 
+  <!-- TODO: inline styles for this layout -->
+
 </head>
 <body>
 
-<!-- TODO: temporary, will be replaced by rise-rss-display -->
-<rise-rss id="rss" entries="10"></rise-rss>
+<rise-rss id="rss"></rise-rss>
 
-<div id="rssContainer">
-  <!-- TODO: content -->
+<div id="scrollContainer">
+  <section class="page"></section>
+
+  <!-- TODO: template layout -->
 </div>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/gsap/1.11.7/TweenLite.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/gsap/1.11.7/plugins/CSSPlugin.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/gsap/1.11.7/utils/Draggable.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/gsap/1.11.7/plugins/ScrollToPlugin.min.js"></script>
+
+<!-- Club GreenSock Members Only Plugin, subject to its own license: http://greensock.com/club/ -->
+<script src="//s3.amazonaws.com/rise-common/scripts/greensock/ThrowPropsPlugin.min.js"></script>
 
 <!-- build:e2egadgets -->
 <script src="//rvashow2.appspot.com/gadgets/gadgets.min.js"></script>
@@ -28,8 +41,12 @@
 
 <!-- build:js js/widget.min.js -->
 <script src="config/config.js"></script>
+<script src="components/auto-scroll/jquery.auto-scroll.js"></script>
+<script src="components/jQuery.dotdotdot/src/js/jquery.dotdotdot.js"></script>
 <script src="widget/rss.js"></script>
-<script src="widget/component.js"></script>
+<script src="widget/rise-rss.js"></script>
+<script src="widget/images.js"></script>
+<script src="widget/content-rss.js"></script>
 <script src="widget/main.js"></script>
 <!-- endbuild -->
 
