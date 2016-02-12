@@ -15,264 +15,79 @@
     body, html {
       background: transparent;
     }
-
-    .landscape-layout {
-      width:220px;
-    }
-
-    .portrait-layout {
-      width:110px;
-    }
-
-    .overlay {
-      /* Positioning */
-      position: absolute;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      left: 0;
-
-      /* Visual */
-      background: rgba(255, 255, 255, 0.7);
-    }
   </style>
 
-  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.18/angular.min.js"></script>
+  <!-- FullStory -->
+  <script>window['_fs_is_outer_script'] = true; window['_fs_debug'] = false; window['_fs_host'] = 'www.fullstory.com'; window['_fs_org'] = 'U3O'; (function(m,n,e,t,l,o,g,y){ g=m[e]=function(a,b){g.q?g.q.push([a,b]):g._api(a,b);};g.q=[]; o=n.createElement(t);o.async=1;o.src='https://'+_fs_host+'/s/fs.js'; y=n.getElementsByTagName(t)[0];y.parentNode.insertBefore(o,y); g.identify=function(i,v){g(l,{uid:i});if(v)g(l,v)};g.setUserVars=function(v){FS(l,v)}; g.identifyAccount=function(i,v){o='account';v=v||{};v.acctId=i;FS(o,v)}; g.clearUserCookie=function(d,i){d=n.domain;while(1){n.cookie='fs_uid=;domain='+d+ ';path=/;expires='+new Date(0);i=d.indexOf('.');if(i<0)break;d=d.slice(i+1)}} })(window,document,'FS','script','user');</script>
+
+  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.20/angular.min.js"></script>
+  <!-- if AngularJS fails to load fallback to a local version -->
+  <script>window.angular || document.write(unescape("%3Cscript src='js/vendor/angular/angular.min.js' type='text/javascript'%3E%3C/script%3E"));
+  </script>
+
 </head>
 <body ng-app="risevision.widget.rss.settings" ng-controller="settingsController">
-<div class="overlay"></div>
-<div class="container-fluid">
+<div class="container-fluid image-settings-fs">
   <div class="modal-dialog modal-lg">
-    <!-- MODAL-->
-    <div class="modal-content" ng-controller="rssSettingsController" ng-cloak>
-      <!-- Start Modal Header-->
+    <div class="modal-content scrollable-list" ng-controller="rssSettingsController" ng-cloak>
+
+      <!-- Modal Header-->
       <div class="modal-header">
         <button type="button" class="close" ng-click="closeSettings()">
-          <i class="fa fa-times"></i>
+          <i class="fa fa-times half-top"></i>
         </button>
-        <h2 class="modal-title">{{"widget-rss.settings" | translate}}
-          <a type="button" class="btn btn-link" target="_blank" href="https://github.com/Rise-Vision/widget-rss">
-            <i class="fa fa-github fa-2x"></i>
+        <h2 class="modal-title">
+          {{"widget-rss.settings" | translate }}
+          <a class="btn btn-link" href="https://github.com/Rise-Vision/widget-rss" target="_blank">
+            <i class="fa fa-github fa-2x icon-gray"></i>
           </a>
         </h2>
       </div>
-      <!-- End Modal Header-->
 
-      <!-- Start Modal Body-->
-      <div class="modal-body">
-        <form role="form" name="settingsForm">
-          <!-- URL -->
-          <url-field id="rssUrl" name="rssUrl" url="settings.additionalParams.url"
-                     hide-storage="true"
-                     ng-model="urlentry" valid></url-field>
-          <!-- Stories To Display -->
-          <div class="row">
-            <div class="col-md-3">
-              <div class="form-group">
-                <label class="control-label">{{"widget-rss.stories" | translate}}</label>
-                <input type="number" class="form-control" ng-model="settings.additionalParams.stories">
-              </div>
-            </div>
-            <div class="col-md-3">
-              <div class="form-group">
-                <label class="control-label">{{"widget-rss.queue" | translate}}</label>
-                <input type="number" class="form-control" ng-model="settings.additionalParams.queue">
-              </div>
-            </div>
-            <div class="col-md-3">
-              <div class="form-group">
-                <label class="control-label">{{"widget-rss.transition-hold" | translate}}</label>
-                <div class="input-group">
-                  <input type="number" class="form-control" ng-model="settings.additionalParams.transition">
-                  <span class="input-group-addon">{{"common.units.seconds" | translate}}</span>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <div class="form-group">
-                <label class="control-label">{{"widget-rss.refresh" | translate}}</label>
-                <div class="input-group">
-                  <input type="number" class="form-control" ng-model="settings.additionalParams.refresh">
-                  <span class="input-group-addon">{{"common.units.minutes" | translate}}</span>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <div class="form-group"></div>
-            </div>
-          </div>
-          <!-- Scroll Setting-->
-          <scroll-setting scroll="settings.additionalParams.scroll"></scroll-setting>
+      <!-- Modal Body-->
+      <form role="form" name="settingsForm">
+        <div class="modal-body">
 
-          <hr>
+          <!-- TODO: build content -->
 
-          <!-- Data Selection -->
-          <label class="control-label">{{"widget-rss.selection.heading" | translate}}</label>
-          <div class="row">
-            <div class="radio">
-              <div class="col-md-2">
-                <label class="radio-inline add-bottom">
-                  <input type="radio" name="story" value="full"
-                         ng-model="settings.additionalParams.selection.story">{{"widget-rss.selection.story" | translate}}
-                </label>
-              </div>
-              <div class="col-md-2">
-                <label class="radio-inline add-bottom">
-                  <input type="radio" name="story" value="snippet"
-                         ng-model="settings.additionalParams.selection.story">{{"widget-rss.selection.snippet" | translate}}
-                </label>
-              </div>
-            </div>
-          </div>
-          <div class="row">
-            <div class="checkbox">
-              <div class="form-group">
-                <div class="col-md-2">
-                  <label class="add-bottom">
-                    <input name="title" type="checkbox"
-                           ng-model="settings.additionalParams.selection.title">{{"widget-rss.selection.title" | translate}}
-                  </label>
-                </div>
-                <div class="col-md-2">
-                  <label class="add-bottom">
-                    <input name="date" type="checkbox"
-                           ng-model="settings.additionalParams.selection.date">{{"widget-rss.selection.date" | translate}}
-                  </label>
-                </div>
-                <div class="col-md-2">
-                  <label class="add-bottom">
-                    <input name="author" type="checkbox"
-                           ng-model="settings.additionalParams.selection.author">{{"widget-rss.selection.author" | translate}}
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <hr>
-
-          <!-- Font Formatting -->
-          <div ng-hide="!settings.additionalParams.selection.title">
-            <label class="control-label">{{"widget-rss.heading-format.heading" | translate}}</label>
-            <font-setting font-data="settings.additionalParams.headingFont"
-                          preview-text="{{'widget-rss.heading-format.text' | translate}}"></font-setting>
-          </div>
-
-          <div ng-hide="!settings.additionalParams.selection.date">
-            <label class="control-label">{{"widget-rss.date-format.heading" | translate}}</label>
-            <font-setting font-data="settings.additionalParams.dateFont"
-                          preview-text="{{'widget-rss.date-format.text' | translate}}"></font-setting>
-          </div>
-
-          <div ng-hide="!settings.additionalParams.selection.author">
-            <label class="control-label">{{"widget-rss.author-format.heading" | translate}}</label>
-            <font-setting font-data="settings.additionalParams.authorFont"
-                          preview-text="{{'widget-rss.author-format.text' | translate}}"></font-setting>
-          </div>
-
-          <label class="control-label">{{"widget-rss.story-format.heading" | translate}}</label>
-          <font-setting font-data="settings.additionalParams.storyFont"
-                        preview-text="{{'widget-rss.story-format.text' | translate}}"></font-setting>
-
-          <hr>
-
-          <label class="control-label">{{"widgets.layout.heading" | translate}}</label>
-          <div class="row">
-            <div class="form-group">
-              <div class="col-md-4 radio-vertical-align add-bottom">
-                <input id="layout-4x1" type="radio" name="layout" value="4x1"
-                       ng-model="settings.additionalParams.layout">
-                <label class="radio-inline" for="layout-4x1">
-                  <img class="landscape-layout" src="img/4x1-layout.png">
-                </label>
-              </div>
-              <div class="col-md-4 radio-vertical-align add-bottom">
-                <input id="layout-2x1" type="radio" name="layout" value="2x1"
-                       ng-model="settings.additionalParams.layout">
-                <label class="radio-inline" for="layout-2x1">
-                  <img class="landscape-layout" src="img/2x1-layout.png">
-                </label>
-              </div>
-              <div class="col-md-4 radio-vertical-align">
-                <input id="layout-1x2" type="radio" name="layout" value="1x2"
-                       ng-model="settings.additionalParams.layout">
-                <label class="radio-inline" for="layout-1x2">
-                  <img class="portrait-layout" src="img/1x2-layout.png">
-                </label>
-              </div>
-            </div>
-          </div>
-
-          <!--Custom Layout Radio-->
-          <div class="form-group">
-            <label class="radio-inline">
-              <input id="layout-custom" type="radio" name="layout" value="custom"
-                     ng-model="settings.additionalParams.layout">{{"widget-rss.custom" | translate}}</input>
-            </label>
-          </div>
-
-          <div ng-if="settings.additionalParams.layout === 'custom'">
-            <url-field id="layoutUrl" name="layoutUrl" url="settings.additionalParams.customLayout"
-                       company-id="{{settings.params.companyId}}"
-                       hide-label="true"
-                       ng-model="urlentry" valid></url-field>
-          </div>
-
-        </form>
-      </div>
-      <!-- End Modal Body -->
-
-      <!--Modal Footer-->
-      <div class="modal-footer">
-        <div class="pull-right">
-          <button id="save" class="btn btn-primary btn-fixed-width" type="button"
-                  ng-click="saveSettings()" ng-disabled="settingsForm.$invalid">
-            <span>{{"common.save" | translate}}</span>
-            <i class="fa fa-white fa-check icon-right"></i>
-          </button>
-          <button id="cancel" class="btn btn-default btn-fixed-width" type="button"
-                  ng-click="closeSettings()">
-            <span>{{"common.cancel" | translate}}</span>
-            <i class="fa fa-white fa-times icon-right"></i>
-          </button>
         </div>
-      </div>
-      <!-- End Modal Footer-->
+
+        <hr>
+
+        <!-- Modal Footer-->
+        <div class="modal-footer">
+          <!-- Button Toolbar -->
+          <widget-button-toolbar save="saveSettings()" cancel="closeSettings()" disable-save="settingsForm.$invalid">
+          </widget-button-toolbar>
+        </div>
+
+      </form>
     </div>
   </div>
 </div>
 
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+<script>
+  if (typeof jQuery == "undefined") {
+    document.write(unescape("%3Cscript src='js/vendor/jquery/dist/jquery.min.js' type='text/javascript'%3E%3C/script%3E"));
+  }
+</script>
 
 <!-- build:js js/settings.min.js -->
 <script src="components/angular-translate/angular-translate.js"></script>
+<script src="components/angular-sanitize/angular-sanitize.js"></script>
 <script src="components/angular-translate-loader-static-files/angular-translate-loader-static-files.js"></script>
 <script src="components/rv-common-i18n/dist/i18n.js"></script>
 <script src="components/bootstrap-sass-official/assets/javascripts/bootstrap.js"></script>
 <script src="components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
-<script src="components/bootstrap-select/bootstrap-select.js"></script>
-<script src="components/rv-bootstrap-formhelpers/dist/js/rv-bootstrap-formhelpers.js"></script>
-<script src="components/spectrum/spectrum.js"></script>
 
-<script src="components/widget-settings-ui-components/dist/js/angular/scroll-setting.js"></script>
 <script src="components/widget-settings-ui-components/dist/js/angular/tooltip.js"></script>
-<script src="components/component-storage-selector/dist/storage-selector.js"></script>
-<script src="components/widget-settings-ui-components/dist/js/angular/url-field.js"></script>
 
-<script src="components/widget-settings-ui-components/dist/js/alignment.js"></script>
-<script src="components/widget-settings-ui-components/dist/js/angular/alignment.js"></script>
-<script src="components/widget-settings-ui-components/dist/js/angular/color-picker.js"></script>
-<script src="components/widget-settings-ui-components/dist/js/url-field.js"></script>
-<script src="components/bootstrap-form-components/dist/js/bootstrap-font-picker.js"></script>
-<script src="components/bootstrap-form-components/dist/js/angular/bootstrap-font-picker.js"></script>
-<script src="components/bootstrap-form-components/dist/js/bootstrap-font-size-picker.js"></script>
-<script src="components/bootstrap-form-components/dist/js/angular/bootstrap-font-size-picker.js"></script>
-<script src="components/widget-settings-ui-components/dist/js/font-style.js"></script>
-<script src="components/widget-settings-ui-components/dist/js/angular/font-style.js"></script>
-<script src="components/widget-settings-ui-components/dist/js/angular/font-setting.js"></script>
+<!-- Control Buttons Toolbar -->
+<script src="components/widget-settings-ui-components/dist/js/angular/widget-button-toolbar.js"></script>
 
-<script src="config/config.js"></script>
 <script src="settings/settings-app.js"></script>
+<script src="config/config.js"></script>
 <script src="components/widget-settings-ui-core/dist/widget-settings-ui-core.js"></script>
 <script src="settings/ctr-rss-settings.js"></script>
 <!-- endbuild -->
@@ -281,6 +96,7 @@
 <script src="//rvashow2.appspot.com/gadgets/gadgets.min.js"></script>
 <!-- endbuild -->
 
+<!-- Get from Bower if needed. -->
 <script src="//s3.amazonaws.com/rise-common/scripts/i18next/i18next.min.js"></script>
 
 </body>

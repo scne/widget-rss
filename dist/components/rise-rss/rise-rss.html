@@ -5,24 +5,45 @@
 <script src="../underscore/underscore.js"></script>
 
 <!--
-Example usage with Polymer data binding
-<template is="dom-bind">
-  <rise-rss id="rss" url="http://example-feed.xml" entries="10" results="{{result}}"></rise-rss>
-  <div>
-    <h2>{{result.title}}</h2>
+`rise-rss` fetches any RSS/Atom feed and returns the data as a Javascript object.
 
-    <template is="dom-repeat" items="{{result.items}}" as="entry">
-      <div class="story">
-        <div>
-          <span class="title">{{entry.title}}</span><br>
-          <span>{{entry.pubdate}}</span><br>
-          <p>{{entry.description}}</p>
-        </div>
-      </div>
-    </template>
-  </div>
+The specified feed is periodically retrieved if the `refresh` attribute is set, although a minimum refresh
+time of 1 minute is enforced.
 
-</template>
+At this time the RSS Web Component is only compatible with the Rise Vision
+[Offline Player](https://github.com/Rise-Vision/offline-player).
+
+#### Example Usage
+
+    <rise-rss id="rss" url="http://rss.cbc.ca/lineup/topstories.xml" entries="3"></rise-rss>
+
+    <script>
+      var rss = document.querySelector("rise-rss");
+
+      // Respond to events it fires.
+      rss.addEventListener("rise-rss-response", function (e) {
+        console.log(e.detail.feed);
+      });
+
+      rss.addEventListener("rise-rss-error", function (e) {
+        console.log(e.detail); // Executes a request.
+      });
+
+      rss.go();
+    </script>
+
+##### Entries
+Entries from an RSS feed can optionally be limited to a specific amount. To limit the number of entries,
+an `entries` attribute should be added to the `<rise-rss>` element.
+
+For example, to limit the amount of entries to 5:
+
+    <rise-rss url="http://example.com/rss.xml" entries="5"></rise-rss>
+
+Please note that the demo provided in this documentation is purely for demonstrative purposes on
+how to set up the component. At this time, the demo page will not work as the `rise-rss` component
+can only be used within Rise Vision [Offline Player](https://github.com/Rise-Vision/offline-player).
+
 @demo
 -->
 
@@ -51,19 +72,6 @@ Example usage with Polymer data binding
 
     Polymer({
       is: "rise-rss",
-
-      /**
-       * Fired when a response is received.
-       *
-       * @param {object} feed javascript object representation of feed
-       * @event rise-rss-response
-       */
-
-      /**
-       * Fired when an error is received.
-       *
-       * @event rise-rss-error
-       */
 
       properties: {
 
@@ -98,6 +106,43 @@ Example usage with Polymer data binding
           type: Object,
           value: function() { return {}; },
           notify: true
+        }
+      },
+
+      // Element Behavior
+
+      /**
+       * Fired when a response is received.
+       *
+       * @param {Object} detail
+       * @param {Object} detail.feed Javascript object representation of feed
+       * @event rise-rss-response
+       */
+
+      /**
+       * Fired when an error is received.
+       *
+       * @event rise-rss-error
+       */
+
+      _offlineRequestPending: false,
+
+      _getCachedData: function () {
+        if (supportsLocalStorage()) {
+          // retrieve cached data and parse back
+          return JSON.parse(localStorage.getItem(LOCAL_STORAGE_NAME));
+        }
+
+        return null;
+      },
+
+      _setCachedData: function (data) {
+        if (supportsLocalStorage()) {
+          try {
+            localStorage.setItem(LOCAL_STORAGE_NAME, JSON.stringify(data));
+          } catch(e) {
+            console.warn(e.message);
+          }
         }
       },
 
@@ -159,9 +204,9 @@ Example usage with Polymer data binding
         var feedJSON = this._parseToJSON(xml),
           responseData = this._prepareResponse(feedJSON);
 
-        // cache data in local storage if localStorage is supported and component running in Offline Player
-        if (offlineWindow && supportsLocalStorage()) {
-          localStorage.setItem(LOCAL_STORAGE_NAME, JSON.stringify(responseData));
+        if (offlineWindow) {
+          // cache the data if possible
+          this._setCachedData(responseData);
         }
 
         this.results = responseData.feed;
@@ -181,19 +226,14 @@ Example usage with Polymer data binding
       },
 
       _handleOfflineError: function (error) {
-        var cachedData;
+        var cachedData = this._getCachedData();
 
-        if (supportsLocalStorage()) {
-          // retrieve any rss data cached and parse back to an object
-          cachedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_NAME));
-
-          if (cachedData) {
-            this.results = cachedData.feed;
-            // start refresh timer and fire the event using the cached data
-            this._startTimer();
-            this.fire("rise-rss-response", cachedData);
-            return;
-          }
+        if (cachedData) {
+          this.results = cachedData.feed;
+          // start refresh timer and fire the event using the cached data
+          this._startTimer();
+          this.fire("rise-rss-response", cachedData);
+          return;
         }
 
         // no cached data available, process the error
@@ -207,6 +247,12 @@ Example usage with Polymer data binding
 
           // store the origin for future "postMessage" calls on the offlineWindow
           offlineOrigin = evt.origin;
+
+          if (this._offlineRequestPending) {
+            // go() was previously called before this registration message was received, execute _postMessage()
+            this._offlineRequestPending = false;
+            this._postMessage();
+          }
 
           return;
         }
@@ -230,6 +276,10 @@ Example usage with Polymer data binding
       _makeRequest: function () {
         var params = {},
           self = this;
+
+        if (typeof gadgets === "undefined") {
+          return;
+        }
 
         try {
           params[gadgets.io.RequestParameters.CONTENT_TYPE] = gadgets.io.ContentType.TEXT;
@@ -258,11 +308,8 @@ Example usage with Polymer data binding
         offlineWindow.postMessage(message, offlineOrigin);
       },
 
-      /**
-       * Lifecycle callback
-       *
-       * @method ready
-       */
+      // Element Lifecycle
+
       ready: function () {
         var self = this;
 
@@ -275,9 +322,15 @@ Example usage with Polymer data binding
       /**
        * Performs a request to obtain the RSS feed
        *
-       * @method go
        */
       go: function() {
+        if (typeof gadgets === "undefined" && !offlineWindow) {
+          // this scenario can happen if go() is called before Offline Player has dispatched initial "message"
+          this._offlineRequestPending = true;
+
+          return;
+        }
+
         if (offlineWindow) {
           // running in Offline Player
           this._postMessage();
