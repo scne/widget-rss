@@ -1,8 +1,5 @@
-*.log
 src/components/
 node_modules/
-coverage/
 src/config/config.js
-tmp
 src/*-e2e.html
 reports/

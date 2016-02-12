@@ -29881,7 +29881,8 @@ var BFHTimezonesList = {
           $scope.defaultSetting = {
             by: "none",
             speed: "medium",
-            pause: 5
+            pause: 5,
+            pud: 10
           };
 
           $scope.defaults = function(obj) {
@@ -29945,6 +29946,17 @@ module.run(["$templateCache", function($templateCache) {
     "      </div>\n" +
     "    </div>\n" +
     "  </div>\n" +
+    "  <div class=\"col-md-3\" ng-show=\"scroll.by != 'none'\">\n" +
+    "    <div class=\"form-group\">\n" +
+    "      <label class=\"control-label\">{{'scroll.pud.label' | translate}}</label>\n" +
+    "      <span popover=\"{{'scroll.pud.tooltip' | translate}}\" popover-trigger=\"click\"\n" +
+    "        popover-placement=\"right\" rv-tooltip></span>\n" +
+    "      <div class=\"input-group\">\n" +
+    "        <input id=\"scroll-pud\" type=\"number\" ng-model=\"scroll.pud\" class=\"form-control\" />\n" +
+    "        <span class=\"input-group-addon\">{{'common.units.seconds' | translate}}</span>\n" +
+    "      </div>\n" +
+    "    </div>\n" +
+    "  </div>\n" +
     "</div>\n" +
     "");
 }]);
@@ -29985,7 +29997,9 @@ if (typeof angular !== "undefined") {
         restrict: "EA",
         scope : {
           companyId : "@",
-          type: "@"
+          type: "@",
+          label: "@",
+          selected: "="
         },
         template: $templateCache.get("storage-selector.html"),
         link: function (scope) {
@@ -30006,7 +30020,7 @@ if (typeof angular !== "undefined") {
             scope.modalInstance = $modal.open({
               templateUrl: "storage.html",
               controller: "StorageCtrl",
-              size: "lg",
+              size: "md",
               backdrop: true,
               resolve: {
                 storageUrl: function () {
@@ -30019,8 +30033,8 @@ if (typeof angular !== "undefined") {
               // for unit test purposes
               scope.files = files;
 
-              // emit an event with name "files", passing the array of files selected from storage
-              scope.$emit("picked", files);
+              // emit an event with name "files", passing the array of files selected from storage and the selector type
+              scope.$emit("picked", files, scope.type);
 
             }, function () {
               // for unit test purposes
@@ -30083,12 +30097,15 @@ angular.module("risevision.widget.common.storage-selector")
   }]);
 
 (function(module) {
-try { app = angular.module("risevision.widget.common.storage-selector"); }
-catch(err) { app = angular.module("risevision.widget.common.storage-selector", []); }
-app.run(["$templateCache", function($templateCache) {
+try { module = angular.module("risevision.widget.common.storage-selector"); }
+catch(err) { module = angular.module("risevision.widget.common.storage-selector", []); }
+module.run(["$templateCache", function($templateCache) {
   "use strict";
   $templateCache.put("storage-selector.html",
-    "<button class=\"btn btn-widget-icon-storage\" ng-click=\"open()\" type=\"button\" />\n" +
+    "<button class=\"btn btn-default\" ng-class=\"{active: selected}\" ng-click=\"open()\" type=\"button\" >\n" +
+    "  {{ label }}<img src=\"http://s3.amazonaws.com/Rise-Images/Icons/storage.png\" class=\"storage-selector-icon\" ng-class=\"{'icon-right': label}\">\n" +
+    "</button>\n" +
+    "\n" +
     "<script type=\"text/ng-template\" id=\"storage.html\">\n" +
     "        <iframe class=\"modal-dialog\" scrolling=\"no\" marginwidth=\"0\" src=\"{{ storageUrl.url }}\"></iframe>\n" +
     "</script>\n" +
@@ -30101,8 +30118,7 @@ app.run(["$templateCache", function($templateCache) {
 
   angular.module("risevision.widget.common.url-field", [
     "risevision.common.i18n",
-    "risevision.widget.common.tooltip",
-    "risevision.widget.common.storage-selector"
+    "risevision.widget.common.tooltip"
   ])
     .directive("urlField", ["$templateCache", "$log", function ($templateCache, $log) {
       return {
@@ -30111,10 +30127,7 @@ app.run(["$templateCache", function($templateCache) {
         scope: {
           url: "=",
           hideLabel: "@",
-          hideStorage: "@",
-          companyId: "@",
-          fileType: "@",
-          storageType: "@"
+          fileType: "@"
         },
         template: $templateCache.get("_angular/url-field/url-field.html"),
         link: function (scope, element, attrs, ctrl) {
@@ -30143,6 +30156,27 @@ app.run(["$templateCache", function($templateCache) {
             return false;
           }
 
+          // Check that the URL points to a valid image file.
+          function testImage() {
+            if ((scope.fileType !== "undefined") && (scope.url !== "undefined")) {
+              if (scope.fileType === "image") {
+                var image = new Image();
+
+                image.onload = function() {
+                  scope.valid = true;
+                  scope.$apply();
+                };
+
+                image.onerror = function() {
+                  scope.valid = false;
+                  scope.invalidType = scope.fileType;
+                  scope.$apply();
+                };
+
+                image.src = scope.url;
+              }
+            }
+          }
 
           function testUrl(value) {
             var urlRegExp,
@@ -30175,6 +30209,10 @@ app.run(["$templateCache", function($templateCache) {
               scope.invalidType = "url";
             }
 
+            if (isValid) {
+              testImage();
+            }
+
             return isValid;
           }
 
@@ -30189,17 +30227,12 @@ app.run(["$templateCache", function($templateCache) {
 
           scope.allowInitEmpty = (typeof attrs.initEmpty !== "undefined");
 
-          if (!scope.hideStorage) {
-            scope.$on("picked", function (event, data) {
-              scope.url = data[0];
-            });
-          }
-
           scope.blur = function() {
             scope.$emit("urlFieldBlur");
           };
 
           scope.$watch("url", function (url) {
+
             if (typeof url !== "undefined" && url !== null) {
 
               if (url !== "" && scope.allowInitEmpty) {
@@ -30248,9 +30281,8 @@ module.run(["$templateCache", function($templateCache) {
   $templateCache.put("_angular/url-field/url-field.html",
     "<div class=\"form-group\" >\n" +
     "  <label ng-if=\"!hideLabel\">{{ \"url.label\" | translate }}</label>\n" +
-    "  <div ng-class=\"{'input-group':!hideStorage}\">\n" +
+    "  <div>\n" +
     "    <input name=\"url\" type=\"text\" ng-model=\"url\" ng-blur=\"blur()\" class=\"form-control\" placeholder=\"http://\">\n" +
-    "    <span class=\"input-url-addon\" ng-if=\"!hideStorage\"><storage-selector company-id=\"{{companyId}}\" type=\"{{storageType}}\"></storage-selector></span>\n" +
     "  </div>\n" +
     "  <p ng-if=\"!valid && invalidType === 'url'\" class=\"text-danger\">{{ \"url.errors.url\" | translate }}</p>\n" +
     "  <p ng-if=\"!valid && invalidType === 'image'\" class=\"text-danger\">{{ \"url.errors.image\" | translate }}</p>\n" +
@@ -30379,13 +30411,27 @@ TEMPLATES['alignment.html'] = "<div class=\"btn-group alignment\">\n" +
   };
 })(jQuery, window, document, TEMPLATES);
 
-/* global WIDGET_SETTINGS_UI_CONFIG: true */
 /* exported WIDGET_SETTINGS_UI_CONFIG */
-if (typeof WIDGET_SETTINGS_UI_CONFIG === "undefined") {
-  var WIDGET_SETTINGS_UI_CONFIG = {
-    //put variables here
-  };
-}
+var WIDGET_SETTINGS_UI_CONFIG = {
+  "families": "Andale Mono=andale mono,monospace;" +
+      "Arial=arial,helvetica,sans-serif;" +
+      "Arial Black=arial black,sans-serif;" +
+      "Book Antiqua=book antiqua,palatino,serif;" +
+      "Comic Sans MS=comic sans ms,sans-serif;" +
+      "Courier New=courier new,courier,monospace;" +
+      "Georgia=georgia,palatino,serif;" +
+      "Helvetica=helvetica,arial,sans-serif;" +
+      "Impact=impact,sans-serif;" +
+      "Symbol=symbol;" +
+      "Tahoma=tahoma,arial,helvetica,sans-serif;" +
+      "Terminal=terminal,monaco,monospace;" +
+      "Times New Roman=times new roman,times,serif;" +
+      "Trebuchet MS=trebuchet ms,geneva,sans-serif;" +
+      "Verdana=verdana,geneva,sans-serif;" +
+      "Webdings=webdings;" +
+      "Wingdings=wingdings,zapf dingbats;",
+  "sizes": "8px 9px 10px 11px 12px 14px 18px 24px 30px 36px 48px 60px 72px 96px"
+};
 
 (function () {
   "use strict";
@@ -30605,13 +30651,27 @@ TEMPLATES['url-field-template.html'] = "<div class=\"form-group validate-url\">\
   };
 })(jQuery, window, document, TEMPLATES);
 
-/* global WIDGET_SETTINGS_UI_CONFIG: true */
 /* exported WIDGET_SETTINGS_UI_CONFIG */
-if (typeof WIDGET_SETTINGS_UI_CONFIG === "undefined") {
-  var WIDGET_SETTINGS_UI_CONFIG = {
-    //put variables here
-  };
-}
+var WIDGET_SETTINGS_UI_CONFIG = {
+  "families": "Andale Mono=andale mono,monospace;" +
+      "Arial=arial,helvetica,sans-serif;" +
+      "Arial Black=arial black,sans-serif;" +
+      "Book Antiqua=book antiqua,palatino,serif;" +
+      "Comic Sans MS=comic sans ms,sans-serif;" +
+      "Courier New=courier new,courier,monospace;" +
+      "Georgia=georgia,palatino,serif;" +
+      "Helvetica=helvetica,arial,sans-serif;" +
+      "Impact=impact,sans-serif;" +
+      "Symbol=symbol;" +
+      "Tahoma=tahoma,arial,helvetica,sans-serif;" +
+      "Terminal=terminal,monaco,monospace;" +
+      "Times New Roman=times new roman,times,serif;" +
+      "Trebuchet MS=trebuchet ms,geneva,sans-serif;" +
+      "Verdana=verdana,geneva,sans-serif;" +
+      "Webdings=webdings;" +
+      "Wingdings=wingdings,zapf dingbats;",
+  "sizes": "8px 9px 10px 11px 12px 14px 18px 24px 30px 36px 48px 60px 72px 96px"
+};
 
 var CONFIG = {};
 
@@ -30690,95 +30750,6 @@ TEMPLATES['font-picker-template.html'] = "<!-- Font Family -->\n" +
 var RiseVision = RiseVision || {};
 
 RiseVision.Common = RiseVision.Common || {};
-
-RiseVision.Common.Validation = (function() {
-  "use strict";
-
-  /*
-  Defining the regular expressions being used
-   */
-  var urlRegExp = /^(?:(?:https?|ftp):\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]+-?)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]+-?)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/[^\s]*)?$/i,
-      numericRegex = /^(\-|\+)?([0-9]+|Infinity)$/,
-      decimalRegex = /^\-?[0-9]*\.?[0-9]+$/;
-
-  function greaterThan(element, param) {
-    var value = element.value.trim();
-
-    if (!decimalRegex.test(value)) {
-      return false;
-    }
-
-    return (parseFloat(value) > parseFloat(param));
-  }
-
-  function lessThan(element, param) {
-    var value = element.value.trim();
-
-    if (!decimalRegex.test(value)) {
-      return false;
-    }
-
-    return (parseFloat(value) < parseFloat(param));
-  }
-
-  function numeric(element){
-    var value = element.value.trim();
-
-    /*
-     Regexp being used is stricter than parseInt. Using regular expression as
-     mentioned on mozilla
-     https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/
-     Global_Objects/parseInt
-     */
-    return numericRegex.test(value);
-  }
-
-  function required(element){
-    var value = element.value.trim(),
-        valid = false;
-
-    if (element.type === "checkbox" || element.type === "radio") {
-      if(element.checked === true) {
-        valid = true;
-      }
-    } else {
-      if (value !== null && value !== '') {
-        valid = true;
-      }
-    }
-
-    return valid;
-  }
-
-  function url(element){
-    var value = element.value.trim();
-
-    // Add http:// if no protocol parameter exists
-    if (value.indexOf("://") === -1) {
-      value = "http://" + value;
-    }
-    /*
-     Discussion
-     http://stackoverflow.com/questions/37684/how-to-replace-plain-urls-
-     with-links#21925491
-
-     Using
-     https://gist.github.com/dperini/729294
-     Reasoning
-     http://mathiasbynens.be/demo/url-regex
-
-     */
-    return urlRegExp.test(value);
-  }
-
-  return {
-    isGreaterThan: greaterThan,
-    isLessThan: lessThan,
-    isValidRequired: required,
-    isValidURL: url,
-    isValidNumber: numeric
-  };
-})();
 
 RiseVision.Common.Utilities = (function() {
 
@@ -30878,12 +30849,40 @@ RiseVision.Common.Utilities = (function() {
     }
   }
 
+  function preloadImages(urls) {
+    var length = urls.length,
+      images = [];
+
+    for (var i = 0; i < length; i++) {
+      images[i] = new Image();
+      images[i].src = urls[i];
+    }
+  }
+
+  function getQueryParameter(param) {
+    var query = window.location.search.substring(1),
+      vars = query.split("&"),
+      pair;
+
+    for (var i = 0; i < vars.length; i++) {
+      pair = vars[i].split("=");
+
+      if (pair[0] == param) {
+        return decodeURIComponent(pair[1]);
+      }
+    }
+
+    return "";
+  }
+
   return {
+    getQueryParameter: getQueryParameter,
     getFontCssStyle:  getFontCssStyle,
     addCSSRules:      addCSSRules,
     loadFonts:        loadFonts,
     loadCustomFont:   loadCustomFont,
-    loadGoogleFont:   loadGoogleFont
+    loadGoogleFont:   loadGoogleFont,
+    preloadImages:    preloadImages
   };
 })();
 
@@ -30925,7 +30924,6 @@ RiseVision.Common.Utilities = (function() {
     function _init() {
       // Get the HTML markup from the template.
       $element.append(TEMPLATES['font-picker-template.html']);
-
       $selectBox = $element.find(".bfh-selectbox");
       $family = $element.find(".font-family");
       $customFont = $element.find(".custom-font");
@@ -31073,6 +31071,12 @@ RiseVision.Common.Utilities = (function() {
         .append(moreFonts);
     }
 
+    /* Select a particular font in the drop-down. */
+    function _selectFont(family) {
+      $selectBox.find(".bfh-selectbox-option").data("option", family).html(family);
+      $selectBox.find(".font-family").val(family);
+    }
+
     /*
      *  Public Methods
      */
@@ -31157,17 +31161,15 @@ RiseVision.Common.Utilities = (function() {
       // Load it.
       utils.loadGoogleFont(family, contentDocument);
 
-      // Remove previous Google font, if applicable, and add the new one.
-      //$options.find("li.google-font").remove();
-      $options.prepend("<li class='google-font'><a tabindex='-1' href='#' " +
-        "style='font-family: Google' data-option='" + family + "'>" + family +
-        "</a></li>");
+      // Check that the font has not already been added.
+      if ($options.find("li.google-font a[data-option='" + family + "']").length === 0) {
+        $options.prepend("<li class='google-font'><a tabindex='-1' href='#' " +
+          "style='font-family: Google' data-option='" + family + "'>" + family +
+          "</a></li>");
+      }
 
-      // Set Google font as default and sort.
       if (isSelected) {
-        $selectBox.find(".bfh-selectbox-option").data("option", family)
-          .html(family);
-        $selectBox.find(".font-family").val(family);
+        _selectFont(family);
       }
 
       _sortFontList();
@@ -31184,14 +31186,14 @@ RiseVision.Common.Utilities = (function() {
     _init();
 
     return {
-      getFont:       getFont,
-      getFontStyle:  getFontStyle,
-      getFontURL:    getFontURL,
-      setFont:       setFont,
-      reset:         reset,
-      setContentDoc: setContentDocument,
-      addGoogleFont: addGoogleFont,
-      addCustomFont: addCustomFont
+      "getFont":       getFont,
+      "getFontStyle":  getFontStyle,
+      "getFontURL":    getFontURL,
+      "setFont":       setFont,
+      "reset":         reset,
+      "setContentDoc": setContentDocument,
+      "addGoogleFont": addGoogleFont,
+      "addCustomFont": addCustomFont
     };
   }
 
@@ -31553,13 +31555,27 @@ TEMPLATES['font-style.html'] = "<div class=\"btn-group\">\n" +
   };
 })(jQuery, window, document, TEMPLATES);
 
-/* global WIDGET_SETTINGS_UI_CONFIG: true */
 /* exported WIDGET_SETTINGS_UI_CONFIG */
-if (typeof WIDGET_SETTINGS_UI_CONFIG === "undefined") {
-  var WIDGET_SETTINGS_UI_CONFIG = {
-    //put variables here
-  };
-}
+var WIDGET_SETTINGS_UI_CONFIG = {
+  "families": "Andale Mono=andale mono,monospace;" +
+      "Arial=arial,helvetica,sans-serif;" +
+      "Arial Black=arial black,sans-serif;" +
+      "Book Antiqua=book antiqua,palatino,serif;" +
+      "Comic Sans MS=comic sans ms,sans-serif;" +
+      "Courier New=courier new,courier,monospace;" +
+      "Georgia=georgia,palatino,serif;" +
+      "Helvetica=helvetica,arial,sans-serif;" +
+      "Impact=impact,sans-serif;" +
+      "Symbol=symbol;" +
+      "Tahoma=tahoma,arial,helvetica,sans-serif;" +
+      "Terminal=terminal,monaco,monospace;" +
+      "Times New Roman=times new roman,times,serif;" +
+      "Trebuchet MS=trebuchet ms,geneva,sans-serif;" +
+      "Verdana=verdana,geneva,sans-serif;" +
+      "Webdings=webdings;" +
+      "Wingdings=wingdings,zapf dingbats;",
+  "sizes": "8px 9px 10px 11px 12px 14px 18px 24px 30px 36px 48px 60px 72px 96px"
+};
 
 (function () {
   "use strict";
@@ -31616,43 +31632,103 @@ if (typeof WIDGET_SETTINGS_UI_CONFIG === "undefined") {
     });
 }());
 
+/* global WIDGET_SETTINGS_UI_CONFIG */
 (function () {
   "use strict";
 
-  angular.module("risevision.widget.common.font-setting", ["risevision.common.i18n",
-    "risevision.widget.common.font-style", "risevision.widget.common.alignment",
-    "risevision.widget.common.color-picker", "risevision.widget.common.fontsizepicker",
-    "risevision.widget.common.fontpicker"])
-    .directive("fontSetting", ["$templateCache", function ($templateCache) {
+  angular.module("risevision.widget.common.font-setting", [
+      "angularLoad",
+      "ui.tinymce",
+      "risevision.common.i18n",
+      "risevision.widget.common.url-field"
+    ])
+    .directive("fontSetting", ["$templateCache", "$log", "$window", "googleFontLoader",
+    function ($templateCache, $log, $window, googleFontLoader) {
       return {
         restrict: "AE",
         scope: {
           fontData: "=",
-          previewText: "@",
-          hideAlignment: "@"
+          previewText: "@"
         },
         template: $templateCache.get("_angular/font-setting/font-setting.html"),
         transclude: false,
-        link: function ($scope, element, attrs) {
-          var $element = $(element);
+        link: function ($scope, element) {
+          var $element = $(element),
+            $customFont = $element.find(".custom-font"),
+            $customFontSize = $element.find(".custom-font-size"),
+            _isLoading = true,
+            _googleFontList = "";
 
           $scope.defaultFont = {
             font: {
+              family: "verdana,geneva,sans-serif",
               type: "standard",
-              name: "Verdana",
-              family: "Verdana"
+              url: ""
             },
-            size: "20",
+            size: "24px",
+            customSize: "",
+            align: "left",
             bold: false,
             italic: false,
             underline: false,
-            color: "black",
-            highlightColor: "transparent"
+            forecolor: "black",
+            backcolor: "transparent"
           };
 
-          if (typeof attrs.hideAlignment === "undefined" || attrs.hideAlignment !== "true") {
-            $scope.defaultFont.align = "left";
-          }
+          // Load Google fonts.
+          googleFontLoader.getFonts().then(function(fonts) {
+            _googleFontList = fonts;
+
+            initTinyMCE();
+          });
+
+          $scope.customFontSize = null;
+
+          // Apply custom font to preview text.
+          $scope.applyCustomFont = function() {
+            var family = getCustomFontFamily();
+
+            if (family !== null) {
+              loadCustomFont(family);
+
+              $scope.fontData.font.family = family;
+              $scope.fontData.font.type = "custom";
+
+              updatePreview($scope.fontData);
+            }
+
+            $customFont.modal("hide");
+          };
+
+          $scope.applyCustomFontSize = function() {
+            $customFontSize.modal("hide");
+
+            if ($scope.customFontSize !== null && $scope.customFontSize >= 8) {
+
+              if (($scope.customFontSize + "px") !== $scope.fontData.size) {
+                $scope.fontData.size = $scope.customFontSize + "px";
+
+                if (WIDGET_SETTINGS_UI_CONFIG.sizes.indexOf($scope.fontData.size) !== -1 ||
+                  $scope.fontData.customSize === $scope.fontData.size) {
+                  // tell editor to select this size
+                  $window.tinymce.activeEditor.execCommand("FontSize", false, $scope.fontData.size);
+                }
+                else {
+                  // new custom font size to add
+                  $scope.fontData.customSize = $scope.customFontSize + "px";
+
+                  // update value of font_formats
+                  $scope.tinymceOptions.fontsize_formats = "Custom " +
+                    (($scope.fontData.customSize !== "") ? $scope.fontData.customSize + " " : "")  +
+                    WIDGET_SETTINGS_UI_CONFIG.sizes;
+                }
+              }
+
+            }
+
+            // reset modal input size value
+            $scope.customFontSize = null;
+          };
 
           $scope.defaults = function(obj) {
             if (obj) {
@@ -31670,8 +31746,20 @@ if (typeof WIDGET_SETTINGS_UI_CONFIG === "undefined") {
           };
 
           var watch = $scope.$watch("fontData", function(fontData) {
+            var family = null;
+
             if (fontData) {
               $scope.defaults(fontData, $scope.defaultFont);
+
+              // Load custom font.
+              if ($scope.fontData.font.url) {
+                family = getCustomFontFamily();
+
+                if (family !== null) {
+                  loadCustomFont(family);
+                }
+              }
+
               updatePreview(fontData);
               watch();
 
@@ -31681,24 +31769,296 @@ if (typeof WIDGET_SETTINGS_UI_CONFIG === "undefined") {
             }
           });
 
-          function updatePreview(fontData) {
-            if ($scope.previewText && fontData) {
-              var parentEl = $element.find(".font-picker-text");
-              var previewEl = $element.find(".font-picker-text span");
-              previewEl.css("font-family", fontData.font.family);
-              previewEl.css("font-size", fontData.size + "px");
-              previewEl.css("font-weight", fontData.bold ? "bold" : "normal");
-              previewEl.css("font-style", fontData.italic ? "italic" : "normal");
-              previewEl.css("text-decoration", fontData.underline ? "underline" : "none");
-              previewEl.css("color", fontData.color);
-              previewEl.css("background-color", fontData.highlightColor);
+          $scope.$watch("tinymceOptions.fontsize_formats", function (value) {
+            if (typeof value !== "undefined" && !_isLoading) {
+              // leverage ui-tinymce workaround of refreshing editor
+              $scope.$broadcast("$tinymce:refresh");
+            }
+          });
 
-              parentEl.css("text-align", fontData.align);
+          // Initialize TinyMCE.
+          function initTinyMCE() {
+            $scope.tinymceOptions = {
+              font_formats: "Use Custom Font=custom;" + WIDGET_SETTINGS_UI_CONFIG.families + _googleFontList,
+              fontsize_formats: "Custom " +
+                (($scope.fontData.customSize !== "") ? $scope.fontData.customSize + " " : "")  +
+                WIDGET_SETTINGS_UI_CONFIG.sizes,
+              menubar: false,
+              plugins: "textcolor colorpicker",
+              /*
+               When testing this via local server, CORS will be required. Handy CORS Chrome extension can be found here
+               https://chrome.google.com/webstore/detail/allow-control-allow-origi/nlfbmbojpeacfghkpbjhddihlkkiljbi?hl=en
+               */
+              skin_url: "//s3.amazonaws.com/rise-common/styles/tinymce/rise",
+              statusbar: false,
+              toolbar: "fontselect fontsizeselect | alignleft aligncenter alignright alignjustify | forecolor backcolor | bold italic underline",
+              setup: function(editor) {
+                editor.on("init", function() {
+                  initToolbar(editor);
+                  _isLoading = false;
+                });
+
+                editor.on("ExecCommand", function(args) {
+                  initCommands(editor, args);
+                });
+              },
+              init_instance_callback: function(editor) {
+                var oldApply = editor.formatter.apply,
+                  oldRemove = editor.formatter.remove;
+
+                // Reference - http://goo.gl/55IhWI
+                editor.formatter.apply = function apply(name, vars, node) {
+                  var args = {
+                    command: name,
+                    value: vars.value
+                  };
+
+                  oldApply(name, vars, node);
+                  editor.fire("ExecCommand", args);
+                };
+
+                editor.formatter.remove = function remove(name, vars, node) {
+                  var args = {
+                    command: name,
+                    value: (vars && vars.value) ? vars.value : null
+                  };
+
+                  oldRemove(name, vars, node);
+                  editor.fire("ExecCommand", args);
+                };
+              }
+            };
+          }
+
+          // Initialize TinyMCE toolbar.
+          function initToolbar(editor) {
+            if ($scope.fontData) {
+              // Font Family
+              if (($scope.fontData.font.type === "custom") && $scope.fontData.font.url) {
+                editor.execCommand("FontName", false, "custom");
+              }
+              else {
+                editor.execCommand("FontName", false, $scope.fontData.font.family);
+              }
+
+              // Font Sizes
+              editor.execCommand("FontSize", false, $scope.fontData.size);
+
+              // Alignment
+              switch($scope.fontData.align) {
+                case "left":
+                  editor.execCommand("JustifyLeft", false);
+                  break;
+                case "center":
+                  editor.execCommand("JustifyCenter", false);
+                  break;
+                case "right":
+                  editor.execCommand("JustifyRight", false);
+                  break;
+                case "justify":
+                  editor.execCommand("JustifyFull", false);
+                  break;
+                default:
+                  break;
+              }
+
+              // Colors
+              $(".mce-colorbutton[aria-label='Text color'] span").css("background-color", $scope.fontData.forecolor);
+              $(".mce-colorbutton[aria-label='Background color'] span").css("background-color", $scope.fontData.backcolor);
+
+              // Font Style
+              if ($scope.fontData.bold) {
+                toggleButton($(".mce-btn[aria-label='Bold']"));
+              }
+
+              if ($scope.fontData.italic) {
+                toggleButton($(".mce-btn[aria-label='Italic']"));
+              }
+
+              if ($scope.fontData.underline) {
+                toggleButton($(".mce-btn[aria-label='Underline']"));
+              }
+            }
+          }
+
+          // Handle toolbar interactions.
+          function initCommands(editor, args) {
+            switch(args.command) {
+              case "FontName":
+                if (_isLoading) {
+                  return;
+                }
+                else if (args.value === "custom") {
+                  $customFont.modal("show");
+
+                  return;
+                }
+                else {
+                  $scope.fontData.font.family = args.value;
+                  $scope.fontData.font.type = getFontType(args.value);
+                }
+
+                break;
+
+              case "FontSize":
+                if (_isLoading) {
+                  return;
+                }
+                else if (args.value === "Custom") {
+                  $customFontSize.modal("show");
+
+                  return;
+                }
+                else {
+                  $scope.fontData.size = args.value;
+                }
+
+                break;
+
+              case "JustifyLeft":
+                $scope.fontData.align = "left";
+                break;
+
+              case "JustifyCenter":
+                $scope.fontData.align = "center";
+                break;
+
+              case "JustifyRight":
+                $scope.fontData.align = "right";
+                break;
+
+              case "JustifyFull":
+                $scope.fontData.align = "justify";
+                break;
+
+              case "forecolor":
+                $scope.fontData.forecolor = (args.value) ? args.value : $scope.defaultFont.forecolor;
+                break;
+
+              case "hilitecolor":
+                $scope.fontData.backcolor = (args.value) ? args.value : $scope.defaultFont.backcolor;
+                break;
+
+              case "mceToggleFormat":
+                if (args.value === "bold") {
+                  $scope.fontData.bold = !$scope.fontData.bold;
+                  toggleButton($(".mce-btn[aria-label='Bold']"));
+                }
+                else if (args.value === "italic") {
+                  $scope.fontData.italic = !$scope.fontData.italic;
+                  toggleButton($(".mce-btn[aria-label='Italic']"));
+                }
+                else if (args.value === "underline") {
+                  $scope.fontData.underline = !$scope.fontData.underline;
+                  toggleButton($(".mce-btn[aria-label='Underline']"));
+                }
+
+                break;
+              default:
+                break;
+            }
+
+            updatePreview($scope.fontData);
+          }
+
+          function toggleButton($btn) {
+            $btn.toggleClass("mce-active");
+          }
+
+          // Style the preview text.
+          function updatePreview(fontData) {
+            var textContainer = document.querySelector(".text-container"),
+              text = document.querySelector(".text");
+
+            if ($scope.previewText && fontData) {
+              text.style.fontFamily = fontData.font.family;
+              text.style.fontSize = fontData.size;
+              text.style.fontWeight = fontData.bold ? "bold" : "normal";
+              text.style.fontStyle = fontData.italic ? "italic" : "normal";
+              text.style.textDecoration = fontData.underline ? "underline" : "none";
+              text.style.color = fontData.forecolor;
+              text.style.backgroundColor = fontData.backcolor;
+              textContainer.style.textAlign = fontData.align;
+            }
+          }
+
+          // Determine what type of font this is (standard or google).
+          function getFontType(family) {
+            if (WIDGET_SETTINGS_UI_CONFIG.families.indexOf(family) !== -1) {
+              return "standard";
+            }
+
+            if (_googleFontList.indexOf(family) !== -1) {
+              return "google";
+            }
+
+            return "custom";
+          }
+
+          // Extract font name from font URL.
+          function getCustomFontFamily() {
+            if ($scope.fontData.font.url) {
+              return $scope.fontData.font.url.split("/").pop().split(".")[0];
+            }
+
+            return null;
+          }
+
+          // Load a custom font.
+          function loadCustomFont(family) {
+            var sheet = null,
+              url = $.trim($scope.fontData.font.url),
+              rule = "font-family: " + family + "; " + "src: url('" + url + "');";
+
+            sheet = document.styleSheets[0];
+
+            if (sheet !== null) {
+              sheet.addRule("@font-face", rule);
             }
           }
         }
       };
     }]);
+}());
+
+(function () {
+  "use strict";
+
+  angular.module("risevision.widget.common.font-setting")
+    .factory("googleFontLoader", ["$http", "angularLoad", function($http, angularLoad) {
+
+    var fontsApi = "https://www.googleapis.com/webfonts/v1/webfonts?key=AIzaSyBXxVK_IOV7LNQMuVVo_l7ZvN53ejN86zY",
+      fontBaseUrl = "//fonts.googleapis.com/css?family=",
+      exclude = ["Buda", "Coda Caption", "Open Sans Condensed", "UnifrakturCook", "Molle"],
+      fallback = ",sans-serif;",
+      fonts = "",
+      factory = {};
+
+    factory.getFonts = function() {
+      return $http.get(fontsApi, { cache: true })
+        .then(function(response) {
+          var family = "";
+
+          if (response.data && response.data.items) {
+            for (var i = 0; i < response.data.items.length; i++) {
+              family = response.data.items[i].family;
+
+              if (exclude.indexOf(family) === -1) {
+                angularLoad.loadCSS(fontBaseUrl + family).then(function() {
+                  // Font loaded.
+                });
+
+                fonts += family + "=" + family + fallback;
+              }
+            }
+          }
+
+          return fonts;
+        });
+    };
+
+    return factory;
+  }]);
 }());
 
 (function(module) {
@@ -31707,34 +32067,90 @@ catch(err) { module = angular.module("risevision.widget.common.font-setting", []
 module.run(["$templateCache", function($templateCache) {
   "use strict";
   $templateCache.put("_angular/font-setting/font-setting.html",
-    "<div class=\"row\">\n" +
-    "  <div class=\"col-md-12\">\n" +
-    "    <ul class=\"list-inline font-setting\">\n" +
-    "      <li class=\"pull-left\">\n" +
-    "        <font-picker font=\"fontData.font\"></font-picker>\n" +
-    "      </li>\n" +
-    "      <li class=\"pull-left\">\n" +
-    "        <font-size-picker ng-model=\"fontData.size\"></font-size-picker>\n" +
-    "      </li>\n" +
-    "      <li class=\"pull-left\" ng-if=\"!hideAlignment\">\n" +
-    "        <alignment align=\"fontData.align\" class=\"font-setting-button\"></alignment>\n" +
-    "      </li>\n" +
-    "      <li class=\"font-setting-button\">\n" +
-    "        <font-style bold=\"fontData.bold\" italic=\"fontData.italic\" underline=\"fontData.underline\"></font-style>\n" +
-    "      </li>\n" +
-    "      <li class=\"pull-left font-setting-button\">\n" +
-    "        <input color-picker type=\"text\" color=\"fontData.color\" />\n" +
-    "      </li>\n" +
-    "      <li class=\"pull-left font-setting-button\">\n" +
-    "        <input color-picker type=\"highlight\" color=\"fontData.highlightColor\" />\n" +
-    "      </li>\n" +
-    "    </ul>\n" +
+    "<div class=\"font-setting\">\n" +
+    "  <div class=\"row\">\n" +
+    "    <div class=\"col-md-12\">\n" +
+    "      <textarea ui-tinymce=\"tinymceOptions\" ng-model=\"tinymceModel\" ng-if=\"tinymceOptions\"></textarea>\n" +
+    "    </div>\n" +
     "  </div>\n" +
-    "</div>\n" +
-    "<div class=\"row\" ng-if=\"previewText\">\n" +
-    "  <div class=\"col-md-12\">\n" +
-    "    <div class=\"font-picker-text form-group\">\n" +
-    "      <span>{{previewText}}</span>\n" +
+    "  <div class=\"row\" ng-if=\"previewText\">\n" +
+    "    <div class=\"col-md-12\">\n" +
+    "      <div class=\"text-container form-group\">\n" +
+    "        <span class=\"text\">{{previewText}}</span>\n" +
+    "      </div>\n" +
+    "    </div>\n" +
+    "  </div>\n" +
+    "\n" +
+    "  <!-- Custom Font -->\n" +
+    "  <div class=\"custom-font modal\" tabindex=\"-1\" role=\"dialog\" aria-hidden=\"true\" data-backdrop=\"false\">\n" +
+    "    <div class=\"modal-dialog\">\n" +
+    "      <div class=\"modal-content\">\n" +
+    "\n" +
+    "        <div class=\"modal-header\">\n" +
+    "          <button type=\"button\" class=\"close\" data-dismiss=\"modal\">\n" +
+    "            <i class=\"fa fa-times half-top\"></i>\n" +
+    "          </button>\n" +
+    "          <h2 class=\"modal-title\">{{\"font-setting.custom-font\" | translate}}</h2>\n" +
+    "        </div>\n" +
+    "\n" +
+    "        <form role=\"form\" name=\"customFontForm\">\n" +
+    "          <div class=\"modal-body\">\n" +
+    "            <url-field url=\"fontData.font.url\" ng-model=\"customFont\" init-empty></url-field>\n" +
+    "          </div>\n" +
+    "\n" +
+    "          <div class=\"modal-footer\">\n" +
+    "            <button type=\"button\" class=\"select btn btn-primary btn-fixed-width\" ng-click=\"applyCustomFont()\" ng-disabled=\"customFontForm.$invalid\">\n" +
+    "              <span>{{\"common.select\" | translate}}</span>\n" +
+    "              <i class=\"fa fa-white fa-check icon-right\"></i>\n" +
+    "            </button>\n" +
+    "            <button type=\"button\" class=\"cancel btn btn-default btn-fixed-width\" data-dismiss=\"modal\">\n" +
+    "              <span>{{\"common.cancel\" | translate}}</span>\n" +
+    "              <i class=\"fa fa-white fa-times icon-right\"></i>\n" +
+    "            </button>\n" +
+    "          </div>\n" +
+    "        </form>\n" +
+    "\n" +
+    "      </div>\n" +
+    "    </div>\n" +
+    "  </div>\n" +
+    "\n" +
+    "  <!-- Custom Font Size -->\n" +
+    "  <div class=\"custom-font-size modal\" tabindex=\"-1\" role=\"dialog\" aria-hidden=\"true\" data-backdrop=\"false\">\n" +
+    "    <div class=\"modal-dialog\">\n" +
+    "      <div class=\"modal-content\">\n" +
+    "\n" +
+    "        <div class=\"modal-header\">\n" +
+    "          <button type=\"button\" class=\"close\" data-dismiss=\"modal\">\n" +
+    "            <i class=\"fa fa-times half-top\"></i>\n" +
+    "          </button>\n" +
+    "          <h2 class=\"modal-title\">{{\"font-setting.custom-font-size\" | translate}}</h2>\n" +
+    "        </div>\n" +
+    "\n" +
+    "        <form role=\"form\" name=\"customFontSizeForm\">\n" +
+    "          <div class=\"modal-body\">\n" +
+    "            <div class=\"row\">\n" +
+    "              <div class=\"col-md-3\">\n" +
+    "                <div class=\"input-group\">\n" +
+    "                  <input type=\"number\" ng-model=\"customFontSize\" class=\"form-control\" />\n" +
+    "                  <span class=\"input-group-addon\">{{'common.units.pixels' | translate}}</span>\n" +
+    "                </div>\n" +
+    "              </div>\n" +
+    "            </div>\n" +
+    "          </div>\n" +
+    "\n" +
+    "          <div class=\"modal-footer\">\n" +
+    "            <button type=\"button\" class=\"select btn btn-primary btn-fixed-width\" ng-click=\"applyCustomFontSize()\" ng-disabled=\"customFontSizeForm.$invalid\">\n" +
+    "              <span>{{\"common.select\" | translate}}</span>\n" +
+    "              <i class=\"fa fa-white fa-check icon-right\"></i>\n" +
+    "            </button>\n" +
+    "            <button type=\"button\" class=\"cancel btn btn-default btn-fixed-width\" data-dismiss=\"modal\">\n" +
+    "              <span>{{\"common.cancel\" | translate}}</span>\n" +
+    "              <i class=\"fa fa-white fa-times icon-right\"></i>\n" +
+    "            </button>\n" +
+    "          </div>\n" +
+    "        </form>\n" +
+    "\n" +
+    "      </div>\n" +
     "    </div>\n" +
     "  </div>\n" +
     "</div>\n" +
@@ -31742,22 +32158,22 @@ module.run(["$templateCache", function($templateCache) {
 }]);
 })();
 
-/* global config: true */
 /* exported config */
-if (typeof config === "undefined") {
-  var config = {};
+if (typeof angular !== "undefined") {
+  angular.module("risevision.widget.rss.config", [])
+    .value("layout4x1", "https://s3.amazonaws.com/widget-rss/1.0.0/dist/layout-4x1.html")
+    .value("layout2x1", "https://s3.amazonaws.com/widget-rss/1.0.0/dist/layout-2x1.html")
+    .value("layout1x2", "https://s3.amazonaws.com/widget-rss/1.0.0/dist/layout-1x2.html");
 
-  if (typeof angular !== "undefined") {
-    angular.module("risevision.widget.rss.config", [])
-      .value("layout4x1", "https://s3.amazonaws.com/widget-rss/1.0.0/dist/layout-4x1.html")
-      .value("layout2x1", "https://s3.amazonaws.com/widget-rss/1.0.0/dist/layout-2x1.html")
-      .value("layout1x2", "https://s3.amazonaws.com/widget-rss/1.0.0/dist/layout-1x2.html");
-
-    angular.module("risevision.common.i18n.config", [])
-      .constant("LOCALES_PREFIX", "locales/translation_")
-      .constant("LOCALES_SUFIX", ".json");
-  }
+  angular.module("risevision.common.i18n.config", [])
+    .constant("LOCALES_PREFIX", "locales/translation_")
+    .constant("LOCALES_SUFIX", ".json");
 }
+
+var config = {};
+
+
+
 
 angular.module("risevision.widget.rss.settings", [
   "risevision.common.i18n",
