@@ -20,6 +20,11 @@
   <script>window.angular || document.write(unescape("%3Cscript src='js/vendor/angular/angular.min.js' type='text/javascript'%3E%3C/script%3E"));
   </script>
 
+  <script src="//cdn.tinymce.com/4/tinymce.min.js"></script>
+  <!-- if TinyMCE fails to load fallback to a local version -->
+  <script>window.tinymce || document.write(unescape("%3Cscript src='js/vendor/tinymce-dist/tinymce.min.js' type='text/javascript'%3E%3C/script%3E"));
+  </script>
+
 </head>
 <body ng-app="risevision.widget.rss.settings" ng-controller="settingsController">
 <div class="container-fluid image-settings-fs">
@@ -43,19 +48,44 @@
       <form role="form" name="settingsForm">
         <div class="modal-body">
 
-          <!-- TODO: build content -->
+          <!-- RSS URL-->
+          <div class="form-group">
+            <url-field id="main" ng-model="myurlfield" url="settings.additionalParams.url" valid init-empty></url-field>
+          </div><!-- END RSS URL-->
+          <hr/>
 
+          <br/>
+
+          <!--Heading Format-->
+          <div class="row">
+            <div class="col-md-12">
+              <label class="control-label">{{"widget-rss.title-format.heading" | translate }}</label>
+              <font-setting id="title-font" font-data="settings.additionalParams.title.fontStyle"
+                            preview-text="{{'widget-rss.title-format.text' | translate }}">
+              </font-setting>
+            </div>
+          </div>
+          <!--End Heading Format-->
+
+          <!--Story Format-->
+          <div class="row">
+            <div class="col-md-12">
+              <label class="control-label">{{"widget-rss.story-format.heading" | translate }}</label>
+              <font-setting id="story-font" font-data="settings.additionalParams.story.fontStyle"
+                            preview-text="{{'widget-rss.story-format.text' | translate }}">
+              </font-setting>
+            </div>
+          </div>
+          <!--End Story Format-->
+          <hr/>
+
+          <!-- Modal Footer-->
+          <div class="modal-footer">
+            <!-- Button Toolbar -->
+            <widget-button-toolbar save="saveSettings()" cancel="closeSettings()" disable-save="settingsForm.$invalid">
+            </widget-button-toolbar>
+          </div>
         </div>
-
-        <hr>
-
-        <!-- Modal Footer-->
-        <div class="modal-footer">
-          <!-- Button Toolbar -->
-          <widget-button-toolbar save="saveSettings()" cancel="closeSettings()" disable-save="settingsForm.$invalid">
-          </widget-button-toolbar>
-        </div>
-
       </form>
     </div>
   </div>

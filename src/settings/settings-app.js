@@ -3,5 +3,6 @@ angular.module("risevision.widget.rss.settings", [
   "risevision.widget.rss.config",
   "risevision.widget.common",
   "risevision.widget.common.widget-button-toolbar",
-  "risevision.widget.common.tooltip"
+  "risevision.widget.common.tooltip",
+  "risevision.widget.common.font-setting"
 ]);

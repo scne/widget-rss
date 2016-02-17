@@ -17,10 +17,75 @@
       browser.get("/src/settings-e2e.html");
     });
 
+    it("Should load Save button", function () {
+      expect(element(by.css("button#save")).isPresent()).to.eventually.be.true;
+    });
+
+    it("Should load Cancel button", function () {
+      expect(element(by.css("button#cancel")).isPresent()).to.eventually.be.true;
+    });
+
+    it("Should load Title Font Setting component", function () {
+      expect(element(by.css("#title-font .mce-tinymce")).isPresent()).to.eventually.be.true;
+    });
+
+    it("Should load Title Font Setting component", function () {
+      expect(element(by.css("#story-font .mce-tinymce")).isPresent()).to.eventually.be.true;
+    });
+
+    it("Should enable Save button", function () {
+      expect(element(by.css("button#save[disabled=disabled")).isPresent()).to.eventually.be.false;
+    });
+
+    it("Should set form to valid", function () {
+      expect(element(by.css("form[name='settingsForm'].ng-invalid")).isPresent()).to.eventually.be.false;
+    });
+
+    it("Should disable Save button for invalid url", function () {
+      element(by.name("url")).sendKeys("invalidURL");
+      expect(element(by.css("button#save[disabled=disabled")).isPresent()).to.eventually.be.true;
+    });
+
     it("Should correctly save settings", function () {
       var settings = {
         params: {},
-        additionalParams: {}
+        additionalParams: {
+          "url":"",
+          "title":{
+            "fontStyle":{
+              "font":{
+                "family":"verdana,geneva,sans-serif",
+                "type":"standard",
+                "url":""
+              },
+              "size":"24px",
+              "customSize":"",
+              "align":"left",
+              "bold":false,
+              "italic":false,
+              "underline":false,
+              "forecolor":"black",
+              "backcolor":"transparent"
+            }
+          },
+          "story":{
+            "fontStyle":{
+              "font":{
+                "family":"verdana,geneva,sans-serif",
+                  "type":"standard",
+                  "url":""
+              },
+              "size":"24px",
+              "customSize":"",
+              "align":"left",
+              "bold":false,
+              "italic":false,
+              "underline":false,
+              "forecolor":"black",
+              "backcolor":"transparent"
+            }
+          }
+        }
       };
 
       element(by.id("save")).click();
