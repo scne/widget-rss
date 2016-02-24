@@ -28,10 +28,7 @@
   ],
     htmlFiles = [
       "./src/settings.html",
-      './src/layout-4x1.html',
-      './src/layout-2x1.html',
-      './src/layout-1x2.html'
-
+      "./src/widget.html"
     ],
     vendorFiles = [
       "./src/components/tinymce-dist/plugins/**/*",
@@ -91,12 +88,7 @@
   });
 
   gulp.task("unminify", function () {
-    return gulp.src([
-      './src/settings.html',
-      './src/layout-4x1.html',
-      './src/layout-2x1.html',
-      './src/layout-1x2.html'
-    ])
+    return gulp.src(htmlFiles)
       .pipe(usemin({
         css: [rename(function (path) {
           path.basename = path.basename.substring(0, path.basename.indexOf(".min"))

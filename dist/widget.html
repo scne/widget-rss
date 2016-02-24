@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
-<head lang="en">
-  <meta charset="UTF-8">
+<head>
+  <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>RSS Widget</title>
 
@@ -10,18 +10,32 @@
 
   <link rel="stylesheet" href="css/rss.min.css"/>
 
-  <!-- TODO: inline styles for this layout -->
-
 </head>
 <body>
 
-<rise-rss id="rss"></rise-rss>
+<rise-rss id="rss" refresh="1"></rise-rss>
 
-<div id="scrollContainer">
+<div id="container">
   <section class="page"></section>
 
-  <!-- TODO: template layout -->
+  <!-- template structure of an RSS Item which will be injected into <section> above -->
+  <template id="rssItem">
+    <article class="item">
+      <div class="textWrapper">
+        <h1 class="headline headline_font-style">
+          <a class="headline_font-style" target="_blank"></a>
+        </h1>
+        <p class="story story_font-style"></p>
+      </div>
+    </article>
+  </template>
 </div>
+
+<div id="messageContainer"></div>
+
+<!-- build:e2egadgets -->
+<script src="//rvashow2.appspot.com/gadgets/gadgets.min.js"></script>
+
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
 <script>
@@ -61,11 +75,6 @@
   }
 </script>
 
-<!-- build:e2egadgets -->
-<script src="//rvashow2.appspot.com/gadgets/gadgets.min.js"></script>
-
-
 <script src="js/widget.min.js"></script>
-
 </body>
 </html>

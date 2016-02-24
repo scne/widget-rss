@@ -1,20 +1,3 @@
-/* exported config */
-if (typeof angular !== "undefined") {
-  angular.module("risevision.widget.rss.config", [])
-    .value("layout4x1", "https://s3.amazonaws.com/widget-rss/1.0.0/dist/layout-4x1.html")
-    .value("layout2x1", "https://s3.amazonaws.com/widget-rss/1.0.0/dist/layout-2x1.html")
-    .value("layout1x2", "https://s3.amazonaws.com/widget-rss/1.0.0/dist/layout-1x2.html");
-
-  angular.module("risevision.common.i18n.config", [])
-    .constant("LOCALES_PREFIX", "locales/translation_")
-    .constant("LOCALES_SUFIX", ".json");
-}
-
-var config = {};
-
-
-
-
 /*
  *  Project: Auto-Scroll
  *  Description: Auto-scroll plugin for use with Rise Vision Widgets
@@ -959,21 +942,397 @@ var config = {};
 
 })( jQuery );
 
+var WIDGET_COMMON_CONFIG = {
+  AUTH_PATH_URL: "v1/widget/auth",
+  LOGGER_CLIENT_ID: "1088527147109-6q1o2vtihn34292pjt4ckhmhck0rk0o7.apps.googleusercontent.com",
+  LOGGER_CLIENT_SECRET: "nlZyrcPLg6oEwO9f9Wfn29Wh",
+  LOGGER_REFRESH_TOKEN: "1/xzt4kwzE1H7W9VnKB8cAaCx6zb4Es4nKEoqaYHdTD15IgOrJDtdun6zK6XiATCKT",
+  STORAGE_ENV: "prod",
+  STORE_URL: "https://store-dot-rvaserver2.appspot.com/"
+};
+var RiseVision = RiseVision || {};
+
+RiseVision.Common = RiseVision.Common || {};
+
+RiseVision.Common.Utilities = (function() {
+
+  function getFontCssStyle(className, fontObj) {
+    var family = "font-family:" + fontObj.font.family + "; ";
+    var color = "color: " + (fontObj.color ? fontObj.color : fontObj.forecolor) + "; ";
+    var size = "font-size: " + (fontObj.size.indexOf("px") === -1 ? fontObj.size + "px; " : fontObj.size + "; ");
+    var weight = "font-weight: " + (fontObj.bold ? "bold" : "normal") + "; ";
+    var italic = "font-style: " + (fontObj.italic ? "italic" : "normal") + "; ";
+    var underline = "text-decoration: " + (fontObj.underline ? "underline" : "none") + "; ";
+    var highlight = "background-color: " + (fontObj.highlightColor ? fontObj.highlightColor : fontObj.backcolor) + "; ";
+
+    return "." + className + " {" + family + color + size + weight + italic + underline + highlight + "}";
+  }
+
+  function addCSSRules(rules) {
+    var style = document.createElement("style");
+
+    for (var i = 0, length = rules.length; i < length; i++) {
+      style.appendChild(document.createTextNode(rules[i]));
+    }
+
+    document.head.appendChild(style);
+  }
+
+  /*
+   * Loads Google or custom fonts, if applicable, and injects CSS styles
+   * into the head of the document.
+   *
+   * @param    array    settings    Array of objects with the following form:
+ *                                   [{
+ *                                     "class": "date",
+ *                                     "fontSetting": {
+ *                                         bold: true,
+ *                                         color: "black",
+ *                                         font: {
+ *                                           family: "Akronim",
+ *                                           font: "Akronim",
+ *                                           name: "Verdana",
+ *                                           type: "google",
+ *                                           url: "http://custom-font-url"
+ *                                         },
+ *                                         highlightColor: "transparent",
+ *                                         italic: false,
+ *                                         size: "20",
+ *                                         underline: false
+ *                                     }
+ *                                   }]
+   *
+   *           object   contentDoc    Document object into which to inject styles
+   *                                  and load fonts (optional).
+   */
+  function loadFonts(settings, contentDoc) {
+    settings.forEach(function(item) {
+      if (item.class && item.fontSetting) {
+        addCSSRules([ getFontCssStyle(item.class, item.fontSetting) ]);
+      }
+
+      if (item.fontSetting.font.type) {
+        if (item.fontSetting.font.type === "custom" && item.fontSetting.font.family &&
+          item.fontSetting.font.url) {
+          loadCustomFont(item.fontSetting.font.family, item.fontSetting.font.url,
+            contentDoc);
+        }
+        else if (item.fontSetting.font.type === "google" && item.fontSetting.font.family) {
+          loadGoogleFont(item.fontSetting.font.family, contentDoc);
+        }
+      }
+    });
+  }
+
+  function loadCustomFont(family, url, contentDoc) {
+    var sheet = null;
+    var rule = "font-family: " + family + "; " + "src: url('" + url + "');";
+
+    contentDoc = contentDoc || document;
+
+    sheet = contentDoc.styleSheets[0];
+
+    if (sheet !== null) {
+      sheet.addRule("@font-face", rule);
+    }
+  }
+
+  function loadGoogleFont(family, contentDoc) {
+    var stylesheet = document.createElement("link");
+
+    contentDoc = contentDoc || document;
+
+    stylesheet.setAttribute("rel", "stylesheet");
+    stylesheet.setAttribute("type", "text/css");
+
+    // split to account for family value containing a fallback (eg. Aladin,sans-serif)
+    stylesheet.setAttribute("href", "https://fonts.googleapis.com/css?family=" + family.split(",")[0]);
+
+    if (stylesheet !== null) {
+      contentDoc.getElementsByTagName("head")[0].appendChild(stylesheet);
+    }
+  }
+
+  function preloadImages(urls) {
+    var length = urls.length,
+      images = [];
+
+    for (var i = 0; i < length; i++) {
+      images[i] = new Image();
+      images[i].src = urls[i];
+    }
+  }
+
+  function getQueryParameter(param) {
+    var query = window.location.search.substring(1),
+      vars = query.split("&"),
+      pair;
+
+    for (var i = 0; i < vars.length; i++) {
+      pair = vars[i].split("=");
+
+      if (pair[0] == param) {
+        return decodeURIComponent(pair[1]);
+      }
+    }
+
+    return "";
+  }
+
+  function getRiseCacheErrorMessage(statusCode) {
+    var errorMessage = "";
+    switch (statusCode) {
+      case 404:
+        errorMessage = "The file does not exist or cannot be accessed.";
+        break;
+      case 507:
+        errorMessage = "There is not enough disk space to save the file on Rise Cache.";
+        break;
+      default:
+        errorMessage = "There was a problem retrieving the file from Rise Cache.";
+    }
+
+    return errorMessage;
+  }
+
+  return {
+    getQueryParameter: getQueryParameter,
+    getFontCssStyle:  getFontCssStyle,
+    addCSSRules:      addCSSRules,
+    loadFonts:        loadFonts,
+    loadCustomFont:   loadCustomFont,
+    loadGoogleFont:   loadGoogleFont,
+    preloadImages:    preloadImages,
+    getRiseCacheErrorMessage: getRiseCacheErrorMessage
+  };
+})();
+
+/* global gadgets */
+
+var RiseVision = RiseVision || {};
+RiseVision.Common = RiseVision.Common || {};
+
+RiseVision.Common.LoggerUtils = (function() {
+  "use strict";
+
+   var displayId = "",
+    companyId = "";
+
+  /*
+   *  Private Methods
+   */
+
+  /* Retrieve parameters to pass to the event logger. */
+  function getEventParams(params, cb) {
+    var json = null;
+
+    // event is required.
+    if (params.event) {
+      json = params;
+
+      if (json.file_url) {
+        json.file_format = getFileFormat(json.file_url);
+      }
+
+      json.company_id = companyId;
+      json.display_id = displayId;
+
+      cb(json);
+    }
+    else {
+      cb(json);
+    }
+  }
+
+  // Get suffix for BQ table name.
+  function getSuffix() {
+    var date = new Date(),
+      year = date.getUTCFullYear(),
+      month = date.getUTCMonth() + 1,
+      day = date.getUTCDate();
+
+    if (month < 10) {
+      month = "0" + month;
+    }
+
+    if (day < 10) {
+      day = "0" + day;
+    }
+
+    return year + month + day;
+  }
+
+  /*
+   *  Public Methods
+   */
+  function getFileFormat(url) {
+    var hasParams = /[?#&]/,
+      str;
+
+    if (!url || typeof url !== "string") {
+      return null;
+    }
+
+    str = url.substr(url.lastIndexOf(".") + 1);
+
+    // don't include any params after the filename
+    if (hasParams.test(str)) {
+      str = str.substr(0 ,(str.indexOf("?") !== -1) ? str.indexOf("?") : str.length);
+
+      str = str.substr(0, (str.indexOf("#") !== -1) ? str.indexOf("#") : str.length);
+
+      str = str.substr(0, (str.indexOf("&") !== -1) ? str.indexOf("&") : str.length);
+    }
+
+    return str.toLowerCase();
+  }
+
+  function getInsertData(params) {
+    var BASE_INSERT_SCHEMA = {
+      "kind": "bigquery#tableDataInsertAllRequest",
+      "skipInvalidRows": false,
+      "ignoreUnknownValues": false,
+      "templateSuffix": getSuffix(),
+      "rows": [{
+        "insertId": ""
+      }]
+    },
+    data = JSON.parse(JSON.stringify(BASE_INSERT_SCHEMA));
+
+    data.rows[0].insertId = Math.random().toString(36).substr(2).toUpperCase();
+    data.rows[0].json = JSON.parse(JSON.stringify(params));
+    data.rows[0].json.ts = new Date().toISOString();
+
+    return data;
+  }
+
+  function logEvent(table, params) {
+    getEventParams(params, function(json) {
+      if (json !== null) {
+        RiseVision.Common.Logger.log(table, json);
+      }
+    });
+  }
+
+  /* Set the Company and Display IDs. */
+  function setIds(company, display) {
+    companyId = company;
+    displayId = display;
+  }
+
+  return {
+    "getInsertData": getInsertData,
+    "getFileFormat": getFileFormat,
+    "logEvent": logEvent,
+    "setIds": setIds
+  };
+})();
+
+RiseVision.Common.Logger = (function(utils) {
+  "use strict";
+
+  var REFRESH_URL = "https://www.googleapis.com/oauth2/v3/token?client_id=" + WIDGET_COMMON_CONFIG.LOGGER_CLIENT_ID +
+      "&client_secret=" + WIDGET_COMMON_CONFIG.LOGGER_CLIENT_SECRET +
+      "&refresh_token=" + WIDGET_COMMON_CONFIG.LOGGER_REFRESH_TOKEN +
+      "&grant_type=refresh_token";
+
+  var serviceUrl = "https://www.googleapis.com/bigquery/v2/projects/client-side-events/datasets/Widget_Events/tables/TABLE_ID/insertAll",
+    throttle = false,
+    throttleDelay = 1000,
+    lastEvent = "",
+    refreshDate = 0,
+    token = "";
+
+  /*
+   *  Private Methods
+   */
+  function refreshToken(cb) {
+    var xhr = new XMLHttpRequest();
+
+    if (new Date() - refreshDate < 3580000) {
+      return cb({});
+    }
+
+    xhr.open("POST", REFRESH_URL, true);
+    xhr.onloadend = function() {
+      var resp = JSON.parse(xhr.response);
+
+      cb({ token: resp.access_token, refreshedAt: new Date() });
+    };
+
+    xhr.send();
+  }
+
+  function isThrottled(event) {
+    return throttle && (lastEvent === event);
+  }
+
+  /*
+   *  Public Methods
+   */
+  function log(tableName, params) {
+    if (!tableName || !params || (params.hasOwnProperty("event") && !params.event) ||
+      (params.hasOwnProperty("event") && isThrottled(params.event))) {
+      return;
+    }
+
+    throttle = true;
+    lastEvent = params.event;
+
+    setTimeout(function () {
+      throttle = false;
+    }, throttleDelay);
+
+    function insertWithToken(refreshData) {
+      var xhr = new XMLHttpRequest(),
+        insertData, url;
+
+      url = serviceUrl.replace("TABLE_ID", tableName);
+      refreshDate = refreshData.refreshedAt || refreshDate;
+      token = refreshData.token || token;
+      insertData = utils.getInsertData(params);
+
+      // Insert the data.
+      xhr.open("POST", url, true);
+      xhr.setRequestHeader("Content-Type", "application/json");
+      xhr.setRequestHeader("Authorization", "Bearer " + token);
+
+      if (params.cb && typeof params.cb === "function") {
+        xhr.onloadend = function() {
+          params.cb(xhr.response);
+        };
+      }
+
+      xhr.send(JSON.stringify(insertData));
+    }
+
+    return refreshToken(insertWithToken);
+  }
+
+  return {
+    "log": log
+  };
+})(RiseVision.Common.LoggerUtils);
 /* global gadgets, _ */
 
 var RiseVision = RiseVision || {};
 RiseVision.RSS = {};
 
-RiseVision.RSS = (function (gadgets) {
+RiseVision.RSS = (function (document, gadgets) {
   "use strict";
 
-  var _additionalParams;
+  var _additionalParams = null,
+    _prefs = new gadgets.Prefs();
 
-  var _prefs = null,
+  var _message = null,
     _riserss = null,
     _content = null;
 
   var _currentFeed = null;
+
+  var _viewerPaused = true,
+    _errorTimer = null,
+    _errorFlag = false;
 
   /*
    *  Private Methods
@@ -986,8 +1345,46 @@ RiseVision.RSS = (function (gadgets) {
     gadgets.rpc.call("", "rsevent_done", null, _prefs.getString("id"));
   }
 
-  function _loadFonts() {
-    // TODO: load fonts and inject any other css into the document head
+  function _clearErrorTimer() {
+    clearTimeout(_errorTimer);
+    _errorTimer = null;
+  }
+
+  function _startErrorTimer() {
+    _clearErrorTimer();
+
+    _errorTimer = setTimeout(function () {
+      // notify Viewer widget is done
+      _done();
+    }, 5000);
+  }
+
+  function _init() {
+    _message = new RiseVision.Common.Message(document.getElementById("container"),
+      document.getElementById("messageContainer"));
+
+    // show wait message
+    _message.show("Please wait while your feed is loaded.");
+
+    // Load fonts.
+    var fontSettings = [
+      {
+        "class": "headline_font-style",
+        "fontSetting": _additionalParams.headline.fontStyle
+      },
+      {
+        "class": "story_font-style",
+        "fontSetting": _additionalParams.story.fontStyle
+      }
+    ];
+
+    RiseVision.Common.Utilities.loadFonts(fontSettings);
+
+    // create and initialize the rss module instance
+    _riserss = new RiseVision.RSS.RiseRSS(_additionalParams);
+    _riserss.init();
+
+    _ready();
   }
 
   /*
@@ -997,59 +1394,174 @@ RiseVision.RSS = (function (gadgets) {
     _done();
   }
 
-  function onContentReady() {
-    _ready();
-  }
-
   function onRiseRSSInit(feed) {
-    _currentFeed = _.clone(feed);
-
-    _content = new RiseVision.RSS.ContentRSS(_prefs, _additionalParams);
-    _content.build(_currentFeed);
-  }
-
-  function onRiseRSSRefresh(feed) {
-    //TODO: logic to come
+    console.log("onRiseRSSInit");
     console.dir(feed);
-  }
 
-  function pause() {
-    _content.scrollPause();
-  }
+    if (feed.items && feed.items.length > 0) {
+      // remove a message previously shown
+      _message.hide();
 
-  function play() {
-    _content.scrollPlay();
-  }
+      _currentFeed = _.clone(feed);
 
-  function setAdditionalParams(names, values) {
-    if (Array.isArray(names) && names.length > 0 && names[0] === "additionalParams") {
-      if (Array.isArray(values) && values.length > 0) {
-        _additionalParams = JSON.parse(values[0]);
-        _prefs = new gadgets.Prefs();
+      // create content module instance
+      _content = new RiseVision.RSS.Content(_prefs);
+      _content.init(_currentFeed);
 
-        _loadFonts();
-
-        // create and initialize the Component module instance
-        _riserss = new RiseVision.RSS.RiseRSS(_additionalParams);
-        _riserss.init();
+      if (!_viewerPaused) {
+        _content.play();
       }
+    }
+    else {
+      showError("There are no entries to show from this RSS feed.");
     }
   }
 
-  function stop() {}
+  function onRiseRSSRefresh(feed) {
+    console.log("onRiseRSSRefresh");
+    console.dir(feed);
+
+    var updated = false;
+
+    if (!feed.items || feed.items.length === 0) {
+      if (!_errorFlag) {
+        showError("There are no entries to show from this RSS feed.");
+      }
+    }
+    else if (feed.items.length !== _currentFeed.items.length) {
+      updated = true;
+    }
+    else {
+      // run through each item and compare, if any are different, feed has been updated
+      for (var i = 0; i < _currentFeed.items.length; i += 1) {
+        if (!_.isEqual(feed.items[i], _currentFeed.items[i])) {
+          updated = true;
+          break;
+        }
+      }
+    }
+
+    if (updated) {
+      _currentFeed = _.clone(feed);
+
+      if (_errorFlag) {
+        _errorFlag = false;
+
+        if (!_content) {
+          // create content module instance
+          _content = new RiseVision.RSS.Content(_prefs);
+        }
+
+        _content.init(_currentFeed);
+
+        if (!_viewerPaused) {
+          _content.play();
+        }
+      }
+      else {
+        _content.update(feed);
+      }
+
+    }
+  }
+
+  function pause() {
+    _viewerPaused = true;
+
+    if (_errorFlag) {
+      _clearErrorTimer();
+      return;
+    }
+
+    if (_content) {
+      _content.pause();
+    }
+  }
+
+  function play() {
+    _viewerPaused = false;
+
+    if (_errorFlag) {
+      _startErrorTimer();
+      return;
+    }
+
+    if (_content) {
+      _content.play();
+    }
+  }
+
+  function setAdditionalParams(additionalParams) {
+    _additionalParams = JSON.parse(JSON.stringify(additionalParams));
+    _prefs = new gadgets.Prefs();
+
+    _additionalParams.width = _prefs.getInt("rsW");
+    _additionalParams.height = _prefs.getInt("rsH");
+
+    document.getElementById("container").style.width = _additionalParams.width + "px";
+    document.getElementById("container").style.height = _additionalParams.height + "px";
+
+    _init();
+  }
+
+  function showError(message) {
+    _errorFlag = true;
+
+    _content.reset();
+    _message.show(message);
+
+    if (!_viewerPaused) {
+      _startErrorTimer();
+    }
+  }
+
+  function stop() {
+    pause();
+  }
 
   return {
     "onContentDone": onContentDone,
-    "onContentReady": onContentReady,
     "onRiseRSSInit": onRiseRSSInit,
     "onRiseRSSRefresh": onRiseRSSRefresh,
     "pause": pause,
     "play": play,
     "setAdditionalParams": setAdditionalParams,
+    "showError": showError,
     "stop": stop
   };
 
-})(gadgets);
+})(document, gadgets);
+
+var RiseVision = RiseVision || {};
+RiseVision.RSS = RiseVision.RSS || {};
+
+RiseVision.RSS.Utils = (function () {
+  "use strict";
+
+  /*
+   *  Public  Methods
+   */
+
+  function stripScripts(html) {
+    var div = document.createElement("div"),
+      scripts, i;
+
+    div.innerHTML = html;
+    scripts = div.getElementsByTagName("script");
+    i = scripts.length;
+
+    while (i--) {
+      scripts[i].parentNode.removeChild(scripts[i]);
+    }
+
+    return div.innerHTML;
+  }
+
+  return {
+    "stripScripts": stripScripts
+  };
+
+})();
 
 var RiseVision = RiseVision || {};
 RiseVision.RSS = RiseVision.RSS || {};
@@ -1063,11 +1575,7 @@ RiseVision.RSS.RiseRSS = function (data) {
    *  Public Methods
    */
   function init() {
-    var rss = document.getElementById("rss");
-
-    if (!rss) {
-      return;
-    }
+    var rss = document.querySelector("rise-rss");
 
     rss.addEventListener("rise-rss-response", function(e) {
       if (e.detail && e.detail.feed) {
@@ -1082,22 +1590,12 @@ RiseVision.RSS.RiseRSS = function (data) {
       }
     });
 
-    rss.addEventListener("rise-rss-error", function (e) {
-      console.log("rise-rss-error handler");
-
-      if (e.detail) {
-        console.log(e.detail);
-      }
-
+    rss.addEventListener("rise-rss-error", function () {
+      RiseVision.RSS.showError("Sorry, there was a problem with the RSS feed.", true);
     });
 
     rss.setAttribute("url", data.url);
-    rss.setAttribute("entries", data.queue);
-    rss.setAttribute("refresh", data.refresh);
-
-    // retrieve the JSON formatted RSS data
     rss.go();
-
   }
 
   return {
@@ -1105,145 +1603,35 @@ RiseVision.RSS.RiseRSS = function (data) {
   };
 };
 
-var RiseVision = RiseVision || {};
-RiseVision.RSS = RiseVision.RSS || {};
-RiseVision.RSS.Images = {};
-
-RiseVision.RSS.Images = (function () {
-
-  "use strict";
-
-  var _imagesToLoad = [],
-    _imageCount = 0,
-    _images = [],
-    _callback = null;
-
-  function _onImageLoaded(image) {
-    _images.push(image);
-    _imageCount += 1;
-
-    if (_imageCount === _imagesToLoad.length && _callback && typeof _callback === "function") {
-      _callback();
-    }
-  }
-
-  function _loadImage(image) {
-    var img = new Image();
-
-    img.onload = function () {
-      _onImageLoaded(this);
-    };
-
-    img.onerror = function () {
-      _onImageLoaded(this);
-    };
-
-    img.src = image.url;
-  }
-
-  function _loadImages() {
-    var i;
-
-    for (i = 0; i < _imagesToLoad.length; i += 1) {
-      if (_imagesToLoad[i] === null) {
-        _onImageLoaded(null);
-      } else {
-        _loadImage(_imagesToLoad[i]);
-      }
-    }
-  }
-
-  function load(images, callback) {
-    if (images.length > 0) {
-      _imagesToLoad = images;
-      _images = [];
-      _loadImages();
-
-      if (callback) {
-        _callback = callback;
-      }
-    } else if (callback) {
-      callback();
-    }
-  }
-
-  function getImages() {
-    return _images;
-  }
-
-  return {
-    getImages: getImages,
-    load: load
-  };
-
-})();
-
 /* global _ */
 
 var RiseVision = RiseVision || {};
 RiseVision.RSS = RiseVision.RSS || {};
 
-RiseVision.RSS.ContentRSS = function (prefs, params) {
+RiseVision.RSS.Content = function (prefs) {
 
   "use strict";
 
-  var SUPPORTED_IMAGES = ["image/bmp", "image/gif", "image/jpeg", "image/png", "image/tiff"];
-
-  // Plugins
-  var PLUGIN_SCROLL = "plugin_autoScroll";
-
   var _items = [],
-    _imageUrls = [];
+    _utils = RiseVision.RSS.Utils;
 
-  var _initialBuild = true,
-    _isScrolling = false;
+  var _$el;
 
-  var $el;
+  var _currentItemIndex = 0;
 
+  var _transitionIntervalId = null,
+    _transitionInterval = 10000;
+
+  var _waitingForUpdate = false;
+
+  /*
+   *  Private Methods
+   */
   function _cache() {
-    $el = {
-      scrollContainer:      $("#scrollContainer"),
-      page:                 $(".page")
+    _$el = {
+      container:      $("#container"),
+      page:           $(".page")
     };
-  }
-
-  function _hasImages(imagesArr) {
-    var list;
-
-    if (imagesArr.length === 0) {
-      return false;
-    }
-
-    list = _.without(imagesArr, null);
-
-    return list.length !== 0;
-  }
-
-  function _urlExists(url, story) {
-    if (url && story) {
-      return story.indexOf(url !== -1);
-    }
-
-    return false;
-  }
-
-  function _useSeparator() {
-    // TODO: no checkbox setting for allowing the choice to use a separator
-    return params.scroll.by.transition === "continuous";
-  }
-
-  function _getItemHeight() {
-    var height = prefs.getInt("rsH") / parseInt(params.stories);
-
-    return (_useSeparator()) ? height - 1: height;
-  }
-
-  function _getScrollEl() {
-    if (typeof $el.scrollContainer.data(PLUGIN_SCROLL) !== "undefined") {
-      return $el.scrollContainer.data(PLUGIN_SCROLL);
-    }
-
-    return null;
   }
 
   function _getStory(item) {
@@ -1258,240 +1646,210 @@ RiseVision.RSS.ContentRSS = function (prefs, params) {
     return story;
   }
 
-  function _getAuthor(item) {
-    var author = null;
-
-    if (_.has(item, "author")) {
-      author = item.author;
-    } else if (_.has(item, "dc:creator")) {
-      author = item["dc:creator"];
-    }
-
-    return author;
-  }
-
-  function _getImage(index) {
-    var images = RiseVision.RSS.Images.getImages(),
-      image = null;
-
-    if (images.length > 0 && images[index]) {
-      if (images[index].src) {
-        image = images[index];
-      }
-    }
-
-    return image;
-  }
-
-  function _setScrolling() {
-    if (!_getScrollEl()) {
-      // Intitiate auto scrolling on the scroll container
-      $el.scrollContainer.autoScroll(params.scroll)
-        .on("done", function () {
-          _isScrolling = false;
-
-          RiseVision.RSS.onContentDone();
-        });
-    }
-  }
-
-  function _getTemplate(item, index) {
+  function _getTemplate(item) {
     var story = _getStory(item),
-      author = _getAuthor(item),
-      image = _getImage(index),
-      content = document.querySelector("#rssItem").content,
-      clone;
+      template = document.querySelector("#rssItem").content,
+      $content = $(template.cloneNode(true)),
+      $story, clone;
 
     // Headline
-    content.querySelector(".headline").textContent = item.title;
-
-    // Author
-    content.querySelector(".author").textContent = (!author) ? "" : author;
-
-    // Date
-    // TODO: use moment.js to format the date
-    content.querySelector(".date").textContent = item.pubdate;
-
-    // Story
-    if (params.selection.story === "snippet") {
-      // TODO: need to convert story value to text and truncate, set full story for now
-      content.querySelector(".story").innerHTML = (!story) ? "" : story;
+    if (!item.title) {
+      $content.remove(".headline");
     }
     else {
-      // TODO: strip out <script> tags before setting this value
-
-      content.querySelector(".story").innerHTML = (!story) ? "" : story;
-
-      // TODO: Reminder - apply story_font-style to everything inside (likely not in this function)
+      $content.find(".headline a").text(item.title);
     }
 
-    // Images
-    if (image) {
-      content.querySelector(".image").setAttribute("src", image.src);
-      // TODO: Reminder - image dimensions need to be applied (not in this function)
-    } else {
-      // remove the src attribute from <image>
-      content.querySelector(".image").removeAttribute("src");
+    // Story
+    if (!story) {
+      $content.remove(".story");
+    }
+    else {
+      $story = $content.find(".story");
+      $story.html(_utils.stripScripts(story));
+
+      // apply the story font styling to child elements as well.
+      $story.find("p").addClass("story_font-style");
+      $story.find("div").addClass("story_font-style");
+      $story.find("span").addClass("story_font-style");
     }
 
-    clone = $(document.importNode(content, true));
+    clone = $(document.importNode($content[0], true));
 
     return clone;
   }
 
-  function _addItems() {
-    var itemsNum = (_items.length <= params.queue) ? _items.length : params.queue,
-      templatesNum, template;
-
+  function _clear() {
     // clear content
-    $el.page.empty();
+    _$el.page.empty();
+  }
 
-    if (params.scroll.by !== "none") {
-      // display all items
-      templatesNum = itemsNum;
-    } else {
-      // TODO: transitioning not implemented yet, this won't be used yet
-      templatesNum = (params.stories <= itemsNum) ? params.stories : itemsNum;
-    }
+  function _showItem(index) {
+    _$el.page.append(_getTemplate(_items[index]));
 
-    for (var i = 0; i < templatesNum; i += 1) {
-      template = _getTemplate(_items[i], i);
-      $el.page.append(template);
-    }
-
-    // TODO: may need to truncate elsewhere when transitioning is implemented
-    // truncate items in order to show the
+    // truncate content
     $(".item").dotdotdot({
-      height: _getItemHeight()
+      height: prefs.getInt("rsH")
     });
 
-    $(".item").height(_getItemHeight());
+    $(".item").height(prefs.getInt("rsH"));
   }
 
-  function _init() {
-    $el.scrollContainer.width(prefs.getInt("rsW"));
-    $el.scrollContainer.height(prefs.getInt("rsH"));
+  function _transition() {
+    if (_currentItemIndex === (_items.length - 1)) {
 
-    _addItems();
+      _stopTransitionTimer();
 
-    if (_initialBuild) {
-      _setScrolling();
+      // set up first item to show
+      _currentItemIndex = 0;
+      _clear();
+      _showItem(_currentItemIndex);
 
-      RiseVision.RSS.onContentReady();
+      _waitingForUpdate = false;
+
+      RiseVision.RSS.onContentDone();
+
+      return;
+    }
+
+    if (_waitingForUpdate) {
+      // start over at first item since the feed has been updated
+      _currentItemIndex = 0;
+      _waitingForUpdate = false;
+    }
+    else {
+      _currentItemIndex += 1;
+    }
+
+    _clear();
+    _showItem(_currentItemIndex);
+  }
+
+  function _startTransitionTimer() {
+    if (_transitionIntervalId === null) {
+      _transitionIntervalId = setInterval(function () {
+        _transition();
+      }, _transitionInterval);
     }
   }
 
-  function _configureMedia(feedItems) {
-    var story, media, medium, url, type, found, enclosure;
-
-    for (var i = 0; i < feedItems.length; i++) {
-      found = false;
-      story = _getStory(feedItems[i]);
-      media = (_.has(feedItems[i], "media:content")) ? feedItems[i]["media:content"] : null;
-      enclosure = (_.has(feedItems[i], "enclosure")) ? feedItems[i].enclosure : null;
-
-      // TODO: Need to account for multiple <media:content> elements within a <media:group> element.
-
-      if (media) {
-        medium = (_.has(media, "medium")) ? media.medium : null;
-        url = (_.has(media, "url")) ? media.url : null;
-        type = (_.has(media, "type")) ? media.type : null;
-
-        if (medium) {
-          if (medium === "image") {
-            if (!_urlExists(url, story)) {
-              _imageUrls.push(url);
-              found = true;
-            }
-          }
-        }
-        else if (type) {
-          if (_.indexOf(SUPPORTED_IMAGES, type) !== -1) {
-            if (!_urlExists(url, story)) {
-              _imageUrls.push(url);
-              found = true;
-            }
-          }
-        }
-      }
-      else if (enclosure) {
-        url = (_.has(enclosure, "url")) ? enclosure.url : null;
-        type = (_.has(enclosure, "type")) ? enclosure.type : null;
-
-        if (_.indexOf(SUPPORTED_IMAGES, type) !== -1) {
-          if (!_urlExists(url, story)) {
-            _imageUrls.push(url);
-            found = true;
-          }
-        }
-      }
-
-      //Add a null url if this particular item has no image.
-      if (!found) {
-        _imageUrls.push(null);
-      }
-    }
+  function _stopTransitionTimer() {
+    clearInterval(_transitionIntervalId);
+    _transitionIntervalId = null;
   }
 
-  function scrollPlay() {
-    var $scroll = _getScrollEl();
-
-    if ($scroll && $scroll.canScroll() && !_isScrolling) {
-      $scroll.play();
-      _isScrolling = true;
-    }
-  }
-
-  function scrollPause() {
-    var $scroll = _getScrollEl();
-
-    if ($scroll && $scroll.canScroll()) {
-      $scroll.pause();
-      _isScrolling = false;
-    }
-  }
-
-  function build(feed) {
+  /*
+   *  Public Methods
+   */
+  function init(feed) {
     _items = feed.items;
-
-    if (!$el) {
-      _cache();
-    }
-
-    _imageUrls = [];
-
-    _configureMedia(_items);
-
-    if (_hasImages(_imageUrls)) {
-      // Load the images
-      RiseVision.RSS.Images.load(_imageUrls, function () {
-        if (_initialBuild) {
-          _init();
-        }
-        /*else {
-          // TODO: not sure what will happen here yet
-        }*/
-      });
-    } else {
-      if (_initialBuild) {
-        _init();
-      }
-      /*else {
-       // TODO: not sure what will happen here yet
-      }*/
-    }
+    _currentItemIndex = 0;
+    _showItem(_currentItemIndex);
   }
+
+  function pause() {
+    _stopTransitionTimer();
+  }
+
+  function reset() {
+    _stopTransitionTimer();
+    _clear();
+    _items = [];
+  }
+
+  function play() {
+    _startTransitionTimer();
+  }
+
+  function update(feed) {
+    _items = feed.items;
+    _waitingForUpdate = true;
+  }
+
+  _cache();
 
   return {
-    build: build,
-    scrollPlay: scrollPlay,
-    scrollPause: scrollPause
+    init: init,
+    pause: pause,
+    play: play,
+    reset: reset,
+    update: update
+  };
+};
+
+var RiseVision = RiseVision || {};
+RiseVision.Common = RiseVision.Common || {};
+
+RiseVision.Common.Message = function (mainContainer, messageContainer) {
+  "use strict";
+
+  var _active = false;
+
+  function _init() {
+    try {
+      messageContainer.style.height = mainContainer.style.height;
+    } catch (e) {
+      console.warn("Can't initialize Message - ", e.message);
+    }
+  }
+
+  /*
+   *  Public Methods
+   */
+  function hide() {
+    if (_active) {
+      // clear content of message container
+      while (messageContainer.firstChild) {
+        messageContainer.removeChild(messageContainer.firstChild);
+      }
+
+      // hide message container
+      messageContainer.style.display = "none";
+
+      // show main container
+      mainContainer.style.visibility = "visible";
+
+      _active = false;
+    }
+  }
+
+  function show(message) {
+    var fragment = document.createDocumentFragment(),
+      p;
+
+    if (!_active) {
+      // hide main container
+      mainContainer.style.visibility = "hidden";
+
+      messageContainer.style.display = "block";
+
+      // create message element
+      p = document.createElement("p");
+      p.innerHTML = message;
+      p.setAttribute("class", "message");
+
+      fragment.appendChild(p);
+      messageContainer.appendChild(fragment);
+
+      _active = true;
+    } else {
+      // message already being shown, update message text
+      p = messageContainer.querySelector(".message");
+      p.innerHTML = message;
+    }
+  }
+
+  _init();
+
+  return {
+    "hide": hide,
+    "show": show
   };
 };
 
 /* global gadgets, RiseVision */
 
-(function (window, gadgets) {
+(function (window, document, gadgets) {
   "use strict";
 
   var prefs = new gadgets.Prefs(),
@@ -1502,6 +1860,39 @@ RiseVision.RSS.ContentRSS = function (prefs, params) {
     return false;
   };
 
+  document.body.onmousedown = function() {
+    return false;
+  };
+
+  function configure(names, values) {
+    var additionalParams,
+      companyId = "",
+      displayId = "";
+
+    if (Array.isArray(names) && names.length > 0 && Array.isArray(values) && values.length > 0) {
+      if (names[0] === "companyId") {
+        companyId = values[0];
+      }
+
+      if (names[1] === "displayId") {
+        if (values[1]) {
+          displayId = values[1];
+        }
+        else {
+          displayId = "preview";
+        }
+      }
+
+      RiseVision.Common.LoggerUtils.setIds(companyId, displayId);
+
+      if (names[2] === "additionalParams") {
+        additionalParams = JSON.parse(values[2]);
+
+        RiseVision.RSS.setAdditionalParams(additionalParams);
+      }
+    }
+  }
+
   function play() {
     RiseVision.RSS.play();
   }
@@ -1511,7 +1902,7 @@ RiseVision.RSS.ContentRSS = function (prefs, params) {
   }
 
   function stop() {
-    RiseVision.RSS.pause();
+    RiseVision.RSS.stop();
   }
 
   function webComponentsReady() {
@@ -1521,15 +1912,14 @@ RiseVision.RSS.ContentRSS = function (prefs, params) {
       gadgets.rpc.register("rscmd_play_" + id, play);
       gadgets.rpc.register("rscmd_pause_" + id, pause);
       gadgets.rpc.register("rscmd_stop_" + id, stop);
-
-      gadgets.rpc.register("rsparam_set_" + id, RiseVision.RSS.setAdditionalParams);
-      gadgets.rpc.call("", "rsparam_get", null, id, ["additionalParams"]);
+      gadgets.rpc.register("rsparam_set_" + id, configure);
+      gadgets.rpc.call("", "rsparam_get", null, id, ["companyId", "displayId", "additionalParams"]);
     }
   }
 
   window.addEventListener("WebComponentsReady", webComponentsReady);
 
 
-})(window, gadgets);
+})(window, document, gadgets);
 
 

@@ -11202,7 +11202,7 @@ angular.module("risevision.widget.rss.settings")
     "params": {},
     "additionalParams": {
       "url": "",
-      "title": {
+      "headline": {
         "fontStyle": {}
       },
       "story": {

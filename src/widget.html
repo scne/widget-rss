@@ -1,27 +1,44 @@
 <!DOCTYPE html>
 <html>
-<head lang="en">
-  <meta charset="UTF-8">
+<head>
+  <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>RSS Widget</title>
 
   <script src="components/webcomponentsjs/webcomponents-lite.min.js"></script>
   <link rel="import" href="components/rise-rss/rise-rss.html">
 
-  <link rel="stylesheet" href="css/rss.min.css"/>
-
-  <!-- TODO: inline styles for this layout -->
+  <!-- build:css css/rss.min.css -->
+  <link rel="stylesheet" type="text/css" href="widget/css/rss.css">
+  <link rel="stylesheet" href="components/widget-common/dist/css/message.css">
+  <!-- endbuild -->
 
 </head>
 <body>
 
-<rise-rss id="rss"></rise-rss>
+<rise-rss id="rss" refresh="1"></rise-rss>
 
-<div id="scrollContainer">
+<div id="container">
   <section class="page"></section>
 
-  <!-- TODO: template layout -->
+  <!-- template structure of an RSS Item which will be injected into <section> above -->
+  <template id="rssItem">
+    <article class="item">
+      <div class="textWrapper">
+        <h1 class="headline headline_font-style">
+          <a class="headline_font-style" target="_blank"></a>
+        </h1>
+        <p class="story story_font-style"></p>
+      </div>
+    </article>
+  </template>
 </div>
+
+<div id="messageContainer"></div>
+
+<!-- build:e2egadgets -->
+<script src="//rvashow2.appspot.com/gadgets/gadgets.min.js"></script>
+<!-- endbuild -->
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
 <script>
@@ -61,11 +78,18 @@
   }
 </script>
 
-<!-- build:e2egadgets -->
-<script src="//rvashow2.appspot.com/gadgets/gadgets.min.js"></script>
-
-
-<script src="js/widget.min.js"></script>
-
+<!-- build:js js/widget.min.js -->
+<script src="components/auto-scroll/jquery.auto-scroll.js"></script>
+<script src="components/jQuery.dotdotdot/src/js/jquery.dotdotdot.js"></script>
+<script src="components/widget-common/dist/config.js"></script>
+<script src="components/widget-common/dist/common.js"></script>
+<script src="components/widget-common/dist/logger.js"></script>
+<script src="widget/rss.js"></script>
+<script src="widget/utils.js"></script>
+<script src="widget/rise-rss.js"></script>
+<script src="widget/content.js"></script>
+<script src="components/widget-common/dist/message.js"></script>
+<script src="widget/main.js"></script>
+<!-- endbuild -->
 </body>
 </html>
