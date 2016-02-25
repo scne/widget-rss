@@ -57,6 +57,18 @@ h1.headline, p.story {
   overflow: hidden;
 }
 
+.fade-in, .fade-out {
+  transition: opacity 1s;
+}
+
+.fade-out, .hide {
+  opacity: 0;
+}
+
+.fade-in {
+  opacity: 1;
+}
+
 #messageContainer {
   display: none; /* hide by default */
   position: absolute;

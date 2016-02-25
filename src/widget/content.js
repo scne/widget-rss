@@ -73,20 +73,32 @@ RiseVision.RSS.Content = function (prefs) {
     return clone;
   }
 
-  function _clear() {
-    // clear content
-    _$el.page.empty();
+  // Fade out and clear content.
+  function _clear(cb) {
+    $(".item").one("transitionend", function() {
+      _$el.page.empty();
+
+      if (!cb || typeof cb !== "function") {
+        return;
+      }
+      else {
+        cb();
+      }
+    });
+
+    $(".item").addClass("fade-out").removeClass("fade-in");
   }
 
   function _showItem(index) {
     _$el.page.append(_getTemplate(_items[index]));
 
+    $(".item").height(prefs.getInt("rsH"));
+    $(".item").addClass("fade-in").removeClass("hide");
+
     // truncate content
     $(".item").dotdotdot({
       height: prefs.getInt("rsH")
     });
-
-    $(".item").height(prefs.getInt("rsH"));
   }
 
   function _transition() {
@@ -96,12 +108,13 @@ RiseVision.RSS.Content = function (prefs) {
 
       // set up first item to show
       _currentItemIndex = 0;
-      _clear();
-      _showItem(_currentItemIndex);
+
+      _clear(function() {
+        _showItem(_currentItemIndex);
+        RiseVision.RSS.onContentDone();
+      });
 
       _waitingForUpdate = false;
-
-      RiseVision.RSS.onContentDone();
 
       return;
     }
@@ -115,8 +128,9 @@ RiseVision.RSS.Content = function (prefs) {
       _currentItemIndex += 1;
     }
 
-    _clear();
-    _showItem(_currentItemIndex);
+    _clear(function() {
+      _showItem(_currentItemIndex);
+    });
   }
 
   function _startTransitionTimer() {
