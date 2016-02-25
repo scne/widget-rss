@@ -3,16 +3,21 @@
 var RiseVision = RiseVision || {};
 RiseVision.RSS = {};
 
-RiseVision.RSS = (function (gadgets) {
+RiseVision.RSS = (function (document, gadgets) {
   "use strict";
 
-  var _additionalParams;
+  var _additionalParams = null,
+    _prefs = new gadgets.Prefs();
 
-  var _prefs = null,
+  var _message = null,
     _riserss = null,
     _content = null;
 
   var _currentFeed = null;
+
+  var _viewerPaused = true,
+    _errorTimer = null,
+    _errorFlag = false;
 
   /*
    *  Private Methods
@@ -25,8 +30,46 @@ RiseVision.RSS = (function (gadgets) {
     gadgets.rpc.call("", "rsevent_done", null, _prefs.getString("id"));
   }
 
-  function _loadFonts() {
-    // TODO: load fonts and inject any other css into the document head
+  function _clearErrorTimer() {
+    clearTimeout(_errorTimer);
+    _errorTimer = null;
+  }
+
+  function _startErrorTimer() {
+    _clearErrorTimer();
+
+    _errorTimer = setTimeout(function () {
+      // notify Viewer widget is done
+      _done();
+    }, 5000);
+  }
+
+  function _init() {
+    _message = new RiseVision.Common.Message(document.getElementById("container"),
+      document.getElementById("messageContainer"));
+
+    // show wait message
+    _message.show("Please wait while your feed is loaded.");
+
+    // Load fonts.
+    var fontSettings = [
+      {
+        "class": "headline_font-style",
+        "fontSetting": _additionalParams.headline.fontStyle
+      },
+      {
+        "class": "story_font-style",
+        "fontSetting": _additionalParams.story.fontStyle
+      }
+    ];
+
+    RiseVision.Common.Utilities.loadFonts(fontSettings);
+
+    // create and initialize the rss module instance
+    _riserss = new RiseVision.RSS.RiseRSS(_additionalParams);
+    _riserss.init();
+
+    _ready();
   }
 
   /*
@@ -36,56 +79,140 @@ RiseVision.RSS = (function (gadgets) {
     _done();
   }
 
-  function onContentReady() {
-    _ready();
-  }
-
   function onRiseRSSInit(feed) {
-    _currentFeed = _.clone(feed);
-
-    _content = new RiseVision.RSS.ContentRSS(_prefs, _additionalParams);
-    _content.build(_currentFeed);
-  }
-
-  function onRiseRSSRefresh(feed) {
-    //TODO: logic to come
+    console.log("onRiseRSSInit");
     console.dir(feed);
-  }
 
-  function pause() {
-    _content.scrollPause();
-  }
+    if (feed.items && feed.items.length > 0) {
+      // remove a message previously shown
+      _message.hide();
 
-  function play() {
-    _content.scrollPlay();
-  }
+      _currentFeed = _.clone(feed);
 
-  function setAdditionalParams(names, values) {
-    if (Array.isArray(names) && names.length > 0 && names[0] === "additionalParams") {
-      if (Array.isArray(values) && values.length > 0) {
-        _additionalParams = JSON.parse(values[0]);
-        _prefs = new gadgets.Prefs();
+      // create content module instance
+      _content = new RiseVision.RSS.Content(_prefs);
+      _content.init(_currentFeed);
 
-        _loadFonts();
-
-        // create and initialize the Component module instance
-        _riserss = new RiseVision.RSS.RiseRSS(_additionalParams);
-        _riserss.init();
+      if (!_viewerPaused) {
+        _content.play();
       }
+    }
+    else {
+      showError("There are no entries to show from this RSS feed.");
     }
   }
 
-  function stop() {}
+  function onRiseRSSRefresh(feed) {
+    console.log("onRiseRSSRefresh");
+    console.dir(feed);
+
+    var updated = false;
+
+    if (!feed.items || feed.items.length === 0) {
+      if (!_errorFlag) {
+        showError("There are no entries to show from this RSS feed.");
+      }
+    }
+    else if (feed.items.length !== _currentFeed.items.length) {
+      updated = true;
+    }
+    else {
+      // run through each item and compare, if any are different, feed has been updated
+      for (var i = 0; i < _currentFeed.items.length; i += 1) {
+        if (!_.isEqual(feed.items[i], _currentFeed.items[i])) {
+          updated = true;
+          break;
+        }
+      }
+    }
+
+    if (updated) {
+      _currentFeed = _.clone(feed);
+
+      if (_errorFlag) {
+        _errorFlag = false;
+
+        if (!_content) {
+          // create content module instance
+          _content = new RiseVision.RSS.Content(_prefs);
+        }
+
+        _content.init(_currentFeed);
+
+        if (!_viewerPaused) {
+          _content.play();
+        }
+      }
+      else {
+        _content.update(feed);
+      }
+
+    }
+  }
+
+  function pause() {
+    _viewerPaused = true;
+
+    if (_errorFlag) {
+      _clearErrorTimer();
+      return;
+    }
+
+    if (_content) {
+      _content.pause();
+    }
+  }
+
+  function play() {
+    _viewerPaused = false;
+
+    if (_errorFlag) {
+      _startErrorTimer();
+      return;
+    }
+
+    if (_content) {
+      _content.play();
+    }
+  }
+
+  function setAdditionalParams(additionalParams) {
+    _additionalParams = JSON.parse(JSON.stringify(additionalParams));
+    _prefs = new gadgets.Prefs();
+
+    _additionalParams.width = _prefs.getInt("rsW");
+    _additionalParams.height = _prefs.getInt("rsH");
+
+    document.getElementById("container").style.width = _additionalParams.width + "px";
+    document.getElementById("container").style.height = _additionalParams.height + "px";
+
+    _init();
+  }
+
+  function showError(message) {
+    _errorFlag = true;
+
+    _content.reset();
+    _message.show(message);
+
+    if (!_viewerPaused) {
+      _startErrorTimer();
+    }
+  }
+
+  function stop() {
+    pause();
+  }
 
   return {
     "onContentDone": onContentDone,
-    "onContentReady": onContentReady,
     "onRiseRSSInit": onRiseRSSInit,
     "onRiseRSSRefresh": onRiseRSSRefresh,
     "pause": pause,
     "play": play,
     "setAdditionalParams": setAdditionalParams,
+    "showError": showError,
     "stop": stop
   };
 
-})(gadgets);
+})(document, gadgets);

@@ -1,6 +1,6 @@
 /* global gadgets, RiseVision */
 
-(function (window, gadgets) {
+(function (window, document, gadgets) {
   "use strict";
 
   var prefs = new gadgets.Prefs(),
@@ -11,6 +11,39 @@
     return false;
   };
 
+  document.body.onmousedown = function() {
+    return false;
+  };
+
+  function configure(names, values) {
+    var additionalParams,
+      companyId = "",
+      displayId = "";
+
+    if (Array.isArray(names) && names.length > 0 && Array.isArray(values) && values.length > 0) {
+      if (names[0] === "companyId") {
+        companyId = values[0];
+      }
+
+      if (names[1] === "displayId") {
+        if (values[1]) {
+          displayId = values[1];
+        }
+        else {
+          displayId = "preview";
+        }
+      }
+
+      RiseVision.Common.LoggerUtils.setIds(companyId, displayId);
+
+      if (names[2] === "additionalParams") {
+        additionalParams = JSON.parse(values[2]);
+
+        RiseVision.RSS.setAdditionalParams(additionalParams);
+      }
+    }
+  }
+
   function play() {
     RiseVision.RSS.play();
   }
@@ -20,7 +53,7 @@
   }
 
   function stop() {
-    RiseVision.RSS.pause();
+    RiseVision.RSS.stop();
   }
 
   function webComponentsReady() {
@@ -30,15 +63,14 @@
       gadgets.rpc.register("rscmd_play_" + id, play);
       gadgets.rpc.register("rscmd_pause_" + id, pause);
       gadgets.rpc.register("rscmd_stop_" + id, stop);
-
-      gadgets.rpc.register("rsparam_set_" + id, RiseVision.RSS.setAdditionalParams);
-      gadgets.rpc.call("", "rsparam_get", null, id, ["additionalParams"]);
+      gadgets.rpc.register("rsparam_set_" + id, configure);
+      gadgets.rpc.call("", "rsparam_get", null, id, ["companyId", "displayId", "additionalParams"]);
     }
   }
 
   window.addEventListener("WebComponentsReady", webComponentsReady);
 
 
-})(window, gadgets);
+})(window, document, gadgets);
 
 

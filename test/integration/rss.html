@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RSS Widget</title>
+
+  <link rel="stylesheet" type="text/css" href="../../src/widget/css/rss.css">
+  <link rel="stylesheet" href="../../src/components/widget-common/dist/css/message.css">
+
+  <script src="../../src/components/webcomponentsjs/webcomponents-lite.min.js"></script>
+  <script src="../../src/components/web-component-tester/browser.js"></script>
+
+  <link rel="import" href="../../src/components/rise-rss/rise-rss.html">
+</head>
+<body>
+
+<rise-rss id="rss" refresh="1"></rise-rss>
+
+<div id="container">
+  <section class="page"></section>
+
+  <template id="rssItem">
+    <article class="item">
+      <div class="textWrapper">
+        <h1 class="headline headline_font-style">
+          <a class="headline_font-style" target="_blank"></a>
+        </h1>
+        <p class="story story_font-style"></p>
+      </div>
+    </article>
+  </template>
+</div>
+
+<div id="messageContainer"></div>
+
+<script src="../data/rss.js"></script>
+
+<script src="../../node_modules/widget-tester/mocks/gadget-mocks.js"></script>
+<script src="../../node_modules/widget-tester/mocks/gadgets.io-mock.js"></script>
+<script src="../../node_modules/widget-tester/mocks/logger-mock.js"></script>
+<script src="../../node_modules/widget-tester/mocks/rss-makeRequest-mock.js"></script>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+
+<script src="../../src/components/jQuery.dotdotdot/src/js/jquery.dotdotdot.js"></script>
+<script src="../../src/components/widget-common/dist/config.js"></script>
+<script src="../../src/components/widget-common/dist/common.js"></script>
+<script src="../../src/widget/rss.js"></script>
+<script src="../../src/widget/utils.js"></script>
+<script src="../../src/widget/rise-rss.js"></script>
+<script src="../../src/widget/content.js"></script>
+<script src="../../src/components/widget-common/dist/message.js"></script>
+<script src="../../src/widget/main.js"></script>
+
+<script>
+
+  var clock, paramsStub;
+
+  paramsStub = sinon.stub(RiseVision.RSS, "setAdditionalParams", function (names, values) {
+    // need to set the fake timer clock before any of the code within setAdditionalParams is executed
+    clock = sinon.useFakeTimers();
+    // restore the function
+    paramsStub.restore();
+    // call it again with the params
+    RiseVision.RSS.setAdditionalParams(names, values);
+  });
+
+  suite("RSS Content", function(){
+
+    suiteTeardown(function() {
+      clock.restore();
+    });
+
+    suite("Initialization", function () {
+      test("should set the width of the container", function() {
+        assert.equal(document.getElementById("container").style.width, window.innerWidth + "px");
+      });
+
+      test("should set the height of the container", function() {
+        assert.equal(document.getElementById("container").style.height, window.innerHeight + "px");
+      });
+    });
+
+    suite("RSS Item", function () {
+      test("should append template item", function() {
+        assert.isNotNull(document.querySelector(".item"));
+      });
+
+      test("should set item height to be same as container height", function() {
+        assert.equal(document.getElementById("container").style.height, document.querySelector(".item").style.height);
+      });
+
+      test("should apply font styling to headline", function() {
+        assert.isNotNull(document.querySelector(".headline_font-style"));
+      });
+
+      test("should populate headline correctly", function() {
+        assert.equal(document.querySelector(".headline a").innerHTML,
+          "RSS 2.0 - Entry 1 title");
+      });
+
+      test("should apply font styling to story", function() {
+        assert.isNotNull(document.querySelector(".story_font-style"));
+      });
+
+      test("should populate story correctly", function() {
+        assert.equal(document.querySelector(".story").innerHTML,
+          "Item 1 - Sample description");
+      });
+    });
+
+    suite("Transitioning", function() {
+
+      test("should always transition to next rss item after 10 seconds", function() {
+        assert.equal(document.querySelector(".headline a").innerHTML,
+          "RSS 2.0 - Entry 1 title", "first item displaying");
+
+        clock.tick(10000);
+
+        assert.equal(document.querySelector(".headline a").innerHTML,
+          "RSS 2.0 - Entry 2 title", "second item displaying");
+      });
+
+      test("should eventually transition all items and start over", function(){
+        var contentDoneSpy = sinon.spy(RiseVision.RSS, "onContentDone");
+
+        assert.equal(document.querySelector(".headline a").innerHTML,
+          "RSS 2.0 - Entry 2 title", "second item currently displaying");
+
+        // move clock enough intervals that last (4th) item has shown for allotted 10 seconds and now time to start over
+        clock.tick(30000);
+
+        assert(contentDoneSpy.calledOnce, "onContentDone called once");
+
+        assert.equal(document.querySelector(".headline a").innerHTML,
+          "RSS 2.0 - Entry 1 title", "first item displaying again");
+
+        RiseVision.RSS.onContentDone.restore();
+      });
+
+    });
+
+  });
+
+</script>
+
+</body>
+</html>

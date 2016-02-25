@@ -216,13 +216,15 @@ can only be used within Rise Vision [Offline Player](https://github.com/Rise-Vis
 
       _validateResponse: function(data) {
         // ensure for actual XML as the data
-        if (typeof data === "string" && data.indexOf('<?xml version="1.0"') !== -1) { // jshint ignore:line
-          this._handleRequestSuccess(data);
+        if (typeof data === "string") {
+          if (data.indexOf('<?xml version="1.0"') !== -1 || data.indexOf("<?xml version='1.0'") !== -1) { // jshint ignore:line
+            this._handleRequestSuccess(data);
+            return;
+          }
         }
-        else {
-          // the request didn't respond with RSS XML
-          this._handleRequestError("Request response is not XML");
-        }
+
+        // the request didn't respond with RSS XML
+        this._handleRequestError("Request response is not XML");
       },
 
       _handleOfflineError: function (error) {

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RSS Widget</title>
+
+  <link rel="stylesheet" type="text/css" href="../../src/widget/css/rss.css">
+  <link rel="stylesheet" href="../../src/components/widget-common/dist/css/message.css">
+
+  <script src="../../src/components/webcomponentsjs/webcomponents-lite.min.js"></script>
+  <script src="../../src/components/web-component-tester/browser.js"></script>
+
+  <link rel="import" href="../../src/components/rise-rss/rise-rss.html">
+</head>
+<body>
+
+<rise-rss id="rss" refresh="1"></rise-rss>
+
+<div id="container">
+  <section class="page"></section>
+
+  <template id="rssItem">
+    <article class="item">
+      <div class="textWrapper">
+        <h1 class="headline headline_font-style">
+          <a class="headline_font-style" target="_blank"></a>
+        </h1>
+        <p class="story story_font-style"></p>
+      </div>
+    </article>
+  </template>
+</div>
+
+<div id="messageContainer"></div>
+
+<script src="../data/rss.js"></script>
+
+<script src="../../node_modules/widget-tester/mocks/gadget-mocks.js"></script>
+<script src="../../node_modules/widget-tester/mocks/gadgets.io-mock.js"></script>
+<script src="../../node_modules/widget-tester/mocks/logger-mock.js"></script>
+<script src="../../node_modules/widget-tester/mocks/rss-makeRequest-mock.js"></script>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+
+<script src="../../src/components/jQuery.dotdotdot/src/js/jquery.dotdotdot.js"></script>
+<script src="../../src/components/widget-common/dist/config.js"></script>
+<script src="../../src/components/widget-common/dist/common.js"></script>
+<script src="../../src/widget/rss.js"></script>
+<script src="../../src/widget/utils.js"></script>
+<script src="../../src/widget/rise-rss.js"></script>
+<script src="../../src/widget/content.js"></script>
+<script src="../../src/components/widget-common/dist/message.js"></script>
+<script src="../../src/widget/main.js"></script>
+
+<script>
+
+  var clock, paramsStub;
+
+  paramsStub = sinon.stub(RiseVision.RSS, "setAdditionalParams", function (names, values) {
+    // need to set the fake timer clock before any of the code within setAdditionalParams is executed
+    clock = sinon.useFakeTimers();
+    // restore the function
+    paramsStub.restore();
+    // call it again with the params
+    RiseVision.RSS.setAdditionalParams(names, values);
+  });
+
+  suite("Messaging", function(){
+    var rss = document.querySelector("rise-rss"),
+      originalFeed = null;
+
+    sinon.stub(RiseVision.RSS, "onRiseRSSInit", function(feed){
+      originalFeed = JSON.parse(JSON.stringify(feed));
+    });
+
+    suiteTeardown(function() {
+      clock.restore();
+    });
+
+    suite("waiting", function() {
+      suiteTeardown(function(){
+        RiseVision.RSS.onRiseRSSInit.restore();
+        RiseVision.RSS.onRiseRSSInit(originalFeed);
+      });
+
+      test("should show waiting message", function() {
+        assert.equal(document.querySelector(".message").innerHTML, "Please wait while your feed is loaded.", "message is correct");
+      });
+    });
+
+    suite("no feed items", function() {
+      test("should show no entries message", function() {
+
+        rss.dispatchEvent(new CustomEvent("rise-rss-response", {
+          "detail": {
+            feed: []
+          },
+          "bubbles": true
+        }));
+
+        assert.equal(document.querySelector(".message").innerHTML, "There are no entries to show from this RSS feed.", "message is correct");
+      });
+    });
+
+    suite("rise-rss error", function() {
+      test("should show rise-rss error message", function() {
+
+        rss.dispatchEvent(new CustomEvent("rise-rss-error", {
+          "detail": null,
+          "bubbles": true
+        }));
+
+        assert.equal(document.querySelector(".message").innerHTML, "Sorry, there was a problem with the RSS feed.", "message is correct");
+      });
+    });
+
+  });
+
+</script>
+
+</body>
+</html>

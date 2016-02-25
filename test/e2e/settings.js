@@ -51,7 +51,7 @@
         params: {},
         additionalParams: {
           "url":"",
-          "title":{
+          "headline":{
             "fontStyle":{
               "font":{
                 "family":"verdana,geneva,sans-serif",

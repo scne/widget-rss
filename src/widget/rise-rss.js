@@ -10,11 +10,7 @@ RiseVision.RSS.RiseRSS = function (data) {
    *  Public Methods
    */
   function init() {
-    var rss = document.getElementById("rss");
-
-    if (!rss) {
-      return;
-    }
+    var rss = document.querySelector("rise-rss");
 
     rss.addEventListener("rise-rss-response", function(e) {
       if (e.detail && e.detail.feed) {
@@ -29,22 +25,12 @@ RiseVision.RSS.RiseRSS = function (data) {
       }
     });
 
-    rss.addEventListener("rise-rss-error", function (e) {
-      console.log("rise-rss-error handler");
-
-      if (e.detail) {
-        console.log(e.detail);
-      }
-
+    rss.addEventListener("rise-rss-error", function () {
+      RiseVision.RSS.showError("Sorry, there was a problem with the RSS feed.", true);
     });
 
     rss.setAttribute("url", data.url);
-    rss.setAttribute("entries", data.queue);
-    rss.setAttribute("refresh", data.refresh);
-
-    // retrieve the JSON formatted RSS data
     rss.go();
-
   }
 
   return {
