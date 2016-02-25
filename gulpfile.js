@@ -205,7 +205,7 @@
   });
 
   gulp.task("test", function(cb) {
-    runSequence("test:unit", "test:e2e"/*, "test:integration"*/, cb);
+    runSequence("test:unit", "test:e2e", "test:integration", cb);
   });
 
   gulp.task("default", [], function() {
