@@ -24,7 +24,6 @@ RiseVision.RSS.Content = function (prefs) {
    */
   function _cache() {
     _$el = {
-      container:      $("#container"),
       page:           $(".page")
     };
   }
