@@ -95,6 +95,10 @@
         assert.isNotNull(document.querySelector(".headline_font-style"));
       });
 
+      test("should apply alignment to headline", function() {
+        assert.equal(document.querySelector(".headline").style.textAlign, "left");
+      });
+
       test("should populate headline correctly", function() {
         assert.equal(document.querySelector(".headline a").innerHTML,
           "RSS 2.0 - Entry 1 title");
@@ -102,6 +106,10 @@
 
       test("should apply font styling to story", function() {
         assert.isNotNull(document.querySelector(".story_font-style"));
+      });
+
+      test("should apply alignment to story", function() {
+        assert.equal(document.querySelector(".story").style.textAlign, "left");
       });
 
       test("should populate story correctly", function() {

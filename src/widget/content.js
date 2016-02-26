@@ -3,7 +3,7 @@
 var RiseVision = RiseVision || {};
 RiseVision.RSS = RiseVision.RSS || {};
 
-RiseVision.RSS.Content = function (prefs) {
+RiseVision.RSS.Content = function (prefs, params) {
 
   "use strict";
 
@@ -51,6 +51,7 @@ RiseVision.RSS.Content = function (prefs) {
       $content.remove(".headline");
     }
     else {
+      $content.find(".headline").css("textAlign", params.headline.fontStyle.align);
       $content.find(".headline a").text(item.title);
     }
 
@@ -60,6 +61,7 @@ RiseVision.RSS.Content = function (prefs) {
     }
     else {
       $story = $content.find(".story");
+      $story.css("textAlign", params.story.fontStyle.align);
       $story.html(_utils.stripScripts(story));
 
       // apply the story font styling to child elements as well.
