@@ -68,7 +68,7 @@
     RiseVision.RSS.setAdditionalParams(names, values);
   });
 
-  suite("rise-rss", function(){
+  suite("rise-rss", function() {
 
     var rss = document.querySelector("rise-rss"),
       spy = sinon.spy(RiseVision.RSS, "onRiseRSSInit");
@@ -77,8 +77,8 @@
       clock.restore();
     });
 
-    suite("Initialization", function(){
-      suiteTeardown(function(){
+    suite("Initialization", function() {
+      suiteTeardown(function() {
         RiseVision.RSS.onRiseRSSInit.restore();
       });
 
@@ -114,44 +114,58 @@
 
       });
 
-      test("should update content", function() {
+      test("should update content", function(done) {
         assert.equal(document.querySelector(".headline a").innerHTML,
           "RSS 2.0 - Entry 1 title", "original first item displayed");
 
         clock.tick(10000);
 
-        assert.equal(document.querySelector(".headline a").innerHTML,
-          "RSS 2.0 - Entry 5 title", "updated first item displayed");
+        $(".item").one("transitionend", function() {
+          assert.equal(document.querySelector(".headline a").innerHTML,
+            "RSS 2.0 - Entry 5 title", "updated first item displayed");
+
+          done();
+        });
       });
 
-      test("should not update content when data hasn't changed", function() {
+      test("should not update content when data hasn't changed", function(done) {
         clock.tick(10000);
 
-        assert.equal(document.querySelector(".headline a").innerHTML,
-          "RSS 2.0 - Entry 6 title", "second item displayed");
+        $(".item").one("transitionend", function() {
+          assert.equal(document.querySelector(".headline a").innerHTML,
+            "RSS 2.0 - Entry 6 title", "second item displayed");
 
-        rss.dispatchEvent(new CustomEvent("rise-rss-response", {
-          "detail": {
-            "feed": jsonRSSUpdate
-          },
-          "bubbles": true
-        }));
+          rss.dispatchEvent(new CustomEvent("rise-rss-response", {
+            "detail": {
+              "feed": jsonRSSUpdate
+            },
+            "bubbles": true
+          }));
 
-        clock.tick(10000);
+          clock.tick(10000);
 
-        assert.equal(document.querySelector(".headline a").innerHTML,
-          "RSS 2.0 - Entry 7 title", "original content continuing to transition");
+          $(".item").one("transitionend", function() {
+            assert.equal(document.querySelector(".headline a").innerHTML,
+              "RSS 2.0 - Entry 7 title", "original content continuing to transition");
+
+            done();
+          });
+        });
       });
     });
 
     suite("error", function() {
-      test("should clear content when rise-rss-error occurs", function(){
+      test("should clear content when rise-rss-error occurs", function(done) {
         rss.dispatchEvent(new CustomEvent("rise-rss-error", {
           "detail": null,
           "bubbles": true
         }));
 
-        assert.isNull(document.querySelector(".item"));
+        $(".item").one("transitionend", function() {
+          assert.isNull(document.querySelector(".item"));
+
+          done();
+        });
       });
     });
 
