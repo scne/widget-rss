@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RSS Widget</title>
+
+  <link rel="stylesheet" type="text/css" href="../../src/widget/css/rss.css">
+  <link rel="stylesheet" href="../../src/components/widget-common/dist/css/message.css">
+
+  <script src="../../src/components/webcomponentsjs/webcomponents-lite.min.js"></script>
+  <script src="../../src/components/web-component-tester/browser.js"></script>
+
+  <link rel="import" href="../../src/components/rise-rss/rise-rss.html">
+</head>
+<body>
+
+<rise-rss id="rss" refresh="1"></rise-rss>
+
+<div id="container">
+  <section class="page"></section>
+
+  <template id="rssItem">
+    <article class="item">
+      <div class="textWrapper">
+        <h1 class="headline headline_font-style">
+          <a class="headline_font-style" target="_blank"></a>
+        </h1>
+        <p class="story story_font-style"></p>
+      </div>
+    </article>
+  </template>
+</div>
+
+<div id="messageContainer"></div>
+
+<script src="../data/rss.js"></script>
+<script src="../data/json-rss.js"></script>
+
+<script src="../../node_modules/widget-tester/mocks/gadget-mocks.js"></script>
+<script src="../../node_modules/widget-tester/mocks/gadgets.io-mock.js"></script>
+<script src="../../node_modules/widget-tester/mocks/logger-mock.js"></script>
+<script src="../../node_modules/widget-tester/mocks/rss-makeRequest-mock.js"></script>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+
+<script src="../../src/components/jQuery.dotdotdot/src/js/jquery.dotdotdot.js"></script>
+<script src="../../src/components/widget-common/dist/config.js"></script>
+<script src="../../src/components/widget-common/dist/common.js"></script>
+<script src="../../src/widget/rss.js"></script>
+<script src="../../src/widget/utils.js"></script>
+<script src="../../src/widget/rise-rss.js"></script>
+<script src="../../src/widget/content.js"></script>
+<script src="../../src/components/widget-common/dist/message.js"></script>
+<script src="../../src/widget/main.js"></script>
+
+<script>
+
+  var clock, paramsStub, spy;
+
+  paramsStub = sinon.stub(RiseVision.RSS, "setAdditionalParams", function (names, values) {
+    // need to set the fake timer clock before any of the code within setAdditionalParams is executed
+    clock = sinon.useFakeTimers();
+    // restore the function
+    paramsStub.restore();
+    // call it again with the params
+    RiseVision.RSS.setAdditionalParams(names, values);
+  });
+
+  suite("Logging", function(){
+    var rss = document.querySelector("rise-rss"),
+      table = "rss_events",
+      params = {
+        "feed_url": "http://test.com/feed.rss",
+        "company_id": '"companyId"',
+        "display_id": '"displayId"'
+      };
+
+    suiteTeardown(function() {
+      clock.restore();
+    });
+
+    setup(function() {
+      spy = sinon.spy(RiseVision.Common.LoggerUtils, "logEvent");
+    });
+
+    teardown(function() {
+      RiseVision.Common.LoggerUtils.logEvent.restore();
+    });
+
+    suite("play", function() {
+
+      test("should log the play event", function() {
+        RiseVision.RSS.play();
+
+        params.event = "play";
+
+        assert(spy.calledOnce);
+        assert(spy.calledWith(table, params));
+      });
+
+    });
+
+    suite("done", function() {
+
+      setup(function() {
+        sinon.stub(RiseVision.RSS, "play");
+      });
+
+      teardown(function(){
+        RiseVision.RSS.play.restore();
+      });
+
+      test("should log the done event when all items have displayed", function(done) {
+        // move clock to past last interval of transitioning items
+        clock.tick(40000);
+
+        params.event = "done";
+
+        $(".item").one("transitionend", function() {
+          assert(spy.calledOnce);
+          assert(spy.calledWith(table, params));
+          done();
+        });
+
+      });
+
+    });
+
+    suite("no feed items", function() {
+
+      test("should log no feed items error when initializing", function() {
+        RiseVision.RSS.onRiseRSSInit({
+          items: []
+        });
+
+        params.event = "error";
+        params.event_details = "no feed items";
+
+        assert(spy.calledOnce);
+        assert(spy.calledWith(table, params));
+      });
+
+      test("should log no feed items error when refreshing", function() {
+        RiseVision.RSS.onRiseRSSRefresh({
+          items: []
+        });
+
+        params.event = "error";
+        params.event_details = "no feed items";
+
+        assert(spy.calledOnce);
+        assert(spy.calledWith(table, params));
+      });
+
+    });
+
+  });
+
+</script>
+
+</body>
+</html>
