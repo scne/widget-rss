@@ -25,7 +25,25 @@ RiseVision.RSS.RiseRSS = function (data) {
       }
     });
 
-    rss.addEventListener("rise-rss-error", function () {
+    rss.addEventListener("rise-rss-error", function (e) {
+      var errorDetails = "";
+
+      if (e.detail && typeof e.detail === "string") {
+        errorDetails = e.detail;
+      }
+      else if (e.detail && Array.isArray(e.detail) && e.detail.length > 0) {
+        // rise-rss-error passes error from gadgets.io.makeRequest which is always an Array with one item
+        errorDetails = e.detail[0];
+      }
+
+      var params = {
+        "event": "error",
+        "event_details": "rise rss error",
+        "error_details": errorDetails,
+        "feed_url": data.url
+      };
+
+      RiseVision.RSS.logEvent(params, true);
       RiseVision.RSS.showError("Sorry, there was a problem with the RSS feed.", true);
     });
 
