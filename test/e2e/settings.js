@@ -46,6 +46,22 @@
       expect(element(by.css("button#save[disabled=disabled")).isPresent()).to.eventually.be.true;
     });
 
+    it("Should load Transition", function () {
+      expect(element(by.id("transitionHeading")).isDisplayed()).to.eventually.be.true;
+    });
+
+    it("Should load Transition options", function () {
+      expect(element(by.model("settings.additionalParams.transition.type")).isDisplayed()).to.eventually.be.true;
+    });
+
+    it("Should load Transition options default to none", function () {
+      expect(element(by.model("settings.additionalParams.transition.type")).getAttribute("value")).to.eventually.equal("none");
+    });
+
+    it("Should load duration", function () {
+      expect(element(by.model("duration")).getAttribute("value")).to.eventually.equal("10");
+    });
+
     it("Should correctly save settings", function () {
       var settings = {
         params: {},
@@ -84,6 +100,10 @@
               "forecolor":"black",
               "backcolor":"transparent"
             }
+          },
+          "transition": {
+            "type": "none",
+            "duration": 10000
           }
         }
       };
