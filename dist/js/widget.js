@@ -1074,6 +1074,7 @@ RiseVision.RSS = (function (document, gadgets) {
 
   var _viewerPaused = true,
     _errorTimer = null,
+    _errorLog = null,
     _errorFlag = false;
 
   /*
@@ -1085,6 +1086,25 @@ RiseVision.RSS = (function (document, gadgets) {
 
   function _done() {
     gadgets.rpc.call("", "rsevent_done", null, _prefs.getString("id"));
+
+    // Any errors need to be logged before the done event.
+    if (_errorLog !== null) {
+      logEvent(_errorLog, true);
+    }
+
+    // log "done" event
+    logEvent({ "event": "done", "feed_url": _additionalParams.url }, false);
+  }
+
+  function _noFeedItems() {
+    var params = {
+      "event": "error",
+      "event_details": "no feed items",
+      "feed_url": _additionalParams.url
+    };
+
+    logEvent(params, true);
+    showError("There are no entries to show from this RSS feed.");
   }
 
   function _clearErrorTimer() {
@@ -1132,6 +1152,18 @@ RiseVision.RSS = (function (document, gadgets) {
   /*
    *  Public Methods
    */
+  function getTableName() {
+    return "rss_events";
+  }
+
+  function logEvent(params, isError) {
+    if (isError) {
+      _errorLog = params;
+    }
+
+    RiseVision.Common.LoggerUtils.logEvent(getTableName(), params);
+  }
+
   function onContentDone() {
     _done();
   }
@@ -1147,7 +1179,7 @@ RiseVision.RSS = (function (document, gadgets) {
       _currentFeed = _.clone(feed);
 
       // create content module instance
-      _content = new RiseVision.RSS.Content(_prefs);
+      _content = new RiseVision.RSS.Content(_prefs, _additionalParams);
       _content.init(_currentFeed);
 
       if (!_viewerPaused) {
@@ -1155,7 +1187,7 @@ RiseVision.RSS = (function (document, gadgets) {
       }
     }
     else {
-      showError("There are no entries to show from this RSS feed.");
+      _noFeedItems();
     }
   }
 
@@ -1166,11 +1198,9 @@ RiseVision.RSS = (function (document, gadgets) {
     var updated = false;
 
     if (!feed.items || feed.items.length === 0) {
-      if (!_errorFlag) {
-        showError("There are no entries to show from this RSS feed.");
-      }
+      _noFeedItems();
     }
-    else if (feed.items.length !== _currentFeed.items.length) {
+    else if (!_currentFeed || feed.items.length !== _currentFeed.items.length) {
       updated = true;
     }
     else {
@@ -1187,18 +1217,16 @@ RiseVision.RSS = (function (document, gadgets) {
       _currentFeed = _.clone(feed);
 
       if (_errorFlag) {
-        _errorFlag = false;
-
         if (!_content) {
           // create content module instance
-          _content = new RiseVision.RSS.Content(_prefs);
+          _content = new RiseVision.RSS.Content(_prefs, _additionalParams);
         }
 
         _content.init(_currentFeed);
 
-        if (!_viewerPaused) {
-          _content.play();
-        }
+        // refreshed feed fixed previous error, ensure flag is removed so next playback shows content
+        _errorFlag = false;
+        _errorLog = null;
       }
       else {
         _content.update(feed);
@@ -1222,6 +1250,8 @@ RiseVision.RSS = (function (document, gadgets) {
 
   function play() {
     _viewerPaused = false;
+
+    logEvent({ "event": "play", "feed_url": _additionalParams.url }, false);
 
     if (_errorFlag) {
       _startErrorTimer();
@@ -1250,6 +1280,7 @@ RiseVision.RSS = (function (document, gadgets) {
     _errorFlag = true;
 
     _content.reset();
+    _currentFeed = null;
     _message.show(message);
 
     if (!_viewerPaused) {
@@ -1262,6 +1293,8 @@ RiseVision.RSS = (function (document, gadgets) {
   }
 
   return {
+    "getTableName": getTableName,
+    "logEvent": logEvent,
     "onContentDone": onContentDone,
     "onRiseRSSInit": onRiseRSSInit,
     "onRiseRSSRefresh": onRiseRSSRefresh,
@@ -1332,7 +1365,25 @@ RiseVision.RSS.RiseRSS = function (data) {
       }
     });
 
-    rss.addEventListener("rise-rss-error", function () {
+    rss.addEventListener("rise-rss-error", function (e) {
+      var errorDetails = "";
+
+      if (e.detail && typeof e.detail === "string") {
+        errorDetails = e.detail;
+      }
+      else if (e.detail && Array.isArray(e.detail) && e.detail.length > 0) {
+        // rise-rss-error passes error from gadgets.io.makeRequest which is always an Array with one item
+        errorDetails = e.detail[0];
+      }
+
+      var params = {
+        "event": "error",
+        "event_details": "rise rss error",
+        "error_details": errorDetails,
+        "feed_url": data.url
+      };
+
+      RiseVision.RSS.logEvent(params, true);
       RiseVision.RSS.showError("Sorry, there was a problem with the RSS feed.", true);
     });
 
@@ -1350,7 +1401,7 @@ RiseVision.RSS.RiseRSS = function (data) {
 var RiseVision = RiseVision || {};
 RiseVision.RSS = RiseVision.RSS || {};
 
-RiseVision.RSS.Content = function (prefs) {
+RiseVision.RSS.Content = function (prefs, params) {
 
   "use strict";
 
@@ -1398,6 +1449,7 @@ RiseVision.RSS.Content = function (prefs) {
       $content.remove(".headline");
     }
     else {
+      $content.find(".headline").css("textAlign", params.headline.fontStyle.align);
       $content.find(".headline a").text(item.title);
     }
 
@@ -1407,6 +1459,7 @@ RiseVision.RSS.Content = function (prefs) {
     }
     else {
       $story = $content.find(".story");
+      $story.css("textAlign", params.story.fontStyle.align);
       $story.html(_utils.stripScripts(story));
 
       // apply the story font styling to child elements as well.

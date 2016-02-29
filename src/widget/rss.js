@@ -122,7 +122,7 @@ RiseVision.RSS = (function (document, gadgets) {
       _currentFeed = _.clone(feed);
 
       // create content module instance
-      _content = new RiseVision.RSS.Content(_prefs);
+      _content = new RiseVision.RSS.Content(_prefs, _additionalParams);
       _content.init(_currentFeed);
 
       if (!_viewerPaused) {
@@ -162,7 +162,7 @@ RiseVision.RSS = (function (document, gadgets) {
       if (_errorFlag) {
         if (!_content) {
           // create content module instance
-          _content = new RiseVision.RSS.Content(_prefs);
+          _content = new RiseVision.RSS.Content(_prefs, _additionalParams);
         }
 
         _content.init(_currentFeed);
