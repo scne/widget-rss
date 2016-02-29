@@ -10429,7 +10429,7 @@ module.run(["$templateCache", function($templateCache) {
     factory.getFonts = function() {
       return $http.get(fontsApi, { cache: true })
         .then(function(response) {
-          var family = "", fonts = "";
+          var family = "", fonts = "", spaces = false;
 
           if (response.data && response.data.items) {
             for (var i = 0; i < response.data.items.length; i++) {
@@ -10440,7 +10440,19 @@ module.run(["$templateCache", function($templateCache) {
                   // Font loaded.
                 });
 
-                fonts += family + "=" + family + fallback;
+                // check for spaces in family name
+                if (/\s/.test(family)) {
+                  spaces = true;
+                }
+
+                if (spaces) {
+                  // wrap family name in single quotes
+                  fonts += family + "='" + family + "'" + fallback;
+                }
+                else {
+                  fonts += family + "=" + family + fallback;
+                }
+
               }
             }
           }
