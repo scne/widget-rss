@@ -72,6 +72,7 @@
 
     sinon.stub(RiseVision.RSS, "onRiseRSSInit", function(feed){
       originalFeed = JSON.parse(JSON.stringify(feed));
+      console.log(originalFeed);
     });
 
     suiteTeardown(function() {
@@ -90,7 +91,13 @@
     });
 
     suite("no feed items", function() {
-      test("should show no entries message", function() {
+      test("should show no entries message on initialization", function() {
+        RiseVision.RSS.onRiseRSSInit({ type: "rss 2.0", title: "Fake RSS Feed" });
+
+        assert.equal(document.querySelector(".message").innerHTML, "There are no entries to show from this RSS feed.");
+      });
+
+      test("should show no entries message on refresh", function() {
 
         rss.dispatchEvent(new CustomEvent("rise-rss-response", {
           "detail": {

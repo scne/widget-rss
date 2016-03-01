@@ -115,14 +115,14 @@ RiseVision.RSS = (function (document, gadgets) {
     console.log("onRiseRSSInit");
     console.dir(feed);
 
+    _content = new RiseVision.RSS.Content(_prefs, _additionalParams);
+
     if (feed.items && feed.items.length > 0) {
       // remove a message previously shown
       _message.hide();
 
       _currentFeed = _.clone(feed);
 
-      // create content module instance
-      _content = new RiseVision.RSS.Content(_prefs, _additionalParams);
       _content.init(_currentFeed);
 
       if (!_viewerPaused) {
