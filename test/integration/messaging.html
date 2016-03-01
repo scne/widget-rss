@@ -72,7 +72,6 @@
 
     sinon.stub(RiseVision.RSS, "onRiseRSSInit", function(feed){
       originalFeed = JSON.parse(JSON.stringify(feed));
-      console.log(originalFeed);
     });
 
     suiteTeardown(function() {
