@@ -120,21 +120,18 @@
 
     suite("Transitioning", function() {
 
-      test("should always transition to next rss item after 10 seconds", function(done) {
+      test("should always transition to next rss item after 10 seconds", function() {
         assert.equal(document.querySelector(".headline a").innerHTML,
           "RSS 2.0 - Entry 1 title", "first item displaying");
 
         clock.tick(10000);
 
-        $(".item").one("transitionend", function() {
-          assert.equal(document.querySelector(".headline a").innerHTML,
-            "RSS 2.0 - Entry 2 title", "second item displaying");
+        assert.equal(document.querySelector(".headline a").innerHTML,
+          "RSS 2.0 - Entry 2 title", "second item displaying");
 
-          done();
-        });
       });
 
-      test("should eventually transition all items and start over", function(done) {
+      test("should eventually transition all items and start over", function() {
         var contentDoneSpy = sinon.spy(RiseVision.RSS, "onContentDone");
 
         assert.equal(document.querySelector(".headline a").innerHTML,
@@ -143,14 +140,12 @@
         // move clock enough intervals that last (4th) item has shown for allotted 10 seconds and now time to start over
         clock.tick(30000);
 
-        $(".item").one("transitionend", function() {
-          assert(contentDoneSpy.calledOnce, "onContentDone called once");
-          assert.equal(document.querySelector(".headline a").innerHTML,
-            "RSS 2.0 - Entry 1 title", "first item displaying again");
+        assert(contentDoneSpy.calledOnce, "onContentDone called once");
+        assert.equal(document.querySelector(".headline a").innerHTML,
+          "RSS 2.0 - Entry 1 title", "first item displaying again");
 
-          RiseVision.RSS.onContentDone.restore();
-          done();
-        });
+        RiseVision.RSS.onContentDone.restore();
+
       });
 
     });

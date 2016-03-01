@@ -14,8 +14,12 @@ RiseVision.RSS.Content = function (prefs, params) {
 
   var _currentItemIndex = 0;
 
-  var _transitionIntervalId = null,
-    _transitionInterval = 10000;
+  var _transitionIntervalId = null;
+
+  var _transition = {
+    "type": "none",
+    duration: 10000
+  };
 
   var _waitingForUpdate = false;
 
@@ -77,25 +81,38 @@ RiseVision.RSS.Content = function (prefs, params) {
 
   // Fade out and clear content.
   function _clear(cb) {
-    $(".item").one("transitionend", function() {
-      _$el.page.empty();
+    if (_transition.type === "fade") {
+      $(".item").one("transitionend", function() {
+        _clearPage(cb);
+      });
 
-      if (!cb || typeof cb !== "function") {
-        return;
-      }
-      else {
-        cb();
-      }
-    });
+      $(".item").addClass("fade-out").removeClass("fade-in");
+    }
+    else {
+      _clearPage(cb);
+    }
+  }
 
-    $(".item").addClass("fade-out").removeClass("fade-in");
+  function _clearPage(cb) {
+    _$el.page.empty();
+    if (!cb || typeof cb !== "function") {
+      return;
+    }
+    else {
+      cb();
+    }
   }
 
   function _showItem(index) {
     _$el.page.append(_getTemplate(_items[index]));
 
     $(".item").height(prefs.getInt("rsH"));
-    $(".item").addClass("fade-in").removeClass("hide");
+
+    if (_transition.type === "fade") {
+      $(".item").addClass("fade-in");
+    }
+
+    $(".item").removeClass("hide");
 
     // truncate content
     $(".item").dotdotdot({
@@ -103,7 +120,7 @@ RiseVision.RSS.Content = function (prefs, params) {
     });
   }
 
-  function _transition() {
+  function _makeTransition() {
     if (_currentItemIndex === (_items.length - 1)) {
 
       _stopTransitionTimer();
@@ -130,7 +147,7 @@ RiseVision.RSS.Content = function (prefs, params) {
       _currentItemIndex += 1;
     }
 
-    _clear(function() {
+    _clear(function () {
       _showItem(_currentItemIndex);
     });
   }
@@ -138,8 +155,8 @@ RiseVision.RSS.Content = function (prefs, params) {
   function _startTransitionTimer() {
     if (_transitionIntervalId === null) {
       _transitionIntervalId = setInterval(function () {
-        _transition();
-      }, _transitionInterval);
+        _makeTransition();
+      }, _transition.duration);
     }
   }
 
@@ -153,6 +170,11 @@ RiseVision.RSS.Content = function (prefs, params) {
    */
   function init(feed) {
     _items = feed.items;
+
+    if(params.transition){
+      _transition = params.transition;
+    }
+
     _currentItemIndex = 0;
     _showItem(_currentItemIndex);
   }

@@ -32,4 +32,16 @@ describe("Unit Tests - Settings Controller", function () {
     expect(defaultSettings).to.be.an("object");
   });
 
+  it("should convert duration from milliseconds to seconds", function (){
+    scope.settings.additionalParams.transition.duration = 50000;
+    scope.$digest();
+    expect(scope.duration).to.equal(50);
+  });
+
+  it("should convert duration from seconds to milliseconds", function (){
+    scope.duration = 60;
+    scope.$digest();
+    expect(scope.settings.additionalParams.transition.duration).to.equal(60000);
+  });
+
 });

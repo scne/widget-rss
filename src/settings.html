@@ -54,9 +54,37 @@
           <div class="form-group">
             <url-field id="main" ng-model="myurlfield" url="settings.additionalParams.url" valid init-empty></url-field>
           </div><!-- END RSS URL-->
-          <hr/>
+           <hr/>
 
-          <br/>
+          <!--Transitions-->
+          <div class="row">
+            <div class="col-md-3">
+              <div class="form-group">
+                <label class="control-label" id="transitionHeading">{{"widget-rss.transition.heading" | translate }}</label>
+                <select id="scroll-by" class="form-control" ng-model="settings.additionalParams.transition.type">
+                  <option value="none" selected>{{"widget-rss.transition.type.none" | translate }}</option>
+                  <option value="fade" >{{"widget-rss.transition.type.fade" | translate }}</option>
+                  <!--option value="scroll">{{"widget-rss.transition.type.scroll" | translate }}</option-->
+                  <!--option value="page">{{"widget-rss.transition.type.page" | translate }}</option-->
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <!--Duration-->
+            <div class="fadeDiv box">
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label class="control-label">{{"widget-rss.transition.duration" | translate }}</label>
+                  <div class="input-group">
+                    <input id="scroll-horizontal" name="scrollHorizontal" type="number"  class="form-control" ng-model="duration">
+                    <span class="input-group-addon ng-binding">sec</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <hr/>
 
           <!--Heading Format-->
           <div class="row">
