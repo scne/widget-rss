@@ -70,6 +70,10 @@
       expect(element(by.model("duration")).getAttribute("value")).to.eventually.equal("10");
     });
 
+    it("Should set default value for 'Items to Show'", function () {
+      expect(element(by.id("items-to-show")).getAttribute("value")).to.eventually.equal("2");
+    });
+
     it("Should correctly save settings", function () {
       var settings = {
         params: {},
@@ -110,6 +114,7 @@
               "backcolor":"transparent"
             }
           },
+          "itemsToShow": 2,
           "transition": {
             "type": "none",
             "duration": 10000

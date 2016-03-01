@@ -11233,6 +11233,7 @@ angular.module("risevision.widget.rss.settings")
       "story": {
         "fontStyle": {}
       },
+      "itemsToShow": 2,
       "transition": {
         "type": "none",
         "duration": 10000
