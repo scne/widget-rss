@@ -55,29 +55,26 @@
             <url-field id="main" ng-model="myurlfield" url="settings.additionalParams.url" valid init-empty></url-field>
           </div><!-- END RSS URL-->
 
-          <!-- Max Items in Queue -->
           <div class="row">
-            <div class="col-md-3">
-              <div class="form-group">
-              <label class="control-label">{{ "widget-rss.item.maxItemsInQueue" | translate }}</label>
-              <input type="number" class="form-control" ng-model="settings.additionalParams.itemsInQueue">
-              </div>
-            </div>
-          </div>
-          <!-- End Max Items in Queue -->
-
-          <hr>
-
-          <!-- Items to Show -->
-          <div class="row">
+            <!-- Items to Show -->
             <div class="col-md-3">
               <div class="form-group">
                 <label class="control-label">{{ "widget-rss.item.itemsToShow" | translate }}</label>
                 <input id="items-to-show" type="number" class="form-control" ng-model="settings.additionalParams.itemsToShow">
               </div>
             </div>
+            <!-- End Items to Show -->
+
+            <!-- Max Items in Queue -->
+            <div class="col-md-3">
+              <div class="form-group">
+              <label class="control-label">{{ "widget-rss.item.maxItemsInQueue" | translate }}</label>
+              <input type="number" class="form-control" ng-model="settings.additionalParams.itemsInQueue">
+              </div>
+            </div>
+            <!-- End Max Items in Queue -->
           </div>
-          <!-- End Items to Show -->
+
           <hr/>
 
           <!--Transitions-->
