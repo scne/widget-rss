@@ -47,7 +47,7 @@ RiseVision.RSS = (function (document, gadgets) {
     };
 
     logEvent(params, true);
-    showError("There are no entries to show from this RSS feed.");
+    showError("There are no items to show from this RSS feed.");
   }
 
   function _clearErrorTimer() {
