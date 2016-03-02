@@ -90,7 +90,13 @@
     });
 
     suite("no feed items", function() {
-      test("should show no entries message", function() {
+      test("should show no items message on initialization", function() {
+        RiseVision.RSS.onRiseRSSInit({ type: "rss 2.0", title: "Fake RSS Feed" });
+
+        assert.equal(document.querySelector(".message").innerHTML, "There are no items to show from this RSS feed.");
+      });
+
+      test("should show no items message on refresh", function() {
 
         rss.dispatchEvent(new CustomEvent("rise-rss-response", {
           "detail": {
@@ -99,7 +105,7 @@
           "bubbles": true
         }));
 
-        assert.equal(document.querySelector(".message").innerHTML, "There are no entries to show from this RSS feed.", "message is correct");
+        assert.equal(document.querySelector(".message").innerHTML, "There are no items to show from this RSS feed.", "message is correct");
       });
     });
 
