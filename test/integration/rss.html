@@ -87,8 +87,8 @@
         assert.isNotNull(document.querySelector(".item"));
       });
 
-      test("should set item height to be same as container height", function() {
-        assert.equal(document.getElementById("container").style.height, document.querySelector(".item").style.height);
+      test("should set item height divided by number of items to show", function() {
+        assert.equal(($("#container").height()/window.gadget.settings.additionalParams.itemsToShow) + "px" , document.querySelector(".item").style.height);
       });
 
       test("should apply font styling to headline", function() {
@@ -118,16 +118,34 @@
       });
     });
 
+    suite("Items Showing", function () {
+
+      test("should append amount of items based on number of items to show", function() {
+        assert.equal(document.querySelectorAll(".item").length, window.gadget.settings.additionalParams.itemsToShow);
+      });
+
+    });
+
     suite("Transitioning", function() {
 
-      test("should always transition to next rss item after 10 seconds", function() {
-        assert.equal(document.querySelector(".headline a").innerHTML,
+      test("should always transition to next set of rss items after 10 seconds", function() {
+        var headlines = document.querySelectorAll(".headline a");
+
+        assert.equal(headlines[0].innerHTML,
           "RSS 2.0 - Entry 1 title", "first item displaying");
+
+        assert.equal(headlines[1].innerHTML,
+          "RSS 2.0 - Entry 2 title", "second item displaying");
 
         clock.tick(10000);
 
-        assert.equal(document.querySelector(".headline a").innerHTML,
-          "RSS 2.0 - Entry 2 title", "second item displaying");
+        headlines = document.querySelectorAll(".headline a");
+
+        assert.equal(headlines[0].innerHTML,
+          "RSS 2.0 - Entry 3 title", "third item displaying");
+
+        assert.equal(headlines[1].innerHTML,
+          "RSS 2.0 - Entry 4 title", "fourth item displaying");
 
       });
 
@@ -135,10 +153,10 @@
         var contentDoneSpy = sinon.spy(RiseVision.RSS, "onContentDone");
 
         assert.equal(document.querySelector(".headline a").innerHTML,
-          "RSS 2.0 - Entry 2 title", "second item currently displaying");
+          "RSS 2.0 - Entry 3 title", "third item currently displaying");
 
-        // move clock enough intervals that last (4th) item has shown for allotted 10 seconds and now time to start over
-        clock.tick(30000);
+        // move clock next interval so that the displayed 3rd and 4th items have shown for allotted 10 seconds
+        clock.tick(10000);
 
         assert(contentDoneSpy.calledOnce, "onContentDone called once");
         assert.equal(document.querySelector(".headline a").innerHTML,

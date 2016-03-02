@@ -20,13 +20,13 @@ angular.module("risevision.widget.rss.settings")
     "additionalParams": {
       "url": "",
       "itemsInQueue": 5,
+      "itemsToShow": 2,
       "headline": {
         "fontStyle": {}
       },
       "story": {
         "fontStyle": {}
       },
-      "itemsToShow": 2,
       "transition": {
         "type": "none",
         "duration": 10000

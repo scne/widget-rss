@@ -80,6 +80,7 @@
         additionalParams: {
           "url":"",
           "itemsInQueue": 5,
+          "itemsToShow": 2,
           "headline":{
             "fontStyle":{
               "font":{
@@ -114,7 +115,6 @@
               "backcolor":"transparent"
             }
           },
-          "itemsToShow": 2,
           "transition": {
             "type": "none",
             "duration": 10000

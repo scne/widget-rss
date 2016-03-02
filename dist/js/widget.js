@@ -1457,6 +1457,47 @@ RiseVision.RSS.Content = function (prefs, params) {
     };
   }
 
+  function _getItemHeight() {
+    // account for not enough items to actually show compared to setting value
+    var itemsToShow = (_items.length <= params.itemsToShow) ? _items.length : params.itemsToShow;
+
+    return prefs.getInt("rsH") / itemsToShow;
+  }
+
+  function _getTransitionConfig(index) {
+    var config = {};
+
+    if ((index + params.itemsToShow) >= (_items.length - 1)) {
+      // account for not enough items to actually show from the feed
+      config.itemsToShow = _items.length - (index + 1);
+      config.currentItemIndex = (_items.length - 1);
+    }
+    else {
+      config.itemsToShow = params.itemsToShow;
+      // value is the index of the last item showing
+      config.currentItemIndex = index + params.itemsToShow;
+    }
+
+    return config;
+  }
+
+  function _getStartConfig() {
+    var config = {};
+
+    if (_items.length <= params.itemsToShow) {
+      // account for not enough items to actually show from the feed
+      config.itemsToShow = _items.length;
+      config.currentItemIndex = (_items.length - 1);
+    }
+    else {
+      config.itemsToShow = params.itemsToShow;
+      // value is the index of the last item showing
+      config.currentItemIndex = (params.itemsToShow - 1);
+    }
+
+    return config;
+  }
+
   function _getStory(item) {
     var story = null;
 
@@ -1538,7 +1579,7 @@ RiseVision.RSS.Content = function (prefs, params) {
   function _showItem(index) {
     _$el.page.append(_getTemplate(_items[index]));
 
-    $(".item").height(prefs.getInt("rsH"));
+    $(".item").height(_getItemHeight());
 
     if (_transition.type === "fade") {
       $(".item").addClass("fade-in");
@@ -1548,20 +1589,28 @@ RiseVision.RSS.Content = function (prefs, params) {
 
     // truncate content
     $(".item").dotdotdot({
-      height: prefs.getInt("rsH")
+      height: _getItemHeight()
     });
   }
 
   function _makeTransition() {
+    var startConfig = _getStartConfig(),
+      transConfig = _getTransitionConfig(_currentItemIndex),
+      startingIndex, itemsToShow;
+
     if (_currentItemIndex === (_items.length - 1)) {
 
       _stopTransitionTimer();
 
-      // set up first item to show
-      _currentItemIndex = 0;
-
       _clear(function() {
-        _showItem(_currentItemIndex);
+
+        // show the items
+        for (var i = 0; i < startConfig.itemsToShow; i += 1) {
+          _showItem(i);
+        }
+
+        _currentItemIndex = startConfig.currentItemIndex;
+
         RiseVision.RSS.onContentDone();
       });
 
@@ -1572,15 +1621,26 @@ RiseVision.RSS.Content = function (prefs, params) {
 
     if (_waitingForUpdate) {
       // start over at first item since the feed has been updated
-      _currentItemIndex = 0;
+      startingIndex = 0;
+
       _waitingForUpdate = false;
+
+      // apply config values from a restart
+      itemsToShow = startConfig.itemsToShow;
+      _currentItemIndex = startConfig.currentItemIndex;
     }
     else {
-      _currentItemIndex += 1;
+      startingIndex = _currentItemIndex + 1;
+
+      // apply config values from a transition
+      itemsToShow = transConfig.itemsToShow;
+      _currentItemIndex = transConfig.currentItemIndex;
     }
 
     _clear(function () {
-      _showItem(_currentItemIndex);
+      for (var i = startingIndex; i < (startingIndex + itemsToShow); i += 1) {
+        _showItem(i);
+      }
     });
   }
 
@@ -1601,14 +1661,23 @@ RiseVision.RSS.Content = function (prefs, params) {
    *  Public Methods
    */
   function init(feed) {
+    var startConfig;
+
     _items = feed.items;
 
     if(params.transition){
       _transition = params.transition;
     }
 
-    _currentItemIndex = 0;
-    _showItem(_currentItemIndex);
+    startConfig = _getStartConfig();
+
+    _currentItemIndex = startConfig.currentItemIndex;
+
+    // show the items
+    for (var i = 0; i < startConfig.itemsToShow; i += 1) {
+      _showItem(i);
+    }
+
   }
 
   function pause() {
