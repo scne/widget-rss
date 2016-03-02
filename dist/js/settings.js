@@ -11226,6 +11226,7 @@ angular.module("risevision.widget.rss.settings")
     "params": {},
     "additionalParams": {
       "url": "",
+      "itemsInQueue": 5,
       "headline": {
         "fontStyle": {}
       },
