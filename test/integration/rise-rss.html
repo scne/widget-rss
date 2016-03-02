@@ -86,6 +86,10 @@
         assert.equal(rss.url, "http://test.com/feed.rss");
       });
 
+      test("should set entries attribute of rss component", function() {
+        assert.equal(rss.entries, 4);
+      });
+
       test("should call onRiseRSSInit() with rss feed data", function() {
         assert(spy.calledWith(jsonRSS));
       });

@@ -33,6 +33,10 @@
       expect(element(by.css("#story-font .mce-tinymce")).isPresent()).to.eventually.be.true;
     });
 
+    it("Should set default value for 'Max Items in Queue'", function () {
+      expect(element(by.model("settings.additionalParams.itemsInQueue")).getAttribute("value")).to.eventually.equal("5");
+    });
+
     it("Should enable Save button", function () {
       expect(element(by.css("button#save[disabled=disabled")).isPresent()).to.eventually.be.false;
     });
@@ -67,6 +71,7 @@
         params: {},
         additionalParams: {
           "url":"",
+          "itemsInQueue": 5,
           "headline":{
             "fontStyle":{
               "font":{
