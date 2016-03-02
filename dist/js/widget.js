@@ -1394,6 +1394,11 @@ RiseVision.RSS.RiseRSS = function (data) {
     });
 
     rss.setAttribute("url", data.url);
+
+    if (data.itemsInQueue) {
+      rss.setAttribute("entries", data.itemsInQueue);
+    }
+
     rss.go();
   }
 

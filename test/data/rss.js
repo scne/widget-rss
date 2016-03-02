@@ -6,6 +6,7 @@
     "params": {},
     "additionalParams": {
       "url": "http://test.com/feed.rss",
+      "itemsInQueue": 4,
       "headline": {
         "fontStyle": {
           "font": {
