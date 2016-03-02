@@ -37,6 +37,10 @@
       expect(element(by.model("settings.additionalParams.itemsInQueue")).getAttribute("value")).to.eventually.equal("5");
     });
 
+    it("Should select 'Show Description Snippet'", function () {
+      expect(element(by.css("input[type='radio'][value='snippet']")).isSelected()).to.eventually.be.true;
+    });
+
     it("Should enable Save button", function () {
       expect(element(by.css("button#save[disabled=disabled")).isPresent()).to.eventually.be.false;
     });
@@ -109,6 +113,9 @@
           "transition": {
             "type": "none",
             "duration": 10000
+          },
+          "dataSelection": {
+            "showDescription": "snippet"
           }
         }
       };

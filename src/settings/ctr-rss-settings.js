@@ -29,6 +29,9 @@ angular.module("risevision.widget.rss.settings")
       "transition": {
         "type": "none",
         "duration": 10000
+      },
+      "dataSelection": {
+        "showDescription": "snippet"
       }
     }
   });
