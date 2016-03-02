@@ -1338,8 +1338,24 @@ RiseVision.RSS.Utils = (function () {
     return div.innerHTML;
   }
 
+  /* Truncate text while preserving word boundaries. */
+  function truncate(text) {
+    var maxLength = 120;
+
+    if (text.length > maxLength) {
+      text = text.substring(0, maxLength);
+
+      // Ensure that we don't truncate mid-word.
+      text = text.replace(/\w+$/, "");
+      text += " ...";
+    }
+
+    return text;
+  }
+
   return {
-    "stripScripts": stripScripts
+    "stripScripts": stripScripts,
+    "truncate": truncate
   };
 
 })();
@@ -1475,7 +1491,14 @@ RiseVision.RSS.Content = function (prefs, params) {
     else {
       $story = $content.find(".story");
       $story.css("textAlign", params.story.fontStyle.align);
-      $story.html(_utils.stripScripts(story));
+      story = _utils.stripScripts(story);
+
+      if (params.dataSelection.showDescription === "snippet") {
+        $story.html(_utils.truncate($("<div/>").html(story).text()));
+      }
+      else {
+        $story.html(story);
+      }
 
       // apply the story font styling to child elements as well.
       $story.find("p").addClass("story_font-style");
