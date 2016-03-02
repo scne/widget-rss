@@ -42,6 +42,9 @@
       "transition": {
         "type": "none",
         "duration": 20000
+      },
+      "dataSelection": {
+        "showDescription": "snippet"
       }
     }
   };

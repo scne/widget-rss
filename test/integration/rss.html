@@ -150,6 +150,25 @@
 
     });
 
+    suite("Story", function() {
+      test("should truncate the story", function() {
+        var truncatedText = "Jujubes danish wafer toffee. Biscuit lollipop fruitcake liquorice. Bear " +
+          "claw carrot cake soufflé danish apple pie ice  ...";
+
+        RiseVision.RSS.onRiseRSSRefresh({
+          "items": [{
+            "description": "Jujubes danish wafer toffee. Biscuit lollipop fruitcake liquorice. " +
+              "Bear claw carrot cake soufflé danish apple pie ice cream halvah chupa chups. " +
+              "Candy canes cupcake brownie pie."
+          }]
+        });
+
+        clock.tick(10000);
+
+        assert.equal(document.querySelector(".story").innerHTML, truncatedText);
+      });
+    });
+
   });
 
 </script>

@@ -38,6 +38,9 @@
           "forecolor": "black",
           "backcolor": "transparent"
         }
+      },
+      "dataSelection": {
+        "showDescription": "snippet"
       }
     }
   };

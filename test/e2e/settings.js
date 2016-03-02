@@ -29,7 +29,7 @@
       expect(element(by.css("#title-font .mce-tinymce")).isPresent()).to.eventually.be.true;
     });
 
-    it("Should load Title Font Setting component", function () {
+    it("Should load Description Font Setting component", function () {
       expect(element(by.css("#story-font .mce-tinymce")).isPresent()).to.eventually.be.true;
     });
 
