@@ -119,21 +119,28 @@
       });
 
       test("should update content", function() {
-        assert.equal(document.querySelector(".headline a").innerHTML,
+        var headlines = document.querySelectorAll(".headline a");
+
+        assert.equal(headlines[0].innerHTML,
           "RSS 2.0 - Entry 1 title", "original first item displayed");
+
+        assert.equal(headlines[1].innerHTML,
+          "RSS 2.0 - Entry 2 title", "original second item displayed");
 
         clock.tick(10000);
 
-        assert.equal(document.querySelector(".headline a").innerHTML,
+        headlines = document.querySelectorAll(".headline a");
+
+        assert.equal(headlines[0].innerHTML,
           "RSS 2.0 - Entry 5 title", "updated first item displayed");
+
+        assert.equal(headlines[1].innerHTML,
+          "RSS 2.0 - Entry 6 title", "updated second item displayed");
 
       });
 
       test("should not update content when data hasn't changed", function() {
-        clock.tick(10000);
-
-        assert.equal(document.querySelector(".headline a").innerHTML,
-          "RSS 2.0 - Entry 6 title", "second item displayed");
+        var headlines;
 
         rss.dispatchEvent(new CustomEvent("rise-rss-response", {
           "detail": {
@@ -144,8 +151,13 @@
 
         clock.tick(10000);
 
-        assert.equal(document.querySelector(".headline a").innerHTML,
+        headlines = document.querySelectorAll(".headline a");
+
+        assert.equal(headlines[0].innerHTML,
           "RSS 2.0 - Entry 7 title", "original content continuing to transition");
+
+        assert.equal(headlines[1].innerHTML,
+          "RSS 2.0 - Entry 8 title", "original content continuing to transition");
 
       });
     });
