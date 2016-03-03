@@ -23,8 +23,24 @@ RiseVision.RSS.Utils = (function () {
     return div.innerHTML;
   }
 
+  /* Truncate text while preserving word boundaries. */
+  function truncate(text) {
+    var maxLength = 120;
+
+    if (text.length > maxLength) {
+      text = text.substring(0, maxLength);
+
+      // Ensure that we don't truncate mid-word.
+      text = text.replace(/\w+$/, "");
+      text += " ...";
+    }
+
+    return text;
+  }
+
   return {
-    "stripScripts": stripScripts
+    "stripScripts": stripScripts,
+    "truncate": truncate
   };
 
 })();

@@ -29,12 +29,16 @@
       expect(element(by.css("#title-font .mce-tinymce")).isPresent()).to.eventually.be.true;
     });
 
-    it("Should load Title Font Setting component", function () {
+    it("Should load Description Font Setting component", function () {
       expect(element(by.css("#story-font .mce-tinymce")).isPresent()).to.eventually.be.true;
     });
 
     it("Should set default value for 'Max Items in Queue'", function () {
       expect(element(by.model("settings.additionalParams.itemsInQueue")).getAttribute("value")).to.eventually.equal("5");
+    });
+
+    it("Should select 'Show Description Snippet'", function () {
+      expect(element(by.css("input[type='radio'][value='snippet']")).isSelected()).to.eventually.be.true;
     });
 
     it("Should enable Save button", function () {
@@ -109,6 +113,9 @@
           "transition": {
             "type": "none",
             "duration": 10000
+          },
+          "dataSelection": {
+            "showDescription": "snippet"
           }
         }
       };

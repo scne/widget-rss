@@ -96,6 +96,30 @@
           </div>
           <hr/>
 
+          <!-- Data Selection -->
+          <label class="control-label add-top">{{ "widget-rss.data-selection.heading" | translate }}</label>
+
+          <div class="row">
+            <div class="radio">
+              <div class="col-md-3">
+                <label class="radio-inline add-bottom">
+                  <input type="radio" ng-model="settings.additionalParams.dataSelection.showDescription" value="full">
+                  {{ "widget-rss.data-selection.showFullDescription" | translate }}
+                </label>
+              </div>
+              <div class="col-md-3">
+                <label class="radio-inline add-bottom">
+                  <input type="radio" ng-model="settings.additionalParams.dataSelection.showDescription" value="snippet">
+                  {{ "widget-rss.data-selection.showDescriptionSnippet" | translate }}
+                </label>
+              </div>
+
+            </div>
+          </div>
+          <!-- End Data Selection -->
+
+          <hr>
+
           <!--Heading Format-->
           <div class="row">
             <div class="col-md-12">

@@ -177,8 +177,15 @@
       "test/unit/settings/**/*spec.js"]}
   ));
 
+  gulp.task("test:unit:widget", factory.testUnitAngular(
+    {testFiles: [
+      "src/widget/utils.js",
+      "test/unit/utils-spec.js"
+    ]}
+  ));
+
   gulp.task("test:unit", function(cb) {
-    runSequence("test:unit:settings", cb);
+    runSequence("test:unit:settings", "test:unit:widget", cb);
   });
 
   // ***** Integration Testing ***** //
