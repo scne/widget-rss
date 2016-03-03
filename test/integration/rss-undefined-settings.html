@@ -35,7 +35,7 @@
 
 <div id="messageContainer"></div>
 
-<script src="../data/rss-data-selection.js"></script>
+<script src="../data/rss-undefined-settings.js"></script>
 
 <script src="../../node_modules/widget-tester/mocks/gadget-mocks.js"></script>
 <script src="../../node_modules/widget-tester/mocks/gadgets.io-mock.js"></script>
@@ -56,16 +56,16 @@
 
 <script>
 
-  suite("Data Selection", function() {
+  suite("New Settings", function() {
     suite("Show Title", function () {
-      test("should remove the headline from the DOM", function() {
-        assert.isNull(document.querySelector(".headline"));
+      test("should populate headline", function() {
+        assert.equal(document.querySelector(".headline a").innerHTML, "RSS 2.0 - Entry 1 title");
       });
     });
 
     suite("Show Timestamp", function () {
-      test("should remove the timestamp from the DOM", function() {
-        assert.isNull(document.querySelector(".timestamp"));
+      test("should populate timestamp", function() {
+        assert.equal(document.querySelector(".timestamp").innerHTML, "June 3, 2003");
       });
     });
   });

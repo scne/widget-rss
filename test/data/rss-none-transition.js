@@ -40,12 +40,29 @@
           "backcolor": "transparent"
         }
       },
+      "timestamp": {
+        "fontStyle": {
+          "font": {
+            "family": "verdana,geneva,sans-serif",
+            "type": "standard"
+          },
+          "size": "24px",
+          "customSize": "",
+          "align": "left",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "forecolor": "black",
+          "backcolor": "transparent"
+        }
+      },
       "transition": {
         "type": "none",
         "duration": 20000
       },
       "dataSelection": {
         "showTitle": true,
+        "showTimestamp": true,
         "showDescription": "snippet"
       }
     }

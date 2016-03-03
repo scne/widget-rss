@@ -26,6 +26,7 @@
         <h1 class="headline headline_font-style">
           <a class="headline_font-style" target="_blank"></a>
         </h1>
+        <span class="timestamp timestamp_font-style"></span>
         <p class="story story_font-style"></p>
       </div>
     </article>
@@ -102,6 +103,10 @@
       test("should populate headline correctly", function() {
         assert.equal(document.querySelector(".headline a").innerHTML,
           "RSS 2.0 - Entry 1 title");
+      });
+
+      test("should populate timestamp", function() {
+        assert.equal(document.querySelector(".timestamp").innerHTML, "June 3, 2003");
       });
 
       test("should apply font styling to story", function() {
