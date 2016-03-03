@@ -92,8 +92,9 @@ RiseVision.RSS.Content = function (prefs, params) {
       $story, clone;
 
     // Headline
-    if (!item.title) {
-      $content.remove(".headline");
+    if (!item.title || ((typeof params.dataSelection.showTitle !== undefined) &&
+      !params.dataSelection.showTitle)) {
+      $content.find(".headline").remove();
     }
     else {
       $content.find(".headline").css("textAlign", params.headline.fontStyle.align);

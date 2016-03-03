@@ -111,18 +111,14 @@
         RiseVision.RSS.play.restore();
       });
 
-      test("should log the done event when all items have displayed", function(done) {
+      test("should log the done event when all items have displayed", function() {
         // move clock to past last interval of transitioning items
-        clock.tick(40000);
+        clock.tick(20000);
 
         params.event = "done";
 
-        $(".item").one("transitionend", function() {
-          assert(spy.calledOnce);
-          assert(spy.calledWith(table, params));
-          done();
-        });
-
+        assert(spy.calledOnce);
+        assert(spy.calledWith(table, params));
       });
 
     });

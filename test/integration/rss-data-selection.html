@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RSS Widget</title>
+
+  <link rel="stylesheet" type="text/css" href="../../src/widget/css/rss.css">
+  <link rel="stylesheet" href="../../src/components/widget-common/dist/css/message.css">
+
+  <script src="../../src/components/webcomponentsjs/webcomponents-lite.min.js"></script>
+  <script src="../../src/components/web-component-tester/browser.js"></script>
+
+  <link rel="import" href="../../src/components/rise-rss/rise-rss.html">
+</head>
+<body>
+
+<rise-rss id="rss" refresh="1"></rise-rss>
+
+<div id="container">
+  <section class="page"></section>
+
+  <template id="rssItem">
+    <article class="item">
+      <div class="textWrapper">
+        <h1 class="headline headline_font-style">
+          <a class="headline_font-style" target="_blank"></a>
+        </h1>
+        <p class="story story_font-style"></p>
+      </div>
+    </article>
+  </template>
+</div>
+
+<div id="messageContainer"></div>
+
+<script src="../data/rss-data-selection.js"></script>
+
+<script src="../../node_modules/widget-tester/mocks/gadget-mocks.js"></script>
+<script src="../../node_modules/widget-tester/mocks/gadgets.io-mock.js"></script>
+<script src="../../node_modules/widget-tester/mocks/logger-mock.js"></script>
+<script src="../../node_modules/widget-tester/mocks/rss-makeRequest-mock.js"></script>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+
+<script src="../../src/components/jQuery.dotdotdot/src/js/jquery.dotdotdot.js"></script>
+<script src="../../src/components/widget-common/dist/config.js"></script>
+<script src="../../src/components/widget-common/dist/common.js"></script>
+<script src="../../src/widget/rss.js"></script>
+<script src="../../src/widget/utils.js"></script>
+<script src="../../src/widget/rise-rss.js"></script>
+<script src="../../src/widget/content.js"></script>
+<script src="../../src/components/widget-common/dist/message.js"></script>
+<script src="../../src/widget/main.js"></script>
+
+<script>
+
+  suite("Data Selection", function() {
+    suite("Show Title", function () {
+      test("should remove the headline from the DOM", function() {
+        assert.isNull(document.querySelector(".headline"));
+      });
+    });
+  });
+
+</script>
+
+</body>
+</html>

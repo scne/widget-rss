@@ -41,7 +41,7 @@
         }
       },
       "dataSelection": {
-        "showTitle": true,
+        "showTitle": false,
         "showDescription": "snippet"
       }
     }
