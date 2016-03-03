@@ -165,6 +165,7 @@ RiseVision.RSS = (function (document, gadgets) {
           _content = new RiseVision.RSS.Content(_prefs, _additionalParams);
         }
 
+        _message.hide();
         _content.init(_currentFeed);
 
         // refreshed feed fixed previous error, ensure flag is removed so next playback shows content

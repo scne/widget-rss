@@ -195,19 +195,20 @@ can only be used within Rise Vision [Offline Player](https://github.com/Rise-Vis
       },
 
       _handleRequestError: function (errors) {
-        this.results = {};
-        this._startTimer();
-        this.fire("rise-rss-error", errors);
+        if (!this._respondWithCacheData()) {
+          // no cached data available, process the error
+          this.results = {};
+          this._startTimer();
+          this.fire("rise-rss-error", errors);
+        }
       },
 
       _handleRequestSuccess: function (xml) {
         var feedJSON = this._parseToJSON(xml),
           responseData = this._prepareResponse(feedJSON);
 
-        if (offlineWindow) {
-          // cache the data if possible
-          this._setCachedData(responseData);
-        }
+        // cache the data if possible
+        this._setCachedData(responseData);
 
         this.results = responseData.feed;
         this._startTimer();
@@ -227,19 +228,19 @@ can only be used within Rise Vision [Offline Player](https://github.com/Rise-Vis
         this._handleRequestError("Request response is not XML");
       },
 
-      _handleOfflineError: function (error) {
+      _respondWithCacheData: function () {
+        var hasCacheData = false;
         var cachedData = this._getCachedData();
 
         if (cachedData) {
+          hasCacheData = true;
           this.results = cachedData.feed;
           // start refresh timer and fire the event using the cached data
           this._startTimer();
           this.fire("rise-rss-response", cachedData);
-          return;
         }
 
-        // no cached data available, process the error
-        this._handleRequestError(error);
+        return hasCacheData;
       },
 
       _handleOfflineMessage: function (evt) {
@@ -262,7 +263,7 @@ can only be used within Rise Vision [Offline Player](https://github.com/Rise-Vis
         if (offlineWindow) {
           // check if "error" property was included
           if (evt.data.hasOwnProperty("error") && typeof evt.data.error !== "undefined" && evt.data.error !== "") {
-            this._handleOfflineError(evt.data.error);
+            this._handleRequestError(evt.data.error);
             return;
           }
 
