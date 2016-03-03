@@ -45,6 +45,7 @@
         "duration": 20000
       },
       "dataSelection": {
+        "showTitle": true,
         "showDescription": "snippet"
       }
     }

@@ -37,6 +37,10 @@
       expect(element(by.model("settings.additionalParams.itemsInQueue")).getAttribute("value")).to.eventually.equal("5");
     });
 
+    it("Should select 'Show Title'", function () {
+      expect(element(by.model("settings.additionalParams.dataSelection.showTitle")).isSelected()).to.eventually.be.true;
+    });
+
     it("Should select 'Show Description Snippet'", function () {
       expect(element(by.css("input[type='radio'][value='snippet']")).isSelected()).to.eventually.be.true;
     });
@@ -120,6 +124,7 @@
             "duration": 10000
           },
           "dataSelection": {
+            "showTitle": true,
             "showDescription": "snippet"
           }
         }
