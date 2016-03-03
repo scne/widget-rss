@@ -11239,6 +11239,7 @@ angular.module("risevision.widget.rss.settings")
         "duration": 10000
       },
       "dataSelection": {
+        "showTitle": true,
         "showDescription": "snippet"
       }
     }
