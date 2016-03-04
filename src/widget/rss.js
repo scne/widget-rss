@@ -74,14 +74,24 @@ RiseVision.RSS = (function (document, gadgets) {
     // Load fonts.
     var fontSettings = [
       {
-        "class": "headline_font-style",
-        "fontSetting": _additionalParams.headline.fontStyle
-      },
-      {
         "class": "story_font-style",
         "fontSetting": _additionalParams.story.fontStyle
       }
     ];
+
+    if(!_.isEmpty(_additionalParams.headline.fontStyle)){
+      fontSettings.push({
+        "class": "headline_font-style",
+        "fontSetting": _additionalParams.headline.fontStyle
+      });
+    }
+
+    if(!_.isEmpty(_additionalParams.timestamp.fontStyle)){
+      fontSettings.push({
+        "class": "timestamp_font-style",
+        "fontSetting": _additionalParams.timestamp.fontStyle
+      });
+    }
 
     RiseVision.Common.Utilities.loadFonts(fontSettings);
 

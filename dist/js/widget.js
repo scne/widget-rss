@@ -1137,14 +1137,24 @@ RiseVision.RSS = (function (document, gadgets) {
     // Load fonts.
     var fontSettings = [
       {
-        "class": "headline_font-style",
-        "fontSetting": _additionalParams.headline.fontStyle
-      },
-      {
         "class": "story_font-style",
         "fontSetting": _additionalParams.story.fontStyle
       }
     ];
+
+    if(!_.isEmpty(_additionalParams.headline.fontStyle)){
+      fontSettings.push({
+        "class": "headline_font-style",
+        "fontSetting": _additionalParams.headline.fontStyle
+      });
+    }
+
+    if(!_.isEmpty(_additionalParams.timestamp.fontStyle)){
+      fontSettings.push({
+        "class": "timestamp_font-style",
+        "fontSetting": _additionalParams.timestamp.fontStyle
+      });
+    }
 
     RiseVision.Common.Utilities.loadFonts(fontSettings);
 
@@ -1518,13 +1528,28 @@ RiseVision.RSS.Content = function (prefs, params) {
       $story, clone;
 
     // Headline
-    if (!item.title || ((typeof params.dataSelection.showTitle !== undefined) &&
+    if (!item.title || ((typeof params.dataSelection.showTitle !== "undefined") &&
       !params.dataSelection.showTitle)) {
       $content.find(".headline").remove();
     }
     else {
       $content.find(".headline").css("textAlign", params.headline.fontStyle.align);
       $content.find(".headline a").text(item.title);
+    }
+
+    // Timestamp
+    if (!item.pubdate || ((typeof params.dataSelection.showTimestamp !== "undefined") &&
+      !params.dataSelection.showTimestamp)) {
+      $content.find(".timestamp").remove();
+    }
+    else {
+      var pubdate = new Date(item.pubdate);
+      var options = {
+        year: "numeric", month: "long", day: "numeric"
+      };
+      var timestamp = pubdate.toLocaleDateString("en-us", options);
+      $content.find(".timestamp").css("textAlign", params.timestamp.fontStyle.align);
+      $content.find(".timestamp").text(timestamp);
     }
 
     // Story

@@ -34,7 +34,9 @@ body {
   background-color: transparent;
 }
 
-h1.headline, p.story {
+.headline,
+.story,
+.timestamp {
   margin: 0;
   padding: 10px;
 }

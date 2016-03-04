@@ -123,6 +123,15 @@
                 </div>
                 <!-- End Show Title -->
 
+                <!-- Show Timestamp -->
+                <div class="col-md-3">
+                  <label class="add-bottom">
+                    <input type="checkbox" ng-model="settings.additionalParams.dataSelection.showTimestamp">
+                    {{ "widget-rss.data-selection.showTimestamp" | translate }}
+                  </label>
+                </div>
+                <!-- End Show Timestamp -->
+
               </div>
             </div>
           </div>
@@ -149,7 +158,7 @@
           <hr>
 
           <!--Heading Format-->
-          <div class="row">
+          <div class="row" ng-if="settings.additionalParams.dataSelection.showTitle">
             <div class="col-md-12">
               <label class="control-label">{{"widget-rss.title-format.heading" | translate }}</label>
               <font-setting id="title-font" font-data="settings.additionalParams.headline.fontStyle"
@@ -169,6 +178,17 @@
             </div>
           </div>
           <!--End Story Format-->
+
+          <!--Date Format-->
+          <div class="row" ng-if="settings.additionalParams.dataSelection.showTimestamp">
+            <div class="col-md-12">
+              <label class="control-label">{{"widget-rss.timestamp-format.heading" | translate }}</label>
+              <font-setting id="timestamp-font" font-data="settings.additionalParams.timestamp.fontStyle"
+                            preview-text="{{'widget-rss.timestamp-format.text' | translate }}">
+              </font-setting>
+            </div>
+          </div>
+          <!--End Date Format-->
           <hr/>
 
           <!-- Modal Footer-->

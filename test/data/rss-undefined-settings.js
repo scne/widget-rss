@@ -56,13 +56,7 @@
           "backcolor": "transparent"
         }
       },
-      "transition": {
-        "type": "fade",
-        "duration": 15000
-      },
       "dataSelection": {
-        "showTitle": true,
-        "showTimestamp": true,
         "showDescription": "snippet"
       }
     }
