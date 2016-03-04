@@ -1142,17 +1142,24 @@ RiseVision.RSS = (function (document, gadgets) {
       }
     ];
 
-    if(!_.isEmpty(_additionalParams.headline.fontStyle)){
+    if(_additionalParams.headline && !_.isEmpty(_additionalParams.headline.fontStyle)){
       fontSettings.push({
         "class": "headline_font-style",
         "fontSetting": _additionalParams.headline.fontStyle
       });
     }
 
-    if(!_.isEmpty(_additionalParams.timestamp.fontStyle)){
+    if(_additionalParams.timestamp && !_.isEmpty(_additionalParams.timestamp.fontStyle)){
       fontSettings.push({
         "class": "timestamp_font-style",
         "fontSetting": _additionalParams.timestamp.fontStyle
+      });
+    }
+
+    if(_additionalParams.author && !_.isEmpty(_additionalParams.author.fontStyle)){
+      fontSettings.push({
+        "class": "author_font-style",
+        "fontSetting": _additionalParams.author.fontStyle
       });
     }
 
@@ -1521,8 +1528,21 @@ RiseVision.RSS.Content = function (prefs, params) {
     return story;
   }
 
+  function _getAuthor(item) {
+    var author = null;
+
+    if (_.has(item, "dc:creator")) {
+      author = item["dc:creator"];
+    } else if (_.has(item, "author")) {
+      author = item.author;
+    }
+
+    return author;
+  }
+
   function _getTemplate(item) {
     var story = _getStory(item),
+      author = _getAuthor(item),
       template = document.querySelector("#rssItem").content,
       $content = $(template.cloneNode(true)),
       $story, clone;
@@ -1537,9 +1557,11 @@ RiseVision.RSS.Content = function (prefs, params) {
       $content.find(".headline a").text(item.title);
     }
 
+    var removeSeparator = false;
     // Timestamp
     if (!item.pubdate || ((typeof params.dataSelection.showTimestamp !== "undefined") &&
       !params.dataSelection.showTimestamp)) {
+      removeSeparator = true;
       $content.find(".timestamp").remove();
     }
     else {
@@ -1548,8 +1570,27 @@ RiseVision.RSS.Content = function (prefs, params) {
         year: "numeric", month: "long", day: "numeric"
       };
       var timestamp = pubdate.toLocaleDateString("en-us", options);
-      $content.find(".timestamp").css("textAlign", params.timestamp.fontStyle.align);
+      if (params.timestamp) {
+        $content.find(".timestamp").css("textAlign", params.timestamp.fontStyle.align);
+      }
       $content.find(".timestamp").text(timestamp);
+    }
+
+    // Author
+    if (!author || ((typeof params.dataSelection.showAuthor !== "undefined") &&
+      !params.dataSelection.showAuthor)) {
+      removeSeparator = true;
+      $content.find(".author").remove();
+    }
+    else {
+      if (params.author) {
+        $content.find(".author").css("textAlign", params.author.fontStyle.align);
+      }
+      $content.find(".author").text(author);
+    }
+
+    if (removeSeparator) {
+      $content.find(".separator").remove();
     }
 
     // Story

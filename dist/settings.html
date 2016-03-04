@@ -130,6 +130,15 @@
                 </div>
                 <!-- End Show Timestamp -->
 
+                <!-- Show Author -->
+                <div class="col-md-3">
+                  <label class="add-bottom">
+                    <input type="checkbox" ng-model="settings.additionalParams.dataSelection.showAuthor">
+                    {{ "widget-rss.data-selection.showAuthor" | translate }}
+                  </label>
+                </div>
+                <!-- End Show Author -->
+
               </div>
             </div>
           </div>
@@ -187,6 +196,17 @@
             </div>
           </div>
           <!--End Date Format-->
+
+          <!--Author Format-->
+          <div class="row" ng-if="settings.additionalParams.dataSelection.showAuthor">
+            <div class="col-md-12">
+              <label class="control-label">{{"widget-rss.author-format.heading" | translate }}</label>
+              <font-setting id="author-font" font-data="settings.additionalParams.author.fontStyle"
+                            preview-text="{{'widget-rss.author-format.text' | translate }}">
+              </font-setting>
+            </div>
+          </div>
+          <!--End Author Format-->
           <hr/>
 
           <!-- Modal Footer-->

@@ -26,7 +26,11 @@
         <h1 class="headline headline_font-style">
           <a class="headline_font-style" target="_blank"></a>
         </h1>
-        <span class="timestamp timestamp_font-style"></span>
+        <div class="meta">
+          <span class="timestamp timestamp_font-style"></span>
+          <span class="separator">-</span>
+          <span class="author author_font-style"></span>
+        </div>
         <p class="story story_font-style"></p>
       </div>
     </article>
@@ -66,6 +70,12 @@
     suite("Show Timestamp", function () {
       test("should populate timestamp", function() {
         assert.equal(document.querySelector(".timestamp").innerHTML, "June 3, 2003");
+      });
+    });
+
+    suite("Show Author", function () {
+      test("should populate author", function() {
+        assert.equal(document.querySelector(".author").innerHTML, "Mr. X1");
       });
     });
   });

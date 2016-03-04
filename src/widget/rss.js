@@ -79,17 +79,24 @@ RiseVision.RSS = (function (document, gadgets) {
       }
     ];
 
-    if(!_.isEmpty(_additionalParams.headline.fontStyle)){
+    if(_additionalParams.headline && !_.isEmpty(_additionalParams.headline.fontStyle)){
       fontSettings.push({
         "class": "headline_font-style",
         "fontSetting": _additionalParams.headline.fontStyle
       });
     }
 
-    if(!_.isEmpty(_additionalParams.timestamp.fontStyle)){
+    if(_additionalParams.timestamp && !_.isEmpty(_additionalParams.timestamp.fontStyle)){
       fontSettings.push({
         "class": "timestamp_font-style",
         "fontSetting": _additionalParams.timestamp.fontStyle
+      });
+    }
+
+    if(_additionalParams.author && !_.isEmpty(_additionalParams.author.fontStyle)){
+      fontSettings.push({
+        "class": "author_font-style",
+        "fontSetting": _additionalParams.author.fontStyle
       });
     }
 

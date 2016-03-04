@@ -36,7 +36,8 @@ body {
 
 .headline,
 .story,
-.timestamp {
+.timestamp,
+.author {
   margin: 0;
   padding: 10px;
 }

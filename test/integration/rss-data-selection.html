@@ -26,7 +26,11 @@
         <h1 class="headline headline_font-style">
           <a class="headline_font-style" target="_blank"></a>
         </h1>
-        <span class="timestamp timestamp_font-style"></span>
+        <div class="meta">
+          <span class="timestamp timestamp_font-style"></span>
+          <span class="separator">-</span>
+          <span class="author author_font-style"></span>
+        </div>
         <p class="story story_font-style"></p>
       </div>
     </article>
@@ -66,6 +70,18 @@
     suite("Show Timestamp", function () {
       test("should remove the timestamp from the DOM", function() {
         assert.isNull(document.querySelector(".timestamp"));
+      });
+    });
+
+    suite("Show Author", function () {
+      test("should remove the author from the DOM", function() {
+        assert.isNull(document.querySelector(".author"));
+      });
+    });
+
+    suite("Show Separator", function () {
+      test("should remove the separator from the DOM", function() {
+        assert.isNull(document.querySelector(".separator"));
       });
     });
   });
