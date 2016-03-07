@@ -26,6 +26,12 @@ angular.module("risevision.widget.rss.settings")
         }
       });
 
+      $scope.$watch("settings.additionalParams.dataSelection.showAuthor", function (value){
+        if (typeof value !== "undefined" && value !== "" && !value) {
+          $scope.settings.additionalParams.author.fontStyle = {};
+        }
+      });
+
     }])
   .value("defaultSettings", {
     "params": {},
@@ -42,6 +48,9 @@ angular.module("risevision.widget.rss.settings")
       "timestamp": {
         "fontStyle": {}
       },
+      "author": {
+        "fontStyle": {}
+      },
       "transition": {
         "type": "none",
         "duration": 10000
@@ -49,6 +58,7 @@ angular.module("risevision.widget.rss.settings")
       "dataSelection": {
         "showTitle": true,
         "showTimestamp": true,
+        "showAuthor": true,
         "showDescription": "snippet"
       }
     }

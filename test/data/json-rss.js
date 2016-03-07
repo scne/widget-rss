@@ -16,28 +16,32 @@ var jsonRSS = {
       link: 'http://example.com/test.php',
       description: 'Item 1 - Sample description',
       pubdate: 'Tue, 03 Jun 2003 09:39:21 GMT',
-      guid: 'http://example.com/rss2.html#example1'
+      guid: 'http://example.com/rss2.html#example1',
+      author: 'Mr. X1',
     },
     {
       title: 'RSS 2.0 - Entry 2 title',
       link: 'http://example.com/test.php',
       description: 'Item 2 - Sample description',
       pubdate: 'Fri, 30 May 2003 11:06:42 GMT',
-      guid: 'http://example.com/rss2.html#example2'
+      guid: 'http://example.com/rss2.html#example2',
+      author: 'Mr. X2',
     },
     {
       title: 'RSS 2.0 - Entry 3 title',
       link: 'http://example.com/test.php',
       description: 'Item 3 - Sample description',
       pubdate: 'Tue, 27 May 2003 08:37:32 GMT',
-      guid: 'http://example.com/rss2.html#example3'
+      guid: 'http://example.com/rss2.html#example3',
+      author: 'Mr. X3',
     },
     {
       title: 'RSS 2.0 - Entry 4 title',
       link: 'http://example.com/test.php',
       description: 'Item 4 - Sample description',
       pubdate: 'Tue, 20 May 2003 08:56:02 GMT',
-      guid: 'http://example.com/rss2.html#example4'
+      guid: 'http://example.com/rss2.html#example4',
+      author: 'Mr. X4',
     }
   ]
 };

@@ -37,6 +37,10 @@
       expect(element(by.css("#timestamp-font .mce-tinymce")).isPresent()).to.eventually.be.true;
     });
 
+    it("Should load Author Font Setting component", function () {
+      expect(element(by.css("#author-font .mce-tinymce")).isPresent()).to.eventually.be.true;
+    });
+
     it("Should set default value for 'Max Items in Queue'", function () {
       expect(element(by.model("settings.additionalParams.itemsInQueue")).getAttribute("value")).to.eventually.equal("5");
     });
@@ -47,6 +51,10 @@
 
     it("Should select 'Show Timestamp'", function () {
       expect(element(by.model("settings.additionalParams.dataSelection.showTimestamp")).isSelected()).to.eventually.be.true;
+    });
+
+    it("Should select 'Show Author'", function () {
+      expect(element(by.model("settings.additionalParams.dataSelection.showAuthor")).isSelected()).to.eventually.be.true;
     });
 
     it("Should select 'Show Description Snippet'", function () {
@@ -144,6 +152,23 @@
               "backcolor":"transparent"
             }
           },
+          "author":{
+            "fontStyle":{
+              "font":{
+                "family":"verdana,geneva,sans-serif",
+                "type":"standard",
+                "url":""
+              },
+              "size":"24px",
+              "customSize":"",
+              "align":"left",
+              "bold":false,
+              "italic":false,
+              "underline":false,
+              "forecolor":"black",
+              "backcolor":"transparent"
+            }
+          },
           "transition": {
             "type": "none",
             "duration": 10000
@@ -151,6 +176,7 @@
           "dataSelection": {
             "showTitle": true,
             "showTimestamp": true,
+            "showAuthor": true,
             "showDescription": "snippet"
           }
         }
@@ -183,6 +209,11 @@
       expect(element(by.css("#timestamp-font .mce-tinymce")).isPresent()).to.eventually.be.false;
     });
 
+    it("Should not load Date Font Setting component", function () {
+      element(by.model("settings.additionalParams.dataSelection.showAuthor")).click();
+      expect(element(by.css("#author-font .mce-tinymce")).isPresent()).to.eventually.be.false;
+    });
+
     it("Should correctly save settings", function () {
       var settings = {
         params: {},
@@ -213,6 +244,9 @@
           "timestamp":{
             "fontStyle":{}
           },
+          "author":{
+            "fontStyle":{}
+          },
           "transition": {
             "type": "none",
             "duration": 10000
@@ -220,6 +254,7 @@
           "dataSelection": {
             "showTitle": false,
             "showTimestamp": false,
+            "showAuthor": false,
             "showDescription": "snippet"
           }
         }

@@ -56,9 +56,26 @@
           "backcolor": "transparent"
         }
       },
+      "author": {
+        "fontStyle": {
+          "font": {
+            "family": "verdana,geneva,sans-serif",
+            "type": "standard"
+          },
+          "size": "24px",
+          "customSize": "",
+          "align": "left",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "forecolor": "black",
+          "backcolor": "transparent"
+        }
+      },
       "dataSelection": {
         "showTitle": false,
         "showTimestamp": false,
+        "showAuthor": false,
         "showDescription": "snippet"
       }
     }
