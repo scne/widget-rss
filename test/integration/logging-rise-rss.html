@@ -145,7 +145,7 @@
 
       test("should log a rise rss error when done is fired", function() {
         rss.dispatchEvent(new CustomEvent("rise-rss-error", {
-          "detail": "Request response is not XML",
+          "detail": "Invalid RSS feed",
           "bubbles": true
         }));
 
@@ -157,7 +157,7 @@
 
         spyCall = RiseVision.Common.LoggerUtils.logEvent.getCall(0);
 
-        params.error_details = "Request response is not XML";
+        params.error_details = "Invalid RSS feed";
 
         assert.equal(spyCall.args[0], table);
         assert.deepEqual(spyCall.args[1], params);
@@ -165,7 +165,7 @@
 
       test("should not log a rise rss error when done is fired if the error has resolved itself on a refresh", function() {
         rss.dispatchEvent(new CustomEvent("rise-rss-error", {
-          "detail": "Request response is not XML",
+          "detail": "Invalid RSS feed",
           "bubbles": true
         }));
 
