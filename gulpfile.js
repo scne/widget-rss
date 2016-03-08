@@ -128,7 +128,9 @@
       "src/components/rise-rss/rise-rss.html",
       "src/components/rise-rss/modules.js",
       "src/components/underscore/*.js",
-      "src/components/polymer/*.*{html,js}"
+      "src/components/polymer/*.*{html,js}",
+      "src/components/iron-ajax/iron-ajax.html",
+      "src/components/iron-ajax/iron-request.html"
     ], {base: "./src/"})
       .pipe(gulp.dest("dist/"));
   });
