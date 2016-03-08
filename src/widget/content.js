@@ -100,7 +100,7 @@ RiseVision.RSS.Content = function (prefs, params) {
   function _getTemplate(item) {
     var story = _getStory(item),
       author = _getAuthor(item),
-      template = document.querySelector("#rssItem").content,
+      template = document.querySelector("#layout-4x1").content,
       $content = $(template.cloneNode(true)),
       $story, clone;
 
