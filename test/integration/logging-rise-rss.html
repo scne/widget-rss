@@ -41,6 +41,8 @@
 
 <script src="../data/rss.js"></script>
 <script src="../data/json-rss.js"></script>
+<script src="../data/xml-rss.js"></script>
+
 
 <script src="../../node_modules/widget-tester/mocks/gadget-mocks.js"></script>
 <script src="../../node_modules/widget-tester/mocks/gadgets.io-mock.js"></script>
@@ -61,11 +63,16 @@
 
 <script>
 
-  var clock, paramsStub, spy;
+  var clock, paramsStub, server;
 
   paramsStub = sinon.stub(RiseVision.RSS, "setAdditionalParams", function (names, values) {
     // need to set the fake timer clock before any of the code within setAdditionalParams is executed
     clock = sinon.useFakeTimers();
+
+    server = sinon.fakeServer.create();
+    server.respondImmediately = true;
+    server.respondWith(xmlRSS);
+
     // restore the function
     paramsStub.restore();
     // call it again with the params
@@ -88,6 +95,7 @@
 
     suiteTeardown(function() {
       playStub.restore();
+      server.restore();
       clock.restore();
     });
 
@@ -98,20 +106,21 @@
     suite("rise rss error", function() {
       var spyCall;
 
-      test("should log a rise rss error with non-makeRequest detail", function() {
+      test("should log a rise rss error with non-makeRequest detail", function(done) {
         spy = sinon.spy(RiseVision.Common.LoggerUtils, "logEvent");
 
         rss.dispatchEvent(new CustomEvent("rise-rss-error", {
-          "detail": "Request response is not XML",
+          "detail": "Invalid RSS feed",
           "bubbles": true
         }));
 
         params.event = "error";
         params.event_details = "rise rss error";
-        params.error_details = "Request response is not XML";
+        params.error_details = "Invalid RSS feed";
 
         assert(spy.calledOnce);
         assert(spy.calledWith(table, params));
+        done();
       });
 
       test("should log a rise rss error with makeRequest detail", function() {

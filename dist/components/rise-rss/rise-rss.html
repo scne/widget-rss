@@ -1,4 +1,5 @@
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-ajax/iron-ajax.html">
 
 <script src="modules.js"></script>
 
@@ -46,6 +47,18 @@ can only be used within Rise Vision [Offline Player](https://github.com/Rise-Vis
 
 @demo
 -->
+
+<dom-module id="rise-rss">
+  <template>
+    <iron-ajax id="proxyRequest"
+               url="{{_proxyRequestUrl}}"
+               handle-as="document"
+               on-response="_handleProxyRequest"
+               on-error="_handleProxyRequestError"
+               verbose="true">
+    </iron-ajax>
+  </template>
+</dom-module>
 
 <script>
   (function() {
@@ -127,6 +140,10 @@ can only be used within Rise Vision [Offline Player](https://github.com/Rise-Vis
 
       _offlineRequestPending: false,
 
+      _proxyServerUrl: "https://proxy.risevision.com/",
+
+      _proxyRequestUrl: "",
+
       _getCachedData: function () {
         if (supportsLocalStorage()) {
           // retrieve cached data and parse back
@@ -180,7 +197,7 @@ can only be used within Rise Vision [Offline Player](https://github.com/Rise-Vis
       },
 
       _startTimer: function() {
-        var refreshFn = (offlineWindow) ? this._postMessage : this._makeRequest,
+        var refreshFn = (offlineWindow) ? this._postMessage : this._makeProxyRequest,
           self = this;
 
         this.refresh = parseInt(this.refresh, 10);
@@ -216,16 +233,28 @@ can only be used within Rise Vision [Offline Player](https://github.com/Rise-Vis
       },
 
       _validateResponse: function(data) {
-        // ensure for actual XML as the data
-        if (typeof data === "string") {
-          if (data.indexOf('<?xml version="1.0"') !== -1 || data.indexOf("<?xml version='1.0'") !== -1) { // jshint ignore:line
-            this._handleRequestSuccess(data);
-            return;
-          }
+        var tmp = null,
+          rss = data.querySelector("rss"),
+          feed = data.querySelector("feed"),
+          rssVersion = null;
+
+        if (rss !== null) {
+          rssVersion = rss.getAttribute("version");
         }
 
-        // the request didn't respond with RSS XML
-        this._handleRequestError("Request response is not XML");
+        // RSS feeds have a mandatory attribute called version.
+        // Atom feeds may have a <feed> element instead of <rss>.
+        if (rssVersion || feed) {
+          // Convert document to text.
+          tmp = document.createElement("div");
+
+          tmp.appendChild(data.documentElement);
+          this._handleRequestSuccess(tmp.innerHTML);
+        }
+        else {
+          // Not a valid RSS feed.
+          this._handleRequestError("Invalid RSS feed");
+        }
       },
 
       _respondWithCacheData: function () {
@@ -270,10 +299,28 @@ can only be used within Rise Vision [Offline Player](https://github.com/Rise-Vis
           // check if "response" property included
           if (evt.data.hasOwnProperty("response")) {
             // successful response provided so bypass localStorage retrieval and process the response
-            this._validateResponse(evt.data.response);
+            this._validateResponse(new window.DOMParser().parseFromString(evt.data.response, "text/xml"));
           }
         }
 
+      },
+
+      _makeProxyRequest: function () {
+        this._proxyRequestUrl = this._proxyServerUrl + this.url;
+        this.$.proxyRequest.generateRequest();
+      },
+
+      _handleProxyRequest: function (e, resp) {
+        if (resp && resp.response) {
+          this._validateResponse(resp.response);
+        }
+        else {
+          this._startTimer();
+        }
+      },
+
+      _handleProxyRequestError: function () {
+        this._makeRequest();
       },
 
       _makeRequest: function () {
@@ -285,7 +332,7 @@ can only be used within Rise Vision [Offline Player](https://github.com/Rise-Vis
         }
 
         try {
-          params[gadgets.io.RequestParameters.CONTENT_TYPE] = gadgets.io.ContentType.TEXT;
+          params[gadgets.io.RequestParameters.CONTENT_TYPE] = gadgets.io.ContentType.DOM;
 
           gadgets.io.makeRequest(this.url, function(response) {
             if (response.errors.length > 0) {
@@ -338,7 +385,7 @@ can only be used within Rise Vision [Offline Player](https://github.com/Rise-Vis
           // running in Offline Player
           this._postMessage();
         } else {
-          this._makeRequest();
+          this._makeProxyRequest();
         }
       }
 

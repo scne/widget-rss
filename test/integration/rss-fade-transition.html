@@ -60,11 +60,17 @@
 
 <script>
 
-  var clock, paramsStub;
+  var clock, paramsStub, server;
 
   paramsStub = sinon.stub(RiseVision.RSS, "setAdditionalParams", function (names, values) {
     // need to set the fake timer clock before any of the code within setAdditionalParams is executed
     clock = sinon.useFakeTimers();
+
+    server = sinon.fakeServer.create();
+    server.respondImmediately = true;
+    server.respondWith("GET", "https://proxy.risevision.com/http://test.com/feed.rss",
+      [200, { "Content-Type": "application/xml" }, "<rss></rss>"]);
+
     // restore the function
     paramsStub.restore();
     // call it again with the params
