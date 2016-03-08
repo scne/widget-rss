@@ -8,9 +8,17 @@
   <link rel="stylesheet" href="components/rv-common-style/dist/css/rise.min.css">
   <!-- endbuild -->
 
-  <style type="text/css">
+  <style>
     body, html {
       background: transparent;
+    }
+
+    .landscape-layout {
+      width: 160px;
+    }
+
+    .portrait-layout {
+      width: 70px;
     }
   </style>
 
@@ -209,7 +217,68 @@
             </div>
           </div>
           <!--End Author Format-->
+
           <hr/>
+
+          <!-- Layout -->
+          <!-- <div id="layouts">
+            <label class="control-label">
+              {{" widget-rss.layout.heading" | translate }}
+            </label>
+            <div class="row">
+              <div class="form-group">
+
+                <div class="col-md-3 radio-vertical-align add-bottom">
+                  <input type="radio" ng-model="settings.additionalParams.layout" value="4x1">
+                  <label class="radio-inline">
+                    <img class="landscape-layout" src="img/4x1-layout.png">
+                  </label>
+                </div>
+
+                <div class="col-md-3 radio-vertical-align add-bottom">
+                  <input type="radio" ng-model="settings.additionalParams.layout" value="2x1">
+                  <label class="radio-inline">
+                    <img class="landscape-layout" src="img/2x1-layout.png">
+                  </label>
+                </div>
+
+                <div class="col-md-3 radio-vertical-align add-bottom">
+                  <input type="radio" ng-model="settings.additionalParams.layout" value="16x9">
+                  <label class="radio-inline">
+                    <img class="landscape-layout" src="img/16x9-layout.png">
+                  </label>
+                </div>
+
+                <div class="col-md-3 radio-vertical-align">
+                  <input type="radio" ng-model="settings.additionalParams.layout" value="1x2">
+                  <label class="radio-inline">
+                    <img class="portrait-layout" src="img/1x2-layout.png">
+                  </label>
+                </div>
+
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="form-group">
+                <div class="col-md-12">
+                  <label class="radio-inline">
+                    <input type="radio" ng-model="settings.additionalParams.layout" value="custom">
+                    {{" widget-rss.layout.custom" | translate }}
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div id="custom-layout" class="half-top" ng-if="settings.additionalParams.layout === 'custom'">
+              <div class="form-group">
+                <input type="text" class="form-control" placeholder="http://" ng-model="settings.additionalParams.layoutUrl">
+              </div>
+            </div>
+          </div> -->
+          <!-- End Layout -->
+
+          <br>
 
           <!-- Modal Footer-->
           <div class="modal-footer">

@@ -8,25 +8,25 @@ angular.module("risevision.widget.rss.settings")
           $scope.settings.additionalParams.transition.duration = value * 1000;
         }
       });
-      $scope.$watch("settings.additionalParams.transition.duration", function (value){
+      $scope.$watch("settings.additionalParams.transition.duration", function (value) {
         if (typeof value !== "undefined" && value !== "") {
           $scope.duration = value / 1000;
         }
       });
 
-      $scope.$watch("settings.additionalParams.dataSelection.showTitle", function (value){
+      $scope.$watch("settings.additionalParams.dataSelection.showTitle", function (value) {
         if (typeof value !== "undefined" && value !== "" && !value) {
           $scope.settings.additionalParams.headline.fontStyle = {};
         }
       });
 
-      $scope.$watch("settings.additionalParams.dataSelection.showTimestamp", function (value){
+      $scope.$watch("settings.additionalParams.dataSelection.showTimestamp", function (value) {
         if (typeof value !== "undefined" && value !== "" && !value) {
           $scope.settings.additionalParams.timestamp.fontStyle = {};
         }
       });
 
-      $scope.$watch("settings.additionalParams.dataSelection.showAuthor", function (value){
+      $scope.$watch("settings.additionalParams.dataSelection.showAuthor", function (value) {
         if (typeof value !== "undefined" && value !== "" && !value) {
           $scope.settings.additionalParams.author.fontStyle = {};
         }
@@ -60,6 +60,8 @@ angular.module("risevision.widget.rss.settings")
         "showTimestamp": true,
         "showAuthor": true,
         "showDescription": "snippet"
-      }
+      },
+      // "layout": "4x1",
+      // "layoutUrl": ""
     }
   });
