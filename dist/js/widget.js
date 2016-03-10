@@ -1889,7 +1889,18 @@ RiseVision.RSS.Content = function (prefs, params) {
   }
 
   function play() {
-    _startTransitionTimer();
+
+    if (_transition.type !== "scroll") {
+      _startTransitionTimer();
+    }
+    else {
+
+      // duplicate the .page content
+      $(".page article").each(function () {
+        $(this).clone().appendTo(".page");
+      });
+
+    }
   }
 
   function update(feed) {
