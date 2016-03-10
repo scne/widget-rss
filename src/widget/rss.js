@@ -109,6 +109,33 @@ RiseVision.RSS = (function (document, gadgets) {
     _ready();
   }
 
+  /* Load the layout file. */
+  function _loadLayout() {
+    var url = window.location.pathname,
+      index = url.lastIndexOf("/") + 1,
+      layout = "";
+
+    if (typeof _additionalParams.layout === "undefined") {
+      layout = "layout-4x1";
+    }
+    else {
+      layout = _additionalParams.layout;
+    }
+
+    url = url.substr(0, index) + "layouts/" + layout + ".html";
+
+    // Load the layout and add it to the DOM.
+    $.get(url)
+      .done(function(data) {
+        $("#container").append(data);
+        _init();
+      })
+      .fail(function() {
+        // TODO: Log error.
+        console.log("Layout could not be loaded");
+      });
+  }
+
   /*
    *  Public Methods
    */
@@ -234,7 +261,7 @@ RiseVision.RSS = (function (document, gadgets) {
     document.getElementById("container").style.width = _additionalParams.width + "px";
     document.getElementById("container").style.height = _additionalParams.height + "px";
 
-    _init();
+    _loadLayout();
   }
 
   function showError(message) {

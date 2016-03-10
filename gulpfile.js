@@ -112,6 +112,11 @@
       .pipe(gulp.dest("dist/img"));
   });
 
+  gulp.task("layouts", function() {
+    return gulp.src("src/widget/layouts/*.html")
+      .pipe(gulp.dest("dist/layouts"));
+  });
+
   gulp.task("i18n", function(cb) {
     return gulp.src(["src/components/rv-common-i18n/dist/locales/**/*"])
       .pipe(gulp.dest("dist/locales"));
@@ -204,7 +209,7 @@
   });
 
   gulp.task("build", function (cb) {
-    runSequence(["clean", "config"], ["source", "fonts", "images", "i18n", "vendor", "rise-rss"], ["unminify"], cb);
+    runSequence(["clean", "config"], ["source", "fonts", "images", "layouts", "i18n", "vendor", "rise-rss"], ["unminify"], cb);
   });
 
   gulp.task("bump", function(){

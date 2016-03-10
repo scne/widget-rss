@@ -88,9 +88,9 @@
         expect(element(by.css("input[type='radio'][value='snippet']")).isSelected()).to.eventually.be.true;
       });
 
-      // it("Should select default layout", function () {
-      //   expect(element(by.css("input[type='radio'][value='4x1']")).isSelected()).to.eventually.be.true;
-      // });
+      it("Should select default layout", function () {
+        expect(element(by.css("input[type='radio'][value='layout-4x1']")).isSelected()).to.eventually.be.true;
+      });
     });
 
     // describe("Visibility", function() {
@@ -200,7 +200,7 @@
               "showAuthor": true,
               "showDescription": "snippet"
             },
-            // "layout": "4x1",
+            "layout": "layout-4x1",
             // "layoutUrl": ""
           }
         };
@@ -281,7 +281,7 @@
             "showAuthor": false,
             "showDescription": "snippet"
           },
-          // "layout": "4x1",
+          "layout": "layout-4x1",
           // "layoutUrl": ""
         }
       };

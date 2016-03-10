@@ -11268,7 +11268,7 @@ angular.module("risevision.widget.rss.settings")
         "showAuthor": true,
         "showDescription": "snippet"
       },
-      // "layout": "4x1",
+      "layout": "layout-4x1",
       // "layoutUrl": ""
     }
   });

@@ -19,36 +19,23 @@
 
 <div id="container">
   <section class="page"></section>
-
-  <template id="layout-4x1">
-    <article class="item">
-      <div class="textWrapper">
-        <h1 class="headline headline_font-style">
-          <a class="headline_font-style" target="_blank"></a>
-        </h1>
-        <div class="meta">
-          <span class="timestamp timestamp_font-style"></span>
-          <span class="separator">-</span>
-          <span class="author author_font-style"></span>
-        </div>
-        <p class="story story_font-style"></p>
-      </div>
-    </article>
-  </template>
 </div>
 
 <div id="messageContainer"></div>
 
 <script src="../data/rss-fade-transition.js"></script>
+<script src="../data/xml-rss.js"></script>
+<script src="../data/layout.js"></script>
 
 <script src="../../node_modules/widget-tester/mocks/gadget-mocks.js"></script>
 <script src="../../node_modules/widget-tester/mocks/gadgets.io-mock.js"></script>
 <script src="../../node_modules/widget-tester/mocks/logger-mock.js"></script>
 <script src="../../node_modules/widget-tester/mocks/rss-makeRequest-mock.js"></script>
+<script src="../../node_modules/chai-as-promised/lib/chai-as-promised.js"></script>
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
 
-<script src="../../src/components/jQuery.dotdotdot/src/js/jquery.dotdotdot.js"></script>
+<script src="../../src/components/jQuery.dotdotdot/src/jquery.dotdotdot.js"></script>
 <script src="../../src/components/widget-common/dist/config.js"></script>
 <script src="../../src/components/widget-common/dist/common.js"></script>
 <script src="../../src/widget/rss.js"></script>
@@ -68,8 +55,10 @@
 
     server = sinon.fakeServer.create();
     server.respondImmediately = true;
-    server.respondWith("GET", "https://proxy.risevision.com/http://test.com/feed.rss",
-      [200, { "Content-Type": "application/xml" }, "<rss></rss>"]);
+
+    server.respondWith("GET", "/components/widget-rss/test/integration/layouts/layout-4x1.html",
+      [200, { "Content-Type": "text/html" }, layout]);
+    server.respondWith(xmlRSS);
 
     // restore the function
     paramsStub.restore();
@@ -81,27 +70,26 @@
 
     suiteTeardown(function() {
       clock.restore();
+      server.restore();
     });
 
     suite("Transitioning", function() {
 
-      test("should always transition to next rss item after 15 seconds", function(done) {
-        assert.equal(document.querySelector(".headline a").innerHTML,
-          "RSS 2.0 - Entry 1 title", "first item displaying");
+      test("should always transition to next rss item after 15 seconds", function() {
+        assert.equal(document.querySelector(".headline a").innerHTML, "RSS 2.0 - Entry 1 title",
+          "first item displaying");
 
         clock.tick(15000);
 
-        $(".item").one("transitionend", function() {
-          assert.equal(document.querySelector(".headline a").innerHTML,
-            "RSS 2.0 - Entry 2 title", "second item displaying");
+        $(".item").trigger("transitionend");
 
-          done();
-        });
+        assert.equal(document.querySelector(".headline a").innerHTML, "RSS 2.0 - Entry 2 title",
+          "second item displaying");
       });
 
-      test("should not transition to next rss item before 15 seconds", function(done) {
-        assert.equal(document.querySelector(".headline a").innerHTML,
-          "RSS 2.0 - Entry 2 title", "second item displaying");
+      test("should not transition to next rss item before 15 seconds", function() {
+        assert.equal(document.querySelector(".headline a").innerHTML, "RSS 2.0 - Entry 2 title",
+          "second item displaying");
 
         clock.tick(10000);
 
@@ -110,15 +98,13 @@
 
         clock.tick(5000);
 
-        $(".item").one("transitionend", function() {
-          assert.equal(document.querySelector(".headline a").innerHTML,
-            "RSS 2.0 - Entry 3 title", "Third item displaying");
+        $(".item").trigger("transitionend");
 
-          done();
-        });
+        assert.equal(document.querySelector(".headline a").innerHTML, "RSS 2.0 - Entry 3 title",
+          "third item displaying");
       });
 
-      test("should eventually transition all items and start over", function(done) {
+      test("should eventually transition all items and start over", function() {
         var contentDoneSpy = sinon.spy(RiseVision.RSS, "onContentDone");
 
         assert.equal(document.querySelector(".headline a").innerHTML,
@@ -127,14 +113,13 @@
         // move clock enough intervals that last (4th) item has shown for allotted 10 seconds and now time to start over
         clock.tick(30000);
 
-        $(".item").one("transitionend", function() {
-          assert(contentDoneSpy.calledOnce, "onContentDone called once");
-          assert.equal(document.querySelector(".headline a").innerHTML,
-            "RSS 2.0 - Entry 1 title", "First item displaying again");
+        $(".item").trigger("transitionend");
 
-          RiseVision.RSS.onContentDone.restore();
-          done();
-        });
+        assert(contentDoneSpy.calledOnce, "onContentDone called once");
+        assert.equal(document.querySelector(".headline a").innerHTML,
+          "RSS 2.0 - Entry 1 title", "First item displaying again");
+
+        RiseVision.RSS.onContentDone.restore();;
       });
     });
   });

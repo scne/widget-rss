@@ -19,27 +19,12 @@
 
 <div id="container">
   <section class="page"></section>
-
-  <template id="layout-4x1">
-    <article class="item">
-      <div class="textWrapper">
-        <h1 class="headline headline_font-style">
-          <a class="headline_font-style" target="_blank"></a>
-        </h1>
-        <div class="meta">
-          <span class="timestamp timestamp_font-style"></span>
-          <span class="separator">-</span>
-          <span class="author author_font-style"></span>
-        </div>
-        <p class="story story_font-style"></p>
-      </div>
-    </article>
-  </template>
 </div>
 
 <div id="messageContainer"></div>
 
 <script src="../data/rss.js"></script>
+<script src="../data/layout.js"></script>
 
 <script src="../../node_modules/widget-tester/mocks/gadget-mocks.js"></script>
 <script src="../../node_modules/widget-tester/mocks/gadgets.io-mock.js"></script>
@@ -48,7 +33,7 @@
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
 
-<script src="../../src/components/jQuery.dotdotdot/src/js/jquery.dotdotdot.js"></script>
+<script src="../../src/components/jQuery.dotdotdot/src/jquery.dotdotdot.js"></script>
 <script src="../../src/components/widget-common/dist/config.js"></script>
 <script src="../../src/components/widget-common/dist/common.js"></script>
 <script src="../../src/widget/rss.js"></script>
@@ -68,6 +53,9 @@
 
     server = sinon.fakeServer.create();
     server.respondImmediately = true;
+
+    server.respondWith("GET", "/components/widget-rss/test/integration/layouts/layout-4x1.html",
+      [200, { "Content-Type": "text/html" }, layout]);
     server.respondWith("GET", "https://proxy.risevision.com/http://test.com/feed.rss",
       [200, { "Content-Type": "application/xml" }, "<rss></rss>"]);
 
@@ -87,6 +75,7 @@
 
     suiteTeardown(function() {
       clock.restore();
+      server.restore();
     });
 
     suite("waiting", function() {

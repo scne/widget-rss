@@ -219,7 +219,7 @@
           <hr/>
 
           <!-- Layout -->
-          <!-- <div id="layouts">
+          <div id="layouts">
             <label class="control-label">
               {{" widget-rss.layout.heading" | translate }}
             </label>
@@ -227,37 +227,38 @@
               <div class="form-group">
 
                 <div class="col-md-3 radio-vertical-align add-bottom">
-                  <input type="radio" ng-model="settings.additionalParams.layout" value="4x1">
+                  <input type="radio" ng-model="settings.additionalParams.layout" value="layout-4x1">
                   <label class="radio-inline">
-                    <img class="landscape-layout" src="img/4x1-layout.png">
+                    <img class="landscape-layout" src="img/layout-4x1.png">
                   </label>
                 </div>
 
                 <div class="col-md-3 radio-vertical-align add-bottom">
-                  <input type="radio" ng-model="settings.additionalParams.layout" value="2x1">
+                  <input type="radio" ng-model="settings.additionalParams.layout" value="layout-2x1">
                   <label class="radio-inline">
-                    <img class="landscape-layout" src="img/2x1-layout.png">
+                    <img class="landscape-layout" src="img/layout-2x1.png">
                   </label>
                 </div>
 
-                <div class="col-md-3 radio-vertical-align add-bottom">
-                  <input type="radio" ng-model="settings.additionalParams.layout" value="16x9">
+                <!-- <div class="col-md-3 radio-vertical-align add-bottom">
+                  <input type="radio" ng-model="settings.additionalParams.layout" value="layout-16x9">
                   <label class="radio-inline">
-                    <img class="landscape-layout" src="img/16x9-layout.png">
+                    <img class="landscape-layout" src="img/layout-16x9.png">
                   </label>
                 </div>
 
                 <div class="col-md-3 radio-vertical-align">
-                  <input type="radio" ng-model="settings.additionalParams.layout" value="1x2">
+                  <input type="radio" ng-model="settings.additionalParams.layout" value="layout-1x2">
                   <label class="radio-inline">
-                    <img class="portrait-layout" src="img/1x2-layout.png">
+                    <img class="portrait-layout" src="img/layout-1x2.png">
                   </label>
-                </div>
+                </div> -->
 
               </div>
             </div>
 
-            <div class="row">
+            <!-- Custom Layout -->
+            <!-- <div class="row">
               <div class="form-group">
                 <div class="col-md-12">
                   <label class="radio-inline">
@@ -270,10 +271,11 @@
 
             <div id="custom-layout" class="half-top" ng-if="settings.additionalParams.layout === 'custom'">
               <div class="form-group">
-                <input type="text" class="form-control" placeholder="http://" ng-model="settings.additionalParams.layoutUrl">
+                <input type="url" class="form-control" placeholder="http://" ng-model="settings.additionalParams.layoutUrl">
               </div>
-            </div>
-          </div> -->
+            </div> -->
+
+          </div>
           <!-- End Layout -->
 
           <br>

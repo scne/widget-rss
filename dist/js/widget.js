@@ -1,5 +1,5 @@
 /*
- *	jQuery dotdotdot 1.7.4
+ *	jQuery dotdotdot 1.8.0
  *
  *	Copyright (c) Fred Heusschen
  *	www.frebsite.nl
@@ -37,6 +37,7 @@
 
 
 		var $dot = this;
+		var orgContent	= $dot.contents();
 
 		if ( $dot.data( 'dotdotdot' ) )
 		{
@@ -180,6 +181,7 @@
 						.end()
 						.append( orgContent )
 						.attr( 'style', $dot.data( 'dotdotdot-style' ) || '' )
+						.removeClass( 'is-truncated' )
 						.data( 'dotdotdot', false );
 				}
 			);
@@ -255,8 +257,7 @@
 			return $dot;
 		};
 
-		var	orgContent	= $dot.contents(),
-			opts 		= $.extend( true, {}, $.fn.dotdotdot.defaults, o ),
+		var	opts 		= $.extend( true, {}, $.fn.dotdotdot.defaults, o ),
 			conf		= {},
 			watchOrg	= {},
 			watchInt	= null,
@@ -395,12 +396,6 @@
 							else
 							{
 								isTruncated = ellipsis( $e, $d, $i, o, after );
-							}
-
-							if ( !isTruncated )
-							{
-								$e.detach();
-								isTruncated = true;
 							}
 						}
 
@@ -684,6 +679,77 @@
 
 })( jQuery );
 
+/*
+
+## Automatic parsing for CSS classes
+Contributed by [Ramil Valitov](https://github.com/rvalitov)
+
+### The idea
+You can add one or several CSS classes to HTML elements to automatically invoke "jQuery.dotdotdot functionality" and some extra features. It allows to use jQuery.dotdotdot only by adding appropriate CSS classes without JS programming.
+
+### Available classes and their description
+* dot-ellipsis - automatically invoke jQuery.dotdotdot to this element. This class must be included if you plan to use other classes below.
+* dot-resize-update - automatically update if window resize event occurs. It's equivalent to option `watch:'window'`.
+* dot-timer-update - automatically update if window resize event occurs. It's equivalent to option `watch:true`.
+* dot-load-update - automatically update after the window has beem completely rendered. Can be useful if your content is generated dynamically using using JS and, hence, jQuery.dotdotdot can't correctly detect the height of the element before it's rendered completely.
+* dot-height-XXX - available height of content area in pixels, where XXX is a number, e.g. can be `dot-height-35` if you want to set maximum height for 35 pixels. It's equivalent to option `height:'XXX'`.
+
+### Usage examples
+*Adding jQuery.dotdotdot to element*
+    
+	<div class="dot-ellipsis">
+	<p>Lorem Ipsum is simply dummy text.</p>
+	</div>
+	
+*Adding jQuery.dotdotdot to element with update on window resize*
+    
+	<div class="dot-ellipsis dot-resize-update">
+	<p>Lorem Ipsum is simply dummy text.</p>
+	</div>
+	
+*Adding jQuery.dotdotdot to element with predefined height of 50px*
+    
+	<div class="dot-ellipsis dot-height-50">
+	<p>Lorem Ipsum is simply dummy text.</p>
+	</div>
+	
+*/
+
+jQuery(document).ready(function($) {
+	//We only invoke jQuery.dotdotdot on elements that have dot-ellipsis class
+	$(".dot-ellipsis").each(function(){
+		//Checking if update on window resize required
+		var watch_window=$(this).hasClass("dot-resize-update");
+		
+		//Checking if update on timer required
+		var watch_timer=$(this).hasClass("dot-timer-update");
+		
+		//Checking if height set
+		var height=0;		
+		var classList = $(this).attr('class').split(/\s+/);
+		$.each(classList, function(index, item) {
+			if (!item.match('/^dot\-height\-\d+$/')) {
+				height=Number(item.substr(item.indexOf('-',-1)+1));
+			}
+		});
+		
+		//Invoking jQuery.dotdotdot
+		var x = new Object();
+		if (watch_timer)
+			x.watch=true;
+		if (watch_window)
+			x.watch='window';
+		if (height>0)
+			x.height=height;
+		$(this).dotdotdot(x);
+	});
+		
+});
+
+//Updating elements (if any) on window.load event
+jQuery(window).load(function(){
+	jQuery(".dot-ellipsis.dot-load-update").trigger("update.dot");
+});
 var WIDGET_COMMON_CONFIG = {
   AUTH_PATH_URL: "v1/widget/auth",
   LOGGER_CLIENT_ID: "1088527147109-6q1o2vtihn34292pjt4ckhmhck0rk0o7.apps.googleusercontent.com",
@@ -1172,6 +1238,33 @@ RiseVision.RSS = (function (document, gadgets) {
     _ready();
   }
 
+  /* Load the layout file. */
+  function _loadLayout() {
+    var url = window.location.pathname,
+      index = url.lastIndexOf("/") + 1,
+      layout = "";
+
+    if (typeof _additionalParams.layout === "undefined") {
+      layout = "layout-4x1";
+    }
+    else {
+      layout = _additionalParams.layout;
+    }
+
+    url = url.substr(0, index) + "layouts/" + layout + ".html";
+
+    // Load the layout and add it to the DOM.
+    $.get(url)
+      .done(function(data) {
+        $("#container").append(data);
+        _init();
+      })
+      .fail(function() {
+        // TODO: Log error.
+        console.log("Layout could not be loaded");
+      });
+  }
+
   /*
    *  Public Methods
    */
@@ -1297,7 +1390,7 @@ RiseVision.RSS = (function (document, gadgets) {
     document.getElementById("container").style.width = _additionalParams.width + "px";
     document.getElementById("container").style.height = _additionalParams.height + "px";
 
-    _init();
+    _loadLayout();
   }
 
   function showError(message) {
@@ -1543,7 +1636,7 @@ RiseVision.RSS.Content = function (prefs, params) {
   function _getTemplate(item) {
     var story = _getStory(item),
       author = _getAuthor(item),
-      template = document.querySelector("#layout-4x1").content,
+      template = document.querySelector("#layout").content,
       $content = $(template.cloneNode(true)),
       $story, clone;
 
