@@ -24,7 +24,7 @@
 <div id="messageContainer"></div>
 
 <script src="../data/rss.js"></script>
-<script src="../data/xml-rss.js"></script>
+<script src="../data/xml-atom.js"></script>
 <script src="../data/layout.js"></script>
 
 <script src="../../node_modules/widget-tester/mocks/gadget-mocks.js"></script>
@@ -57,7 +57,7 @@
 
     server.respondWith("GET", "/components/widget-rss/test/integration/layouts/layout-4x1.html",
       [200, { "Content-Type": "text/html" }, layout]);
-    server.respondWith(xmlRSS);
+    server.respondWith(xmlAtom);
 
     // restore the function
     paramsStub.restore();
@@ -101,11 +101,11 @@
 
       test("should populate headline correctly", function() {
         assert.equal(document.querySelector(".headline a").innerHTML,
-          "RSS 2.0 - Entry 1 title");
+          "Atom - Entry 1 title");
       });
 
       test("should populate timestamp", function() {
-        assert.equal(document.querySelector(".timestamp").innerHTML, "June 3, 2003");
+        assert.equal(document.querySelector(".timestamp").innerHTML, "February 4, 2016");
       });
 
       test("should apply font styling to story", function() {
@@ -128,6 +128,16 @@
         assert.equal(document.querySelectorAll(".item").length, window.gadget.settings.additionalParams.itemsToShow);
       });
 
+      test("should show first and second items", function() {
+        var headlines = document.querySelectorAll(".headline a");
+
+        assert.equal(headlines[0].innerHTML,
+          "Atom - Entry 1 title", "first item displaying");
+
+        assert.equal(headlines[1].innerHTML,
+          "Atom - Entry 2 title", "second item displaying");
+      });
+
       test("should show image", function() {
         var images = document.querySelectorAll(".image");
 
@@ -136,70 +146,7 @@
         assert.equal(images[1].src, "http://image.test2/");
 
       });
-
     });
-
-    suite("Transitioning", function() {
-
-      test("should always transition to next set of rss items after 10 seconds", function() {
-        var headlines = document.querySelectorAll(".headline a");
-
-        assert.equal(headlines[0].innerHTML,
-          "RSS 2.0 - Entry 1 title", "first item displaying");
-
-        assert.equal(headlines[1].innerHTML,
-          "RSS 2.0 - Entry 2 title", "second item displaying");
-
-        clock.tick(10000);
-
-        headlines = document.querySelectorAll(".headline a");
-
-        assert.equal(headlines[0].innerHTML,
-          "RSS 2.0 - Entry 3 title", "third item displaying");
-
-        assert.equal(headlines[1].innerHTML,
-          "RSS 2.0 - Entry 4 title", "fourth item displaying");
-
-      });
-
-      test("should eventually transition all items and start over", function() {
-        var contentDoneSpy = sinon.spy(RiseVision.RSS, "onContentDone");
-
-        assert.equal(document.querySelector(".headline a").innerHTML,
-          "RSS 2.0 - Entry 3 title", "third item currently displaying");
-
-        // move clock next interval so that the displayed 3rd and 4th items have shown for allotted 10 seconds
-        clock.tick(10000);
-
-        assert(contentDoneSpy.calledOnce, "onContentDone called once");
-        assert.equal(document.querySelector(".headline a").innerHTML,
-          "RSS 2.0 - Entry 1 title", "first item displaying again");
-
-        RiseVision.RSS.onContentDone.restore();
-
-      });
-
-    });
-
-    suite("Story", function() {
-      test("should truncate the story", function() {
-        var truncatedText = "Jujubes danish wafer toffee. Biscuit lollipop fruitcake liquorice. Bear " +
-          "claw carrot cake soufflé danish apple pie ice  ...";
-
-        RiseVision.RSS.onRiseRSSRefresh({
-          "items": [{
-            "description": "Jujubes danish wafer toffee. Biscuit lollipop fruitcake liquorice. " +
-              "Bear claw carrot cake soufflé danish apple pie ice cream halvah chupa chups. " +
-              "Candy canes cupcake brownie pie."
-          }]
-        });
-
-        clock.tick(10000);
-
-        assert.equal(document.querySelector(".story").innerHTML, truncatedText);
-      });
-    });
-
   });
 
 </script>

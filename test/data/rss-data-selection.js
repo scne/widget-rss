@@ -76,6 +76,7 @@
         "showTitle": false,
         "showTimestamp": false,
         "showAuthor": false,
+        "showImage": false,
         "showDescription": "snippet"
       }
     }

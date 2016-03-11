@@ -24,7 +24,7 @@
 <div id="messageContainer"></div>
 
 <script src="../data/rss-undefined-settings.js"></script>
-<script src="../data/xml-rss.js"></script>
+<script src="../data/xml-rss-media-group.js"></script>
 <script src="../data/layout.js"></script>
 
 <script src="../../node_modules/widget-tester/mocks/gadget-mocks.js"></script>
@@ -92,7 +92,7 @@
 
     suite("Show Image", function () {
       test("should populate image", function() {
-        assert.equal(document.querySelector(".image").src, "http://image.test1/");
+        assert.equal(document.querySelector(".image").src, "http://image.test1.0/");
       });
     });
   });

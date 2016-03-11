@@ -84,6 +84,10 @@
         expect(element(by.model("settings.additionalParams.dataSelection.showAuthor")).isSelected()).to.eventually.be.true;
       });
 
+      it("Should select 'Show Image'", function () {
+        expect(element(by.model("settings.additionalParams.dataSelection.showImage")).isSelected()).to.eventually.be.true;
+      });
+
       it("Should select 'Show Description Snippet'", function () {
         expect(element(by.css("input[type='radio'][value='snippet']")).isSelected()).to.eventually.be.true;
       });
@@ -198,6 +202,7 @@
               "showTitle": true,
               "showTimestamp": true,
               "showAuthor": true,
+              "showImage": true,
               "showDescription": "snippet"
             },
             "layout": "layout-4x1",
@@ -279,6 +284,7 @@
             "showTitle": false,
             "showTimestamp": false,
             "showAuthor": false,
+            "showImage": true,
             "showDescription": "snippet"
           },
           "layout": "layout-4x1",

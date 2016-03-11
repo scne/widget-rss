@@ -18,6 +18,10 @@ var jsonRSS = {
       pubdate: 'Tue, 03 Jun 2003 09:39:21 GMT',
       guid: 'http://example.com/rss2.html#example1',
       author: 'Mr. X1',
+      'media:content': {
+        url: 'http://image.test1',
+        type: 'image/jpeg'
+      },
     },
     {
       title: 'RSS 2.0 - Entry 2 title',
@@ -26,6 +30,10 @@ var jsonRSS = {
       pubdate: 'Fri, 30 May 2003 11:06:42 GMT',
       guid: 'http://example.com/rss2.html#example2',
       author: 'Mr. X2',
+      'media:content': {
+        url: 'http://image.test2',
+        type: 'image/jpeg'
+      },
     },
     {
       title: 'RSS 2.0 - Entry 3 title',
@@ -34,6 +42,10 @@ var jsonRSS = {
       pubdate: 'Tue, 27 May 2003 08:37:32 GMT',
       guid: 'http://example.com/rss2.html#example3',
       author: 'Mr. X3',
+      'media:content': {
+        url: 'http://image.test3',
+        type: 'image/jpeg'
+      },
     },
     {
       title: 'RSS 2.0 - Entry 4 title',
@@ -42,6 +54,10 @@ var jsonRSS = {
       pubdate: 'Tue, 20 May 2003 08:56:02 GMT',
       guid: 'http://example.com/rss2.html#example4',
       author: 'Mr. X4',
+      'media:content': {
+        url: 'http://image.test4',
+        type: 'image/jpeg'
+      },
     }
   ]
 };

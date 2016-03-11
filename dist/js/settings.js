@@ -11266,6 +11266,7 @@ angular.module("risevision.widget.rss.settings")
         "showTitle": true,
         "showTimestamp": true,
         "showAuthor": true,
+        "showImage": true,
         "showDescription": "snippet"
       },
       "layout": "layout-4x1",
