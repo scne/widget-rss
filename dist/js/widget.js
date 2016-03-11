@@ -1639,7 +1639,13 @@ RiseVision.RSS.Content = function (prefs, params) {
     var imageUrl = null;
 
     // RSS 2.0
-    if (_.has(item, "media:content")) {
+    if (_.has(item, "media:group")) {
+      var mediaGroup = item["media:group"];
+      if (_.contains(_imageTypes, mediaGroup["media:content"][0].type)) {
+        imageUrl = mediaGroup["media:content"][0].url;
+      }
+    }
+    else if (_.has(item, "media:content")) {
       if (_.contains(_imageTypes, item["media:content"].type)) {
         imageUrl = item["media:content"].url;
       }
