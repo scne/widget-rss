@@ -89,6 +89,12 @@
         assert.equal(document.querySelector(".author").innerHTML, "Mr. X1");
       });
     });
+
+    suite("Show Image", function () {
+      test("should populate image", function() {
+        assert.equal(document.querySelector(".image").src, "http://image.test1/");
+      });
+    });
   });
 
 </script>

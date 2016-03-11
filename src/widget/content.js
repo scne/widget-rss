@@ -23,6 +23,8 @@ RiseVision.RSS.Content = function (prefs, params) {
 
   var _waitingForUpdate = false;
 
+  var _imageTypes = ["image/bmp", "image/gif", "image/jpeg", "image/jpg", "image/png", "image/tiff"];
+
   /*
    *  Private Methods
    */
@@ -97,9 +99,29 @@ RiseVision.RSS.Content = function (prefs, params) {
     return author;
   }
 
+  function _getImageUrl(item) {
+    var imageUrl = null;
+
+    // RSS 2.0
+    if (_.has(item, "media:content")) {
+      if (_.contains(_imageTypes, item["media:content"].type)) {
+        imageUrl = item["media:content"].url;
+      }
+    } // ATOM
+    else if (_.has(item, "link")) {
+      var link = _.find(item.link, function(link){ return link.rel === "enclosure" && (_.contains(_imageTypes, link.type));});
+      if (link) {
+        imageUrl = link.href;
+      }
+    }
+
+    return imageUrl;
+  }
+
   function _getTemplate(item) {
     var story = _getStory(item),
       author = _getAuthor(item),
+      imageUrl = _getImageUrl(item),
       template = document.querySelector("#layout").content,
       $content = $(template.cloneNode(true)),
       $story, clone;
@@ -148,6 +170,15 @@ RiseVision.RSS.Content = function (prefs, params) {
 
     if (removeSeparator) {
       $content.find(".separator").remove();
+    }
+
+    // Image
+    if (!imageUrl || ((typeof params.dataSelection.showImage !== "undefined") &&
+      !params.dataSelection.showImage)) {
+      $content.find(".image").remove();
+    }
+    else {
+      $content.find(".image").attr("src",imageUrl);
     }
 
     // Story

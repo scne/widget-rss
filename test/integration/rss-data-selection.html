@@ -63,6 +63,12 @@
       });
     });
 
+    suite("Show Image", function () {
+      test("should remove the image from the DOM", function() {
+        assert.isNull(document.querySelector(".image"));
+      });
+    });
+
     suite("Show Separator", function () {
       test("should remove the separator from the DOM", function() {
         assert.isNull(document.querySelector(".separator"));
