@@ -82,6 +82,10 @@ RiseVision.RSS.Content = function (prefs, params) {
       story = item["content:encoded"];
     } else if (_.has(item, "description")) {
       story = item.description;
+    } else if (_.has(item, "summary")) {
+      story = item.summary;
+    } else if (_.has(item, "content")) {
+      story = item.content;
     }
 
     return story;
@@ -93,7 +97,11 @@ RiseVision.RSS.Content = function (prefs, params) {
     if (_.has(item, "dc:creator")) {
       author = item["dc:creator"];
     } else if (_.has(item, "author")) {
-      author = item.author;
+      if (item.author.name) {
+        author = item.author.name;
+      } else {
+        author = item.author;
+      }
     }
 
     return author;
@@ -124,10 +132,33 @@ RiseVision.RSS.Content = function (prefs, params) {
     return imageUrl;
   }
 
+  function _getDate(item) {
+    var pubdate = null, formattedDate = null;
+
+    if (_.has(item, "pubdate")) {
+      pubdate = item.pubdate;
+    } else if (_.has(item, "updated")) {
+      pubdate = item.updated;
+    } else if (_.has(item, "published")) {
+      pubdate = item.published;
+    }
+
+    if (pubdate) {
+      pubdate = new Date(pubdate);
+      var options = {
+        year: "numeric", month: "long", day: "numeric"
+      };
+      formattedDate = pubdate.toLocaleDateString("en-us", options);
+    }
+
+    return formattedDate;
+  }
+
   function _getTemplate(item) {
     var story = _getStory(item),
       author = _getAuthor(item),
       imageUrl = _getImageUrl(item),
+      date = _getDate(item),
       template = document.querySelector("#layout").content,
       $content = $(template.cloneNode(true)),
       $story, clone;
@@ -144,21 +175,16 @@ RiseVision.RSS.Content = function (prefs, params) {
 
     var removeSeparator = false;
     // Timestamp
-    if (!item.pubdate || ((typeof params.dataSelection.showTimestamp !== "undefined") &&
+    if (!date || ((typeof params.dataSelection.showTimestamp !== "undefined") &&
       !params.dataSelection.showTimestamp)) {
       removeSeparator = true;
       $content.find(".timestamp").remove();
     }
     else {
-      var pubdate = new Date(item.pubdate);
-      var options = {
-        year: "numeric", month: "long", day: "numeric"
-      };
-      var timestamp = pubdate.toLocaleDateString("en-us", options);
       if (params.timestamp) {
         $content.find(".timestamp").css("textAlign", params.timestamp.fontStyle.align);
       }
-      $content.find(".timestamp").text(timestamp);
+      $content.find(".timestamp").text(date);
     }
 
     // Author

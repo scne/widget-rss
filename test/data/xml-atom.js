@@ -37,4 +37,4 @@ var xmlAtom = '<rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xm
 '<link rel="enclosure" type="image/bmp" href="http://image.test4" />' +
 '</item>' +
 '</channel>' +
-'</rss>'
+'</rss>';
