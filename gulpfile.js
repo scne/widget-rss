@@ -134,6 +134,7 @@
       "src/components/rise-rss/modules.js",
       "src/components/underscore/*.js",
       "src/components/polymer/*.*{html,js}",
+      "src/components/promise-polyfill/promise-polyfill-lite.html",
       "src/components/iron-ajax/iron-ajax.html",
       "src/components/iron-ajax/iron-request.html"
     ], {base: "./src/"})
