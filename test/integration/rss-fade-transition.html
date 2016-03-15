@@ -76,31 +76,31 @@
     suite("Transitioning", function() {
 
       test("should always transition to next rss item after 15 seconds", function() {
-        assert.equal(document.querySelector(".headline a").innerHTML, "RSS 2.0 - Entry 1 title",
+        assert.equal(document.querySelector(".headline a").innerHTML, "RSS 2.0 – Entry 1 title",
           "first item displaying");
 
         clock.tick(15000);
 
         $(".item").trigger("transitionend");
 
-        assert.equal(document.querySelector(".headline a").innerHTML, "RSS 2.0 - Entry 2 title",
+        assert.equal(document.querySelector(".headline a").innerHTML, "RSS 2.0 – Entry 2 title",
           "second item displaying");
       });
 
       test("should not transition to next rss item before 15 seconds", function() {
-        assert.equal(document.querySelector(".headline a").innerHTML, "RSS 2.0 - Entry 2 title",
+        assert.equal(document.querySelector(".headline a").innerHTML, "RSS 2.0 – Entry 2 title",
           "second item displaying");
 
         clock.tick(10000);
 
         assert.equal(document.querySelector(".headline a").innerHTML,
-          "RSS 2.0 - Entry 2 title", "second still item displaying");
+          "RSS 2.0 – Entry 2 title", "second still item displaying");
 
         clock.tick(5000);
 
         $(".item").trigger("transitionend");
 
-        assert.equal(document.querySelector(".headline a").innerHTML, "RSS 2.0 - Entry 3 title",
+        assert.equal(document.querySelector(".headline a").innerHTML, "RSS 2.0 – Entry 3 title",
           "third item displaying");
       });
 
@@ -108,7 +108,7 @@
         var contentDoneSpy = sinon.spy(RiseVision.RSS, "onContentDone");
 
         assert.equal(document.querySelector(".headline a").innerHTML,
-          "RSS 2.0 - Entry 3 title", "Third item currently displaying");
+          "RSS 2.0 – Entry 3 title", "Third item currently displaying");
 
         // move clock enough intervals that last (4th) item has shown for allotted 10 seconds and now time to start over
         clock.tick(30000);
@@ -117,7 +117,7 @@
 
         assert(contentDoneSpy.calledOnce, "onContentDone called once");
         assert.equal(document.querySelector(".headline a").innerHTML,
-          "RSS 2.0 - Entry 1 title", "First item displaying again");
+          "RSS 2.0 – Entry 1 title", "First item displaying again");
 
         RiseVision.RSS.onContentDone.restore();;
       });
