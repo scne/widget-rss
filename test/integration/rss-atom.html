@@ -101,7 +101,7 @@
 
       test("should populate headline correctly", function() {
         assert.equal(document.querySelector(".headline a").innerHTML,
-          "Atom - Entry 1 title");
+          "Atom – Entry 1 title");
       });
 
       test("should populate timestamp", function() {
@@ -118,7 +118,7 @@
 
       test("should populate story correctly", function() {
         assert.equal(document.querySelector(".story").innerHTML,
-          "Item 1 - Sample description");
+          "Item 1 – Sample description");
       });
     });
 
@@ -132,10 +132,10 @@
         var headlines = document.querySelectorAll(".headline a");
 
         assert.equal(headlines[0].innerHTML,
-          "Atom - Entry 1 title", "first item displaying");
+          "Atom – Entry 1 title", "first item displaying");
 
         assert.equal(headlines[1].innerHTML,
-          "Atom - Entry 2 title", "second item displaying");
+          "Atom – Entry 2 title", "second item displaying");
       });
 
       test("should show image", function() {

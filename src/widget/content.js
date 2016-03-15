@@ -170,7 +170,7 @@ RiseVision.RSS.Content = function (prefs, params) {
     }
     else {
       $content.find(".headline").css("textAlign", params.headline.fontStyle.align);
-      $content.find(".headline a").text(item.title);
+      $content.find(".headline a").text(_utils.stripScripts(item.title));
     }
 
     var removeSeparator = false;

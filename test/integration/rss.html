@@ -101,7 +101,7 @@
 
       test("should populate headline correctly", function() {
         assert.equal(document.querySelector(".headline a").innerHTML,
-          "RSS 2.0 - Entry 1 title");
+          "RSS 2.0 – Entry 1 title");
       });
 
       test("should populate timestamp", function() {
@@ -118,7 +118,7 @@
 
       test("should populate story correctly", function() {
         assert.equal(document.querySelector(".story").innerHTML,
-          "Item 1 - Sample description");
+          "Item 1 – Sample description");
       });
     });
 
@@ -145,20 +145,20 @@
         var headlines = document.querySelectorAll(".headline a");
 
         assert.equal(headlines[0].innerHTML,
-          "RSS 2.0 - Entry 1 title", "first item displaying");
+          "RSS 2.0 – Entry 1 title", "first item displaying");
 
         assert.equal(headlines[1].innerHTML,
-          "RSS 2.0 - Entry 2 title", "second item displaying");
+          "RSS 2.0 – Entry 2 title", "second item displaying");
 
         clock.tick(10000);
 
         headlines = document.querySelectorAll(".headline a");
 
         assert.equal(headlines[0].innerHTML,
-          "RSS 2.0 - Entry 3 title", "third item displaying");
+          "RSS 2.0 – Entry 3 title", "third item displaying");
 
         assert.equal(headlines[1].innerHTML,
-          "RSS 2.0 - Entry 4 title", "fourth item displaying");
+          "RSS 2.0 – Entry 4 title", "fourth item displaying");
 
       });
 
@@ -166,14 +166,14 @@
         var contentDoneSpy = sinon.spy(RiseVision.RSS, "onContentDone");
 
         assert.equal(document.querySelector(".headline a").innerHTML,
-          "RSS 2.0 - Entry 3 title", "third item currently displaying");
+          "RSS 2.0 – Entry 3 title", "third item currently displaying");
 
         // move clock next interval so that the displayed 3rd and 4th items have shown for allotted 10 seconds
         clock.tick(10000);
 
         assert(contentDoneSpy.calledOnce, "onContentDone called once");
         assert.equal(document.querySelector(".headline a").innerHTML,
-          "RSS 2.0 - Entry 1 title", "first item displaying again");
+          "RSS 2.0 – Entry 1 title", "first item displaying again");
 
         RiseVision.RSS.onContentDone.restore();
 

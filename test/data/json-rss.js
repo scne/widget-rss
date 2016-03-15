@@ -12,9 +12,9 @@ var jsonRSS = {
   webmaster: 'webmaster@example.com',
   items:  [
     {
-      title: 'RSS 2.0 - Entry 1 title',
+      title: 'RSS 2.0 &ndash; Entry 1 title',
       link: 'http://example.com/test.php',
-      description: 'Item 1 - Sample description',
+      description: 'Item 1 &ndash; Sample description',
       pubdate: 'Tue, 03 Jun 2003 09:39:21 GMT',
       guid: 'http://example.com/rss2.html#example1',
       author: 'Mr. X1',
@@ -24,9 +24,9 @@ var jsonRSS = {
       },
     },
     {
-      title: 'RSS 2.0 - Entry 2 title',
+      title: 'RSS 2.0 &ndash; Entry 2 title',
       link: 'http://example.com/test.php',
-      description: 'Item 2 - Sample description',
+      description: 'Item 2 &ndash; Sample description',
       pubdate: 'Fri, 30 May 2003 11:06:42 GMT',
       guid: 'http://example.com/rss2.html#example2',
       author: 'Mr. X2',
@@ -36,9 +36,9 @@ var jsonRSS = {
       },
     },
     {
-      title: 'RSS 2.0 - Entry 3 title',
+      title: 'RSS 2.0 &ndash; Entry 3 title',
       link: 'http://example.com/test.php',
-      description: 'Item 3 - Sample description',
+      description: 'Item 3 &ndash; Sample description',
       pubdate: 'Tue, 27 May 2003 08:37:32 GMT',
       guid: 'http://example.com/rss2.html#example3',
       author: 'Mr. X3',
@@ -48,9 +48,9 @@ var jsonRSS = {
       },
     },
     {
-      title: 'RSS 2.0 - Entry 4 title',
+      title: 'RSS 2.0 &ndash; Entry 4 title',
       link: 'http://example.com/test.php',
-      description: 'Item 4 - Sample description',
+      description: 'Item 4 &ndash; Sample description',
       pubdate: 'Tue, 20 May 2003 08:56:02 GMT',
       guid: 'http://example.com/rss2.html#example4',
       author: 'Mr. X4',
