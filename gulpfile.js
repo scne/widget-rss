@@ -187,7 +187,9 @@
   gulp.task("test:unit:widget", factory.testUnitAngular(
     {testFiles: [
       "src/widget/utils.js",
-      "test/unit/utils-spec.js"
+      "src/widget/images.js",
+      "test/unit/widget/utils-spec.js",
+      "test/unit/widget/images-spec.js"
     ]}
   ));
 

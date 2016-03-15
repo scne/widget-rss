@@ -8,7 +8,8 @@ RiseVision.RSS.Content = function (prefs, params) {
   "use strict";
 
   var _items = [],
-    _utils = RiseVision.RSS.Utils;
+    _utils = RiseVision.RSS.Utils,
+    _images = RiseVision.RSS.Images;
 
   var _$el;
 
@@ -132,6 +133,16 @@ RiseVision.RSS.Content = function (prefs, params) {
     return imageUrl;
   }
 
+  function _getImageUrls() {
+    var urls = [];
+
+    for (var i = 0; i < _items.length; i += 1) {
+      urls.push(_getImageUrl(_items[i]));
+    }
+
+    return urls;
+  }
+
   function _getDate(item) {
     var pubdate = null, formattedDate = null;
 
@@ -154,14 +165,39 @@ RiseVision.RSS.Content = function (prefs, params) {
     return formattedDate;
   }
 
-  function _getTemplate(item) {
+  function _getImageDimensions(image) {
+    var dimensions = null,
+      ratioX, ratioY, scale;
+
+    switch (params.layout) {
+      case "layout-16x9":
+        dimensions = {};
+        dimensions.width = prefs.getString("rsW") - 20; // 20px padding left & right
+        dimensions.height = prefs.getString("rsH") / params.itemsToShow - 20;
+
+        ratioX = dimensions.width / parseInt(image.width);
+        ratioY = dimensions.height / parseInt(image.height);
+        scale = ratioX < ratioY ? ratioX : ratioY;
+
+        dimensions.width = parseInt(parseInt(image.width) * scale);
+        dimensions.height = parseInt(parseInt(image.height) * scale);
+        break;
+
+      // TODO: need to calculate dimensions for 4x1 and 2x1 layouts
+
+    }
+
+    return dimensions;
+  }
+
+  function _getTemplate(item, index) {
     var story = _getStory(item),
       author = _getAuthor(item),
       imageUrl = _getImageUrl(item),
       date = _getDate(item),
       template = document.querySelector("#layout").content,
       $content = $(template.cloneNode(true)),
-      $story, clone;
+      $story, clone, image, dimensions;
 
     // Headline
     if (!item.title || ((typeof params.dataSelection.showTitle !== "undefined") &&
@@ -210,7 +246,19 @@ RiseVision.RSS.Content = function (prefs, params) {
       $content.find(".image").remove();
     }
     else {
-      $content.find(".image").attr("src",imageUrl);
+      // get preloaded image pertaining to this item based on index value
+      image = _images.getImages()[index];
+
+      if (image) {
+        $content.find(".image").attr("src", imageUrl);
+
+        dimensions = _getImageDimensions(image);
+
+        if (dimensions) {
+          $content.find(".image").attr("width", dimensions.width);
+          $content.find(".image").attr("height", dimensions.height);
+        }
+      }
     }
 
     // Story
@@ -265,7 +313,7 @@ RiseVision.RSS.Content = function (prefs, params) {
   }
 
   function _showItem(index) {
-    _$el.page.append(_getTemplate(_items[index]));
+    _$el.page.append(_getTemplate(_items[index], index));
 
     $(".item").height(_getItemHeight());
 
@@ -284,7 +332,7 @@ RiseVision.RSS.Content = function (prefs, params) {
   function _makeTransition() {
     var startConfig = _getStartConfig(),
       transConfig = _getTransitionConfig(_currentItemIndex),
-      startingIndex, itemsToShow;
+      startingIndex;
 
     if (_currentItemIndex === (_items.length - 1)) {
 
@@ -308,28 +356,34 @@ RiseVision.RSS.Content = function (prefs, params) {
     }
 
     if (_waitingForUpdate) {
-      // start over at first item since the feed has been updated
-      startingIndex = 0;
-
       _waitingForUpdate = false;
 
-      // apply config values from a restart
-      itemsToShow = startConfig.itemsToShow;
-      _currentItemIndex = startConfig.currentItemIndex;
+      // load all images
+      _images.load(_getImageUrls(), function () {
+
+        _clear(function () {
+          for (var i = 0; i < startConfig.itemsToShow; i += 1) {
+            _showItem(i);
+          }
+
+          _currentItemIndex = startConfig.currentItemIndex;
+        });
+
+      });
+
     }
     else {
       startingIndex = _currentItemIndex + 1;
 
-      // apply config values from a transition
-      itemsToShow = transConfig.itemsToShow;
       _currentItemIndex = transConfig.currentItemIndex;
+
+      _clear(function () {
+        for (var i = startingIndex; i < (startingIndex + transConfig.itemsToShow); i += 1) {
+          _showItem(i);
+        }
+      });
     }
 
-    _clear(function () {
-      for (var i = startingIndex; i < (startingIndex + itemsToShow); i += 1) {
-        _showItem(i);
-      }
-    });
   }
 
   function _startTransitionTimer() {
@@ -361,10 +415,13 @@ RiseVision.RSS.Content = function (prefs, params) {
 
     _currentItemIndex = startConfig.currentItemIndex;
 
-    // show the items
-    for (var i = 0; i < startConfig.itemsToShow; i += 1) {
-      _showItem(i);
-    }
+    // load all images
+    _images.load(_getImageUrls(), function () {
+      // show the items
+      for (var i = 0; i < startConfig.itemsToShow; i += 1) {
+        _showItem(i);
+      }
+    });
 
   }
 

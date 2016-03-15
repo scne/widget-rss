@@ -57,6 +57,12 @@ body {
   padding-top: 10px;
 }
 
+#layout-16x9 .image {
+  padding: 10px;
+  float: none;
+  display: block;
+}
+
 #container {
   width: 100%;
   height: 100%;
