@@ -20,18 +20,9 @@ RiseVision.RSS.Images = (function () {
     }
   }
 
-  function _loadImage(url) {
+  function _loadImage() {
     var img = new Image();
-
-    img.onload = function () {
-      _onImageLoaded(this);
-    };
-
-    img.onerror = function () {
-      _onImageLoaded(this);
-    };
-
-    img.src = url;
+    _onImageLoaded(img);
   }
 
   function _loadImages() {
@@ -55,8 +46,12 @@ RiseVision.RSS.Images = (function () {
       if (callback) {
         _callback = callback;
       }
+      else {
+        _callback = null;
+      }
 
       _loadImages();
+
 
     } else if (callback && typeof callback === "function") {
       callback();
