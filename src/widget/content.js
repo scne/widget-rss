@@ -165,22 +165,22 @@ RiseVision.RSS.Content = function (prefs, params) {
     return formattedDate;
   }
 
-  function _getImageDimensions(image) {
+  function _getImageDimensions($image) {
     var dimensions = null,
       ratioX, ratioY, scale;
 
     switch (params.layout) {
       case "layout-16x9":
         dimensions = {};
-        dimensions.width = prefs.getString("rsW") - 20; // 20px padding left & right
-        dimensions.height = prefs.getString("rsH") / params.itemsToShow - 20;
+        dimensions.width = prefs.getString("rsW") - parseInt($image.css("padding-left"), 10) - parseInt($image.css("padding-right"), 10);
+        dimensions.height = prefs.getString("rsH") / params.itemsToShow - parseInt($image.css("padding-top")) - parseInt($image.css("padding-bottom"));
 
-        ratioX = dimensions.width / parseInt(image.width);
-        ratioY = dimensions.height / parseInt(image.height);
+        ratioX = dimensions.width / parseInt($image.width());
+        ratioY = dimensions.height / parseInt($image.height());
         scale = ratioX < ratioY ? ratioX : ratioY;
 
-        dimensions.width = parseInt(parseInt(image.width) * scale);
-        dimensions.height = parseInt(parseInt(image.height) * scale);
+        dimensions.width = parseInt(parseInt($image.width()) * scale);
+        dimensions.height = parseInt(parseInt($image.height()) * scale);
         break;
 
       // TODO: need to calculate dimensions for 4x1 and 2x1 layouts
@@ -197,7 +197,7 @@ RiseVision.RSS.Content = function (prefs, params) {
       date = _getDate(item),
       template = document.querySelector("#layout").content,
       $content = $(template.cloneNode(true)),
-      $story, clone, image, dimensions;
+      $story, clone, image;
 
     // Headline
     if (!item.title || ((typeof params.dataSelection.showTitle !== "undefined") &&
@@ -251,13 +251,6 @@ RiseVision.RSS.Content = function (prefs, params) {
 
       if (image) {
         $content.find(".image").attr("src", imageUrl);
-
-        dimensions = _getImageDimensions(image);
-
-        if (dimensions) {
-          $content.find(".image").attr("width", dimensions.width);
-          $content.find(".image").attr("height", dimensions.height);
-        }
       }
     }
 
@@ -288,6 +281,23 @@ RiseVision.RSS.Content = function (prefs, params) {
     return clone;
   }
 
+  function _setImageDimensions() {
+    $(".item").each(function () {
+      var $image = $(this).find(".image"),
+        dimensions = null;
+
+      if ($image) {
+        dimensions = _getImageDimensions($image);
+
+        if (dimensions) {
+          $image.width(dimensions.width);
+          $image.height(dimensions.height);
+        }
+      }
+
+    });
+  }
+
   // Fade out and clear content.
   function _clear(cb) {
     if (_transition.type === "fade") {
@@ -314,6 +324,8 @@ RiseVision.RSS.Content = function (prefs, params) {
 
   function _showItem(index) {
     _$el.page.append(_getTemplate(_items[index], index));
+
+    _setImageDimensions();
 
     $(".item").height(_getItemHeight());
 
