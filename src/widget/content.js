@@ -165,26 +165,54 @@ RiseVision.RSS.Content = function (prefs, params) {
     return formattedDate;
   }
 
-  function _getImageDimensions($image) {
+  function _getImageDimensions($image, item) {
     var dimensions = null,
+      paddingWidth = parseInt($image.css("padding-left"), 10) + parseInt($image.css("padding-right"), 10),
+      paddingHeight = parseInt($image.css("padding-top"), 10) + parseInt($image.css("padding-bottom"), 10),
       ratioX, ratioY, scale;
 
     switch (params.layout) {
-      case "layout-16x9":
+      case "layout-4x1":
         dimensions = {};
-        dimensions.width = prefs.getString("rsW") - parseInt($image.css("padding-left"), 10) - parseInt($image.css("padding-right"), 10);
-        dimensions.height = prefs.getString("rsH") / params.itemsToShow - parseInt($image.css("padding-top")) - parseInt($image.css("padding-bottom"));
+        dimensions.width = prefs.getString("rsW") * 0.33;
+        dimensions.height = (prefs.getString("rsH") / params.itemsToShow) - paddingHeight;
 
-        ratioX = dimensions.width / parseInt($image.width());
-        ratioY = dimensions.height / parseInt($image.height());
-        scale = ratioX < ratioY ? ratioX : ratioY;
-
-        dimensions.width = parseInt(parseInt($image.width()) * scale);
-        dimensions.height = parseInt(parseInt($image.height()) * scale);
         break;
 
-      // TODO: need to calculate dimensions for 4x1 and 2x1 layouts
+      case "layout-2x1":
+        dimensions = {};
 
+        if ($(item).find(".story").length === 0) {
+          dimensions.width = prefs.getString("rsW") - paddingWidth;
+        }
+        else {
+          dimensions.width = prefs.getString("rsW") * 0.5;
+        }
+
+        dimensions.height = (prefs.getString("rsH") / params.itemsToShow) - $(item).find(".textWrapper").outerHeight(true) - paddingHeight;
+
+        break;
+
+      case "layout-16x9":
+        dimensions = {};
+        dimensions.width = prefs.getString("rsW") - paddingWidth;
+        dimensions.height = (prefs.getString("rsH") / params.itemsToShow) - paddingHeight;
+
+        break;
+      case "layout-1x2":
+        dimensions = {};
+        dimensions.width = prefs.getString("rsW") - paddingWidth;
+        dimensions.height = ((prefs.getString("rsH") / params.itemsToShow) - paddingHeight) / 2;
+        break;
+    }
+
+    if (dimensions) {
+      ratioX = dimensions.width / parseInt($image.width());
+      ratioY = dimensions.height / parseInt($image.height());
+      scale = ratioX < ratioY ? ratioX : ratioY;
+
+      dimensions.width = parseInt(parseInt($image.width()) * scale);
+      dimensions.height = parseInt(parseInt($image.height()) * scale);
     }
 
     return dimensions;
@@ -287,7 +315,7 @@ RiseVision.RSS.Content = function (prefs, params) {
         dimensions = null;
 
       if ($image) {
-        dimensions = _getImageDimensions($image);
+        dimensions = _getImageDimensions($image, this);
 
         if (dimensions) {
           $image.width(dimensions.width);
