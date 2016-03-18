@@ -39,7 +39,12 @@ RiseVision.RSS.Content = function (prefs, params) {
     // account for not enough items to actually show compared to setting value
     var itemsToShow = (_items.length <= params.itemsToShow) ? _items.length : params.itemsToShow;
 
-    return prefs.getInt("rsH") / itemsToShow;
+    if (params.separator && params.separator.show) {
+      return prefs.getInt("rsH") / itemsToShow - params.separator.size;
+    }
+    else {
+      return prefs.getInt("rsH") / itemsToShow;
+    }
   }
 
   function _getTransitionConfig(index) {
@@ -355,6 +360,10 @@ RiseVision.RSS.Content = function (prefs, params) {
 
     _setImageDimensions();
 
+    if (params.separator && params.separator.show) {
+      $(".item").css("border-bottom", "solid " + params.separator.size + "px " + params.separator.color);
+    }
+
     $(".item").height(_getItemHeight());
 
     if (_transition.type === "fade") {
@@ -363,10 +372,14 @@ RiseVision.RSS.Content = function (prefs, params) {
 
     $(".item").removeClass("hide");
 
-    // truncate content
-    $(".item").dotdotdot({
-      height: _getItemHeight()
-    });
+    // 16x9 (images only) layout doesn't need truncating, image sizing handled in _setImageDimensions()
+    if (params.layout !== "layout-16x9") {
+      // truncate content
+      $(".item").dotdotdot({
+        height: _getItemHeight()
+      });
+    }
+
   }
 
   function _makeTransition() {

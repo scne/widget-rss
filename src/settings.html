@@ -6,6 +6,7 @@
 
   <!-- build:css css/settings.min.css -->
   <link rel="stylesheet" href="components/rv-common-style/dist/css/rise.min.css">
+  <link rel="stylesheet" href="components/rv-angular-bootstrap-colorpicker/css/colorpicker.css">
   <!-- endbuild -->
 
   <style>
@@ -291,6 +292,36 @@
 
           <br>
 
+          <!-- Separator -->
+          <label class="control-label add-top">{{ "widget-rss.separator.heading" | translate }}</label>
+
+          <div class="row">
+            <div class="col-md-3">
+              <input class="half-top half-bottom" type="checkbox" ng-model="settings.additionalParams.separator.show">
+              {{ "widget-rss.separator.option" | translate }}
+            </div>
+            <div ng-if="settings.additionalParams.separator.show">
+              <div class="col-md-3">
+                <div class="form-group">
+                  <div class="input-group">
+                    <input id="separator-size" type="number" class="form-control"
+                           ng-model="settings.additionalParams.separator.size" />
+                    <span class="input-group-addon">{{'common.units.pixels' | translate}}</span>
+                  </div>
+                </div>
+              </div>
+              <!-- Color -->
+              <div class="col-md-3">
+                <div class="input-group" colorpicker="rgb" colorpicker-parent="true" ng-model="settings.additionalParams.separator.color">
+                  <input class="form-control" type="text" ng-model="settings.additionalParams.separator.color">
+                  <span class="input-group-addon color-wheel"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <hr/>
+
           <!-- Modal Footer-->
           <div class="modal-footer">
             <!-- Button Toolbar -->
@@ -324,6 +355,9 @@
 <script src="components/widget-settings-ui-components/dist/js/widget-settings-ui-components.js"></script>
 <script src="components/widget-settings-ui-components/dist/js/angular/url-field.js"></script>
 <script src="components/widget-settings-ui-components/dist/js/angular/font-setting.js"></script>
+
+<!-- Angular Color Picker -->
+<script src="components/rv-angular-bootstrap-colorpicker/js/bootstrap-colorpicker-module.js"></script>
 
 <!-- TinyMCE -->
 <script src="components/angular-ui-tinymce/src/tinymce.js"></script>
