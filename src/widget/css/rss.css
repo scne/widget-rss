@@ -43,36 +43,17 @@ body {
   padding: 10px;
 }
 
+.author, .timestamp {
+  display: inline-block;
+}
+
 .image {
-  float: left;
   max-width: 100%;
   max-height: 100%;
-  padding-left: 10px;
-  padding-right: 10px;
-  margin: 0;
-}
-
-#layout-2x1 .image {
-  padding-right: 10px;
-  padding-top: 10px;
-}
-
-#layout-16x9 .image {
   padding: 10px;
-  float: none;
-  display: block;
-}
-
-#container {
-  width: 100%;
-  height: 100%;
 }
 
 .item {
-  overflow: hidden;
-}
-
-.textWrapper {
   overflow: hidden;
 }
 
@@ -86,4 +67,30 @@ body {
 
 .fade-in {
   opacity: 1;
+}
+
+#container {
+  width: 100%;
+  height: 100%;
+}
+
+#layout-4x1 .textWrapper {
+  overflow: hidden;
+}
+
+#layout-2x1 .item {
+  clear: left;
+}
+
+#layout-2x1 .story {
+  overflow: hidden;
+}
+
+#layout-4x1 .image,
+#layout-2x1 .image {
+  float: left;
+}
+
+#layout-16x9 .image {
+  display: block;
 }
