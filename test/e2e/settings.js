@@ -50,6 +50,10 @@
         expect(element(by.model("settings.additionalParams.transition.type")).isDisplayed()).to.eventually.be.true;
       });
 
+      it("Should load Separator Color Picker component", function () {
+        expect(element(by.model("settings.additionalParams.separator.color")).isDisplayed()).to.eventually.be.true;
+      });
+
       // it("Should not load URL field", function() {
       //   expect(element(by.id("custom-layout")).isPresent()).to.eventually.be.false;
       // });
@@ -94,6 +98,18 @@
 
       it("Should select default layout", function () {
         expect(element(by.css("input[type='radio'][value='layout-4x1']")).isSelected()).to.eventually.be.true;
+      });
+
+      it("Should select 'Show Separator'", function () {
+        expect(element(by.model("settings.additionalParams.separator.show")).isSelected()).to.eventually.be.true;
+      });
+
+      it("Should set default for Separator size", function () {
+        expect(element(by.model("settings.additionalParams.separator.size")).getAttribute("value")).to.eventually.equal("1");
+      });
+
+      it("Should set default for Separator color", function () {
+        expect(element(by.model("settings.additionalParams.separator.color")).getAttribute("value")).to.eventually.equal("rgb(238,238,238)");
       });
     });
 
@@ -206,6 +222,11 @@
               "showDescription": "snippet"
             },
             "layout": "layout-4x1",
+            "separator": {
+              "show": true,
+              "size": 1,
+              "color": "rgb(238,238,238)"
+            }
             // "layoutUrl": ""
           }
         };
@@ -241,6 +262,12 @@
     it("Should not load Date Font Setting component", function () {
       element(by.model("settings.additionalParams.dataSelection.showAuthor")).click();
       expect(element(by.css("#author-font .mce-tinymce")).isPresent()).to.eventually.be.false;
+    });
+
+    it("Should not display size and color selections for Separator", function () {
+      element(by.model("settings.additionalParams.separator.show")).click();
+      expect(element(by.model("settings.additionalParams.separator.size")).isPresent()).to.eventually.be.false;
+      expect(element(by.model("settings.additionalParams.separator.color")).isPresent()).to.eventually.be.false;
     });
 
     it("Should correctly save settings", function () {
@@ -288,6 +315,11 @@
             "showDescription": "snippet"
           },
           "layout": "layout-4x1",
+          "separator": {
+            "show": false,
+            "size": 1,
+            "color": "rgb(238,238,238)"
+          }
           // "layoutUrl": ""
         }
       };

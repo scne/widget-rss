@@ -91,8 +91,8 @@
         assert.isNotNull(document.querySelector(".item"));
       });
 
-      test("should set item height divided by number of items to show", function() {
-        assert.equal(($("#container").height()/window.gadget.settings.additionalParams.itemsToShow) + "px" , document.querySelector(".item").style.height);
+      test("should set item height correctly", function() {
+        assert.equal((($("#container").height()/window.gadget.settings.additionalParams.itemsToShow) - window.gadget.settings.additionalParams.separator.size) + "px" , document.querySelector(".item").style.height);
       });
 
       test("should apply font styling to headline", function() {
@@ -123,6 +123,10 @@
       test("should populate story correctly", function() {
         assert.equal(document.querySelector(".story").innerHTML,
           "Item 1 – Sample description");
+      });
+
+      test("should apply separator between stories", function () {
+        assert.equal(document.querySelector(".item").style.borderBottom, "1px solid rgb(238, 238, 238)");
       });
     });
 
