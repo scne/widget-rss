@@ -61,7 +61,7 @@
 
     describe("Defaults", function() {
       it("Should set default value for 'Items to Show'", function () {
-        expect(element(by.id("items-to-show")).getAttribute("value")).to.eventually.equal("2");
+        expect(element(by.id("items-to-show")).getAttribute("value")).to.eventually.equal("1");
       });
 
       it("Should set default value for 'Max Items in Queue'", function () {
@@ -141,7 +141,7 @@
           additionalParams: {
             "url":"",
             "itemsInQueue": 5,
-            "itemsToShow": 2,
+            "itemsToShow": 1,
             "headline":{
               "fontStyle":{
                 "font":{
@@ -152,7 +152,7 @@
                 "size":"24px",
                 "customSize":"",
                 "align":"left",
-                "bold":false,
+                "bold":true,
                 "italic":false,
                 "underline":false,
                 "forecolor":"black",
@@ -166,10 +166,10 @@
                     "type":"standard",
                     "url":""
                 },
-                "size":"24px",
+                "size":"18px",
                 "customSize":"",
                 "align":"left",
-                "bold":false,
+                "bold":true,
                 "italic":false,
                 "underline":false,
                 "forecolor":"black",
@@ -183,13 +183,13 @@
                   "type":"standard",
                   "url":""
                 },
-                "size":"24px",
+                "size":"14px",
                 "customSize":"",
                 "align":"left",
-                "bold":false,
+                "bold":true,
                 "italic":false,
                 "underline":false,
-                "forecolor":"black",
+                "forecolor":"#969696",
                 "backcolor":"transparent"
               }
             },
@@ -200,13 +200,13 @@
                   "type":"standard",
                   "url":""
                 },
-                "size":"24px",
+                "size":"14px",
                 "customSize":"",
                 "align":"left",
-                "bold":false,
+                "bold":true,
                 "italic":false,
                 "underline":false,
-                "forecolor":"black",
+                "forecolor":"#969696",
                 "backcolor":"transparent"
               }
             },
@@ -276,7 +276,7 @@
         additionalParams: {
           "url":"",
           "itemsInQueue": 5,
-          "itemsToShow": 2,
+          "itemsToShow": 1,
           "headline":{
             "fontStyle":{}
           },
@@ -287,10 +287,10 @@
                 "type":"standard",
                 "url":""
               },
-              "size":"24px",
+              "size":"18px",
               "customSize":"",
               "align":"left",
-              "bold":false,
+              "bold":true,
               "italic":false,
               "underline":false,
               "forecolor":"black",
