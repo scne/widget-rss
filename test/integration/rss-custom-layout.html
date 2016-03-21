@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RSS Widget</title>
+
+  <link rel="stylesheet" type="text/css" href="../../src/widget/css/rss.css">
+  <link rel="stylesheet" href="../../src/components/widget-common/dist/css/message.css">
+
+  <script src="../../src/components/webcomponentsjs/webcomponents-lite.min.js"></script>
+  <script src="../../src/components/web-component-tester/browser.js"></script>
+
+  <link rel="import" href="../../src/components/rise-rss/rise-rss.html">
+</head>
+<body>
+
+  <rise-rss id="rss" refresh="1"></rise-rss>
+
+  <div id="container">
+    <section class="page"></section>
+  </div>
+
+  <div id="messageContainer"></div>
+
+  <script src="../data/rss-custom-layout.js"></script>
+  <script src="../data/json-rss.js"></script>
+  <script src="../data/layout.js"></script>
+
+  <script src="../../node_modules/widget-tester/mocks/gadget-mocks.js"></script>
+  <script src="../../node_modules/widget-tester/mocks/gadgets.io-mock.js"></script>
+  <script src="../../node_modules/widget-tester/mocks/logger-mock.js"></script>
+
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+
+  <script src="../../src/components/jQuery.dotdotdot/src/jquery.dotdotdot.js"></script>
+  <script src="../../src/components/widget-common/dist/config.js"></script>
+  <script src="../../src/components/widget-common/dist/common.js"></script>
+  <script src="../../src/widget/rss.js"></script>
+  <script src="../../src/widget/utils.js"></script>
+
+  <!-- mock the image loader -->
+  <script src="../../test/mocks/images-mock.js"></script>
+
+  <script src="../../src/widget/rise-rss.js"></script>
+  <script src="../../src/widget/content.js"></script>
+  <script src="../../src/components/widget-common/dist/message.js"></script>
+  <script src="../../src/widget/main.js"></script>
+
+  <script>
+    var paramsStub, server
+
+    paramsStub = sinon.stub(RiseVision.RSS, "setAdditionalParams", function(additionalParams) {
+      server = sinon.fakeServer.create();
+      server.respondImmediately = true;
+      server.respondWith(layout);
+
+      paramsStub.restore();
+      RiseVision.RSS.setAdditionalParams(additionalParams);
+    });
+
+    suite("Custom Layout", function() {
+     test("should load a custom layout", function() {
+        assert.isNotNull(document.querySelector("#container template#layout"));
+      });
+    });
+  </script>
+</body>
+</html>
