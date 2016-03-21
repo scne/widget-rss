@@ -131,8 +131,19 @@ RiseVision.RSS = (function (document, gadgets) {
         _init();
       })
       .fail(function() {
-        // TODO: Log error.
-        console.log("Layout could not be loaded");
+        _message = new RiseVision.Common.Message(document.getElementById("container"),
+          document.getElementById("messageContainer"));
+
+        _message.show("The layout file could not be loaded.");
+
+        logEvent({
+          "event": "error",
+          "event_details": "layout not loaded",
+          "error_details": url,
+          "feed_url": _additionalParams.url
+        }, true);
+
+        _ready();
       });
   }
 
@@ -156,9 +167,6 @@ RiseVision.RSS = (function (document, gadgets) {
   }
 
   function onRiseRSSInit(feed) {
-    console.log("onRiseRSSInit");
-    console.dir(feed);
-
     _content = new RiseVision.RSS.Content(_prefs, _additionalParams);
 
     if (feed.items && feed.items.length > 0) {
@@ -179,9 +187,6 @@ RiseVision.RSS = (function (document, gadgets) {
   }
 
   function onRiseRSSRefresh(feed) {
-    console.log("onRiseRSSRefresh");
-    console.dir(feed);
-
     var updated = false;
 
     if (!feed.items || feed.items.length === 0) {
