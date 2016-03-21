@@ -152,7 +152,7 @@
                 "size":"24px",
                 "customSize":"",
                 "align":"left",
-                "bold":false,
+                "bold":true,
                 "italic":false,
                 "underline":false,
                 "forecolor":"black",
@@ -166,10 +166,10 @@
                     "type":"standard",
                     "url":""
                 },
-                "size":"24px",
+                "size":"18px",
                 "customSize":"",
                 "align":"left",
-                "bold":false,
+                "bold":true,
                 "italic":false,
                 "underline":false,
                 "forecolor":"black",
@@ -183,13 +183,13 @@
                   "type":"standard",
                   "url":""
                 },
-                "size":"24px",
+                "size":"14px",
                 "customSize":"",
                 "align":"left",
-                "bold":false,
+                "bold":true,
                 "italic":false,
                 "underline":false,
-                "forecolor":"black",
+                "forecolor":"#969696",
                 "backcolor":"transparent"
               }
             },
@@ -200,13 +200,13 @@
                   "type":"standard",
                   "url":""
                 },
-                "size":"24px",
+                "size":"14px",
                 "customSize":"",
                 "align":"left",
-                "bold":false,
+                "bold":true,
                 "italic":false,
                 "underline":false,
-                "forecolor":"black",
+                "forecolor":"#969696",
                 "backcolor":"transparent"
               }
             },
@@ -287,10 +287,10 @@
                 "type":"standard",
                 "url":""
               },
-              "size":"24px",
+              "size":"18px",
               "customSize":"",
               "align":"left",
-              "bold":false,
+              "bold":true,
               "italic":false,
               "underline":false,
               "forecolor":"black",

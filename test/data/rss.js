@@ -17,7 +17,7 @@
           "size": "24px",
           "customSize": "",
           "align": "left",
-          "bold": false,
+          "bold": true,
           "italic": false,
           "underline": false,
           "forecolor": "black",
@@ -30,10 +30,10 @@
             "family": "verdana,geneva,sans-serif",
             "type": "standard"
           },
-          "size": "24px",
+          "size": "18px",
           "customSize": "",
           "align": "left",
-          "bold": false,
+          "bold": true,
           "italic": false,
           "underline": false,
           "forecolor": "black",
@@ -46,13 +46,13 @@
             "family": "verdana,geneva,sans-serif",
             "type": "standard"
           },
-          "size": "24px",
+          "size": "14px",
           "customSize": "",
           "align": "left",
-          "bold": false,
+          "bold": true,
           "italic": false,
           "underline": false,
-          "forecolor": "black",
+          "forecolor":"#969696",
           "backcolor": "transparent"
         }
       },
@@ -62,13 +62,13 @@
             "family": "verdana,geneva,sans-serif",
             "type": "standard"
           },
-          "size": "24px",
+          "size": "14px",
           "customSize": "",
           "align": "left",
-          "bold": false,
+          "bold": true,
           "italic": false,
           "underline": false,
-          "forecolor": "black",
+          "forecolor":"#969696",
           "backcolor": "transparent"
         }
       },

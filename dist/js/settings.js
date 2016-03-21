@@ -11909,16 +11909,72 @@ angular.module("risevision.widget.rss.settings")
       "itemsInQueue": 5,
       "itemsToShow": 2,
       "headline": {
-        "fontStyle": {}
+        "fontStyle":{
+          "font":{
+            "family":"verdana,geneva,sans-serif",
+            "type":"standard",
+            "url":""
+          },
+          "size":"24px",
+          "customSize":"",
+          "align":"left",
+          "bold":true,
+          "italic":false,
+          "underline":false,
+          "forecolor":"black",
+          "backcolor":"transparent"
+        }
       },
       "story": {
-        "fontStyle": {}
+        "fontStyle":{
+          "font":{
+            "family":"verdana,geneva,sans-serif",
+            "type":"standard",
+            "url":""
+          },
+          "size":"18px",
+          "customSize":"",
+          "align":"left",
+          "bold":true,
+          "italic":false,
+          "underline":false,
+          "forecolor":"black",
+          "backcolor":"transparent"
+        }
       },
       "timestamp": {
-        "fontStyle": {}
+        "fontStyle":{
+          "font":{
+            "family":"verdana,geneva,sans-serif",
+            "type":"standard",
+            "url":""
+          },
+          "size":"14px",
+          "customSize":"",
+          "align":"left",
+          "bold":true,
+          "italic":false,
+          "underline":false,
+          "forecolor":"#969696",
+          "backcolor":"transparent"
+        }
       },
       "author": {
-        "fontStyle": {}
+        "fontStyle":{
+          "font":{
+            "family":"verdana,geneva,sans-serif",
+            "type":"standard",
+            "url":""
+          },
+          "size":"14px",
+          "customSize":"",
+          "align":"left",
+          "bold":true,
+          "italic":false,
+          "underline":false,
+          "forecolor":"#969696",
+          "backcolor":"transparent"
+        }
       },
       "transition": {
         "type": "none",
