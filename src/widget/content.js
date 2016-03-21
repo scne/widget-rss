@@ -84,14 +84,8 @@ RiseVision.RSS.Content = function (prefs, params) {
   function _getStory(item) {
     var story = null;
 
-    if (_.has(item, "content:encoded")) {
-      story = item["content:encoded"];
-    } else if (_.has(item, "description")) {
+    if (_.has(item, "description")) {
       story = item.description;
-    } else if (_.has(item, "summary")) {
-      story = item.summary;
-    } else if (_.has(item, "content")) {
-      story = item.content;
     }
 
     return story;
@@ -100,14 +94,10 @@ RiseVision.RSS.Content = function (prefs, params) {
   function _getAuthor(item) {
     var author = null;
 
-    if (_.has(item, "dc:creator")) {
-      author = item["dc:creator"];
-    } else if (_.has(item, "author")) {
-      if (item.author.name) {
-        author = item.author.name;
-      } else {
-        author = item.author;
-      }
+    if (item.author) {
+      author = item.author;
+    } else if (_.has(item, "dc:creator")) {
+      author = item["dc:creator"]["#"];
     }
 
     return author;
@@ -116,22 +106,12 @@ RiseVision.RSS.Content = function (prefs, params) {
   function _getImageUrl(item) {
     var imageUrl = null;
 
-    // RSS 2.0
-    if (_.has(item, "media:group")) {
-      var mediaGroup = item["media:group"];
-      if (_.contains(_imageTypes, mediaGroup["media:content"][0].type)) {
-        imageUrl = mediaGroup["media:content"][0].url;
-      }
+    if (item.image && item.image.url) {
+      imageUrl = item.image.url;
     }
-    else if (_.has(item, "media:content")) {
-      if (_.contains(_imageTypes, item["media:content"].type)) {
-        imageUrl = item["media:content"].url;
-      }
-    } // ATOM
-    else if (_.has(item, "link")) {
-      var link = _.find(item.link, function(link){ return link.rel === "enclosure" && (_.contains(_imageTypes, link.type));});
-      if (link) {
-        imageUrl = link.href;
+    else if (_.has(item, "enclosures")) {
+      if (item.enclosures[0] && (_.contains(_imageTypes, item.enclosures[0].type))) {
+        imageUrl = item.enclosures[0].url;
       }
     }
 
@@ -149,15 +129,7 @@ RiseVision.RSS.Content = function (prefs, params) {
   }
 
   function _getDate(item) {
-    var pubdate = null, formattedDate = null;
-
-    if (_.has(item, "pubdate")) {
-      pubdate = item.pubdate;
-    } else if (_.has(item, "updated")) {
-      pubdate = item.updated;
-    } else if (_.has(item, "published")) {
-      pubdate = item.published;
-    }
+    var pubdate = item.date, formattedDate = null;
 
     if (pubdate) {
       pubdate = new Date(pubdate);

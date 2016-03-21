@@ -24,13 +24,12 @@
 <div id="messageContainer"></div>
 
 <script src="../data/rss-undefined-settings.js"></script>
-<script src="../data/xml-rss-media-group.js"></script>
+<script src="../data/json-rss-media-group.js"></script>
 <script src="../data/layout.js"></script>
 
 <script src="../../node_modules/widget-tester/mocks/gadget-mocks.js"></script>
 <script src="../../node_modules/widget-tester/mocks/gadgets.io-mock.js"></script>
 <script src="../../node_modules/widget-tester/mocks/logger-mock.js"></script>
-<script src="../../node_modules/widget-tester/mocks/rss-makeRequest-mock.js"></script>
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
 
@@ -61,7 +60,7 @@
 
     server.respondWith("GET", "/components/widget-rss/test/integration/layouts/layout-4x1.html",
       [200, { "Content-Type": "text/html" }, layout]);
-    server.respondWith(xmlRSS);
+    server.respondWith(JSON.stringify(jsonRSSMediaGroup));
 
     // restore the function
     paramsStub.restore();
@@ -91,12 +90,6 @@
     suite("Show Author", function () {
       test("should populate author", function() {
         assert.equal(document.querySelector(".author").innerHTML, "Mr. X1");
-      });
-    });
-
-    suite("Show Image", function () {
-      test("should populate image", function() {
-        assert.equal(document.querySelector(".image").src, "http://image.test1.0/");
       });
     });
   });

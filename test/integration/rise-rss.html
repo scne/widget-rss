@@ -26,13 +26,11 @@
 <script src="../data/rss.js"></script>
 <script src="../data/json-rss.js"></script>
 <script src="../data/json-rss-update.js"></script>
-<script src="../data/xml-rss.js"></script>
 <script src="../data/layout.js"></script>
 
 <script src="../../node_modules/widget-tester/mocks/gadget-mocks.js"></script>
 <script src="../../node_modules/widget-tester/mocks/gadgets.io-mock.js"></script>
 <script src="../../node_modules/widget-tester/mocks/logger-mock.js"></script>
-<script src="../../node_modules/widget-tester/mocks/rss-makeRequest-mock.js"></script>
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
 
@@ -63,7 +61,7 @@
 
     server.respondWith("GET", "/components/widget-rss/test/integration/layouts/layout-4x1.html",
       [200, { "Content-Type": "text/html" }, layout]);
-    server.respondWith(xmlRSS);
+    server.respondWith(JSON.stringify(jsonRSS));
 
     // restore the function
     paramsStub.restore();
@@ -95,7 +93,7 @@
       });
 
       test("should call onRiseRSSInit() with rss feed data", function() {
-        assert(spy.calledWith(jsonRSS));
+        assert(spy.calledWith({ "items":jsonRSS}));
       });
     });
 
@@ -113,12 +111,12 @@
       test("should call onRiseRSSRefresh() with rss feed data", function() {
         rss.dispatchEvent(new CustomEvent("rise-rss-response", {
           "detail": {
-            "feed": jsonRSSUpdate
+            "feed": { "items" : jsonRSSUpdate }
           },
           "bubbles": true
         }));
 
-        assert(refreshSpy.calledWith(jsonRSSUpdate));
+        assert(refreshSpy.calledWith({ "items" : jsonRSSUpdate }));
 
       });
 
@@ -127,12 +125,12 @@
         var author = document.querySelectorAll(".author");
 
         assert.equal(headlines[0].innerHTML,
-          "RSS 2.0 – Entry 1 title", "original first item displayed");
+          "RSS 2.0 - Entry 1 title", "original first item displayed");
         assert.equal(author[0].innerHTML,
           "Mr. X1");
 
         assert.equal(headlines[1].innerHTML,
-          "RSS 2.0 – Entry 2 title", "original second item displayed");
+          "RSS 2.0 - Entry 2 title", "original second item displayed");
         assert.equal(author[1].innerHTML,
           "Mr. X2");
 
@@ -158,7 +156,7 @@
 
         rss.dispatchEvent(new CustomEvent("rise-rss-response", {
           "detail": {
-            "feed": jsonRSSUpdate
+            "feed": { "items" : jsonRSSUpdate }
           },
           "bubbles": true
         }));
