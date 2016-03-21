@@ -112,17 +112,19 @@ RiseVision.RSS = (function (document, gadgets) {
   /* Load the layout file. */
   function _loadLayout() {
     var url = window.location.pathname,
-      index = url.lastIndexOf("/") + 1,
-      layout = "";
+      index = url.lastIndexOf("/") + 1;
+
+    url = url.substr(0, index) + "layouts/";
 
     if (typeof _additionalParams.layout === "undefined") {
-      layout = "layout-4x1";
+      url += "layout-4x1.html";
+    }
+    else if (_additionalParams.layout === "custom") {
+      url = _additionalParams.layoutUrl;
     }
     else {
-      layout = _additionalParams.layout;
+      url += _additionalParams.layout + ".html";
     }
-
-    url = url.substr(0, index) + "layouts/" + layout + ".html";
 
     // Load the layout and add it to the DOM.
     $.get(url)

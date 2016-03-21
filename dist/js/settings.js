@@ -11988,11 +11988,11 @@ angular.module("risevision.widget.rss.settings")
         "showDescription": "snippet"
       },
       "layout": "layout-4x1",
+      "layoutUrl": "",
       "separator": {
         "show": true,
         "size": 1,
         "color": "rgb(238,238,238)"
-      },
-      // "layoutUrl": ""
+      }
     }
   });
