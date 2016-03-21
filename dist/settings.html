@@ -289,6 +289,36 @@
 
           <br>
 
+          <!-- Separator -->
+          <label class="control-label add-top">{{ "widget-rss.separator.heading" | translate }}</label>
+
+          <div class="row">
+            <div class="col-md-3">
+              <input class="half-top half-bottom" type="checkbox" ng-model="settings.additionalParams.separator.show">
+              {{ "widget-rss.separator.option" | translate }}
+            </div>
+            <div ng-if="settings.additionalParams.separator.show">
+              <div class="col-md-3">
+                <div class="form-group">
+                  <div class="input-group">
+                    <input id="separator-size" type="number" class="form-control"
+                           ng-model="settings.additionalParams.separator.size" />
+                    <span class="input-group-addon">{{'common.units.pixels' | translate}}</span>
+                  </div>
+                </div>
+              </div>
+              <!-- Color -->
+              <div class="col-md-3">
+                <div class="input-group" colorpicker="rgb" colorpicker-parent="true" ng-model="settings.additionalParams.separator.color">
+                  <input class="form-control" type="text" ng-model="settings.additionalParams.separator.color">
+                  <span class="input-group-addon color-wheel"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <hr/>
+
           <!-- Modal Footer-->
           <div class="modal-footer">
             <!-- Button Toolbar -->

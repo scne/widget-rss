@@ -80,7 +80,7 @@
         "showDescription": "snippet"
       },
       "separator": {
-        "show": true,
+        "show": false,
         "size": 1,
         "color": "rgb(238,238,238)"
       }

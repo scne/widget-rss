@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RSS Widget</title>
+
+  <link rel="stylesheet" type="text/css" href="../../src/widget/css/rss.css">
+  <link rel="stylesheet" href="../../src/components/widget-common/dist/css/message.css">
+
+  <script src="../../src/components/webcomponentsjs/webcomponents-lite.min.js"></script>
+  <script src="../../src/components/web-component-tester/browser.js"></script>
+
+  <link rel="import" href="../../src/components/rise-rss/rise-rss.html">
+</head>
+<body>
+
+<rise-rss id="rss" refresh="1"></rise-rss>
+
+<div id="container">
+  <section class="page"></section>
+</div>
+
+<div id="messageContainer"></div>
+
+<script src="../data/rss-separator-selection.js"></script>
+<script src="../data/xml-rss.js"></script>
+<script src="../data/layout.js"></script>
+
+<script src="../../node_modules/widget-tester/mocks/gadget-mocks.js"></script>
+<script src="../../node_modules/widget-tester/mocks/gadgets.io-mock.js"></script>
+<script src="../../node_modules/widget-tester/mocks/logger-mock.js"></script>
+<script src="../../node_modules/widget-tester/mocks/rss-makeRequest-mock.js"></script>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+
+<script src="../../src/components/jQuery.dotdotdot/src/jquery.dotdotdot.js"></script>
+<script src="../../src/components/widget-common/dist/config.js"></script>
+<script src="../../src/components/widget-common/dist/common.js"></script>
+<script src="../../src/widget/rss.js"></script>
+<script src="../../src/widget/utils.js"></script>
+
+<!-- mock the image loader -->
+<script src="../../test/mocks/images-mock.js"></script>
+
+<script src="../../src/widget/rise-rss.js"></script>
+<script src="../../src/widget/content.js"></script>
+<script src="../../src/components/widget-common/dist/message.js"></script>
+<script src="../../src/widget/main.js"></script>
+
+<script>
+
+  var clock, paramsStub, server;
+
+  paramsStub = sinon.stub(RiseVision.RSS, "setAdditionalParams", function (names, values) {
+    // need to set the fake timer clock before any of the code within setAdditionalParams is executed
+    clock = sinon.useFakeTimers();
+
+    server = sinon.fakeServer.create();
+    server.respondImmediately = true;
+
+    server.respondWith("GET", "/components/widget-rss/test/integration/layouts/layout-4x1.html",
+      [200, { "Content-Type": "text/html" }, layout]);
+    server.respondWith(xmlRSS);
+
+    // restore the function
+    paramsStub.restore();
+    // call it again with the params
+    RiseVision.RSS.setAdditionalParams(names, values);
+  });
+
+  suite("No Separator", function() {
+
+    suiteTeardown(function() {
+      clock.restore();
+      server.restore();
+    });
+
+    test("should set item height correctly", function() {
+      assert.equal(($("#container").height()/window.gadget.settings.additionalParams.itemsToShow) + "px" , document.querySelector(".item").style.height);
+    });
+
+    test("should not apply separator between stories", function () {
+      assert.equal(document.querySelector(".item").style.borderBottom, "");
+    });
+
+  });
+
+</script>
+
+</body>
+</html>
