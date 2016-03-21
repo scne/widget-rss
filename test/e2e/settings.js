@@ -61,7 +61,7 @@
 
     describe("Defaults", function() {
       it("Should set default value for 'Items to Show'", function () {
-        expect(element(by.id("items-to-show")).getAttribute("value")).to.eventually.equal("2");
+        expect(element(by.id("items-to-show")).getAttribute("value")).to.eventually.equal("1");
       });
 
       it("Should set default value for 'Max Items in Queue'", function () {
@@ -141,7 +141,7 @@
           additionalParams: {
             "url":"",
             "itemsInQueue": 5,
-            "itemsToShow": 2,
+            "itemsToShow": 1,
             "headline":{
               "fontStyle":{
                 "font":{
@@ -276,7 +276,7 @@
         additionalParams: {
           "url":"",
           "itemsInQueue": 5,
-          "itemsToShow": 2,
+          "itemsToShow": 1,
           "headline":{
             "fontStyle":{}
           },
