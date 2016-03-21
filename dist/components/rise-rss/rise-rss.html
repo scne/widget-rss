@@ -1,8 +1,6 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../iron-ajax/iron-ajax.html">
 
-<script src="modules.js"></script>
-
 <script src="../underscore/underscore.js"></script>
 
 <!--
@@ -50,11 +48,11 @@ can only be used within Rise Vision [Offline Player](https://github.com/Rise-Vis
 
 <dom-module id="rise-rss">
   <template>
-    <iron-ajax id="proxyRequest"
-               url="{{_proxyRequestUrl}}"
-               handle-as="document"
-               on-response="_handleProxyRequest"
-               on-error="_handleProxyRequestError"
+    <iron-ajax id="feedParserRequest"
+               url="{{_feedParserRequestUrl}}"
+               handle-as="json"
+               on-response="_handleFeedParserRequest"
+               on-error="_handleFeedParserRequestError"
                verbose="true">
     </iron-ajax>
   </template>
@@ -62,7 +60,7 @@ can only be used within Rise Vision [Offline Player](https://github.com/Rise-Vis
 
 <script>
   (function() {
-    /* global Polymer, gadgets, RiseVision, _ */
+    /* global Polymer, gadgets, _ */
     /* jshint newcap: false */
 
     "use strict";
@@ -140,9 +138,9 @@ can only be used within Rise Vision [Offline Player](https://github.com/Rise-Vis
 
       _offlineRequestPending: false,
 
-      _proxyServerUrl: "https://proxy.risevision.com/",
+      _feedParserUrl: "https://feed-parser.risevision.com/",
 
-      _proxyRequestUrl: "",
+      _feedParserRequestUrl: "",
 
       _getCachedData: function () {
         if (supportsLocalStorage()) {
@@ -163,41 +161,31 @@ can only be used within Rise Vision [Offline Player](https://github.com/Rise-Vis
         }
       },
 
-      _prepareResponse: function(feed) {
+      _prepareResponse: function(items) {
         var response = {},
           limit;
 
-        response.feed = _.clone(feed);
+        response.feed = { "items" : _.clone(items) };
 
         this.entries = parseInt(this.entries, 10);
 
         // limit the entries to provide in response
         if (!isNaN(this.entries) && this.entries > 0) {
           // ensure feed.items exists
-          if (feed.items && feed.items.length) {
+          if (items && items.length) {
             // determine value to use for how many items to limit to
-            limit = (feed.items.length >= this.entries) ? this.entries : feed.items.length;
+            limit = (items.length >= this.entries) ? this.entries : items.length;
 
             // revise to include only required entries
-            response.feed.items = _.first(feed.items, limit);
+            response.feed.items = _.first(items, limit);
           }
         }
 
         return response;
       },
 
-      _parseToJSON: function (xml) {
-        var parser = new RiseVision.ModuleExports.FeedMe(true);
-
-        // pass the XML string from the response
-        parser.write(xml);
-
-        // return the JSON parsed object
-        return parser.done();
-      },
-
       _startTimer: function() {
-        var refreshFn = (offlineWindow) ? this._postMessage : this._makeProxyRequest,
+        var refreshFn = (offlineWindow) ? this._postMessage : this._makeFeedParserRequest,
           self = this;
 
         this.refresh = parseInt(this.refresh, 10);
@@ -220,9 +208,8 @@ can only be used within Rise Vision [Offline Player](https://github.com/Rise-Vis
         }
       },
 
-      _handleRequestSuccess: function (xml) {
-        var feedJSON = this._parseToJSON(xml),
-          responseData = this._prepareResponse(feedJSON);
+      _handleRequestSuccess: function (items) {
+        var responseData = this._prepareResponse(items);
 
         // cache the data if possible
         this._setCachedData(responseData);
@@ -233,27 +220,10 @@ can only be used within Rise Vision [Offline Player](https://github.com/Rise-Vis
       },
 
       _validateResponse: function(data) {
-        var tmp = null,
-          rss = data.querySelector("rss"),
-          feed = data.querySelector("feed"),
-          rssVersion = null;
-
-        if (rss !== null) {
-          rssVersion = rss.getAttribute("version");
-        }
-
-        // RSS feeds have a mandatory attribute called version.
-        // Atom feeds may have a <feed> element instead of <rss>.
-        if (rssVersion || feed) {
-          // Convert document to text.
-          tmp = document.createElement("div");
-
-          tmp.appendChild(data.documentElement);
-          this._handleRequestSuccess(tmp.innerHTML);
-        }
-        else {
-          // Not a valid RSS feed.
-          this._handleRequestError("Invalid RSS feed");
+        if (data.Error) {
+          this._handleRequestError(data.Error);
+        } else{
+          this._handleRequestSuccess(data);
         }
       },
 
@@ -299,18 +269,18 @@ can only be used within Rise Vision [Offline Player](https://github.com/Rise-Vis
           // check if "response" property included
           if (evt.data.hasOwnProperty("response")) {
             // successful response provided so bypass localStorage retrieval and process the response
-            this._validateResponse(new window.DOMParser().parseFromString(evt.data.response, "text/xml"));
+            this._validateResponse(evt.data.response);
           }
         }
 
       },
 
-      _makeProxyRequest: function () {
-        this._proxyRequestUrl = this._proxyServerUrl + this.url;
-        this.$.proxyRequest.generateRequest();
+      _makeFeedParserRequest: function () {
+        this._feedParserRequestUrl = this._feedParserUrl + this.url;
+        this.$.feedParserRequest.generateRequest();
       },
 
-      _handleProxyRequest: function (e, resp) {
+      _handleFeedParserRequest: function (e, resp) {
         if (resp && resp.response) {
           this._validateResponse(resp.response);
         }
@@ -319,34 +289,8 @@ can only be used within Rise Vision [Offline Player](https://github.com/Rise-Vis
         }
       },
 
-      _handleProxyRequestError: function () {
-        this._makeRequest();
-      },
-
-      _makeRequest: function () {
-        var params = {},
-          self = this;
-
-        if (typeof gadgets === "undefined") {
-          return;
-        }
-
-        try {
-          params[gadgets.io.RequestParameters.CONTENT_TYPE] = gadgets.io.ContentType.DOM;
-
-          gadgets.io.makeRequest(this.url, function(response) {
-            if (response.errors.length > 0) {
-              self._handleRequestError(response.errors);
-            }
-            else {
-              self._validateResponse(response.data);
-            }
-
-          }, params);
-        } catch (e) {
-          console.error("gadgets.io.makeRequest failure", e.message);
-        }
-
+      _handleFeedParserRequestError: function (e, resp) {
+        this._handleRequestError(resp);
       },
 
       _postMessage: function () {
@@ -385,7 +329,7 @@ can only be used within Rise Vision [Offline Player](https://github.com/Rise-Vis
           // running in Offline Player
           this._postMessage();
         } else {
-          this._makeProxyRequest();
+          this._makeFeedParserRequest();
         }
       }
 

@@ -24,7 +24,7 @@
 <div id="messageContainer"></div>
 
 <script src="../data/rss.js"></script>
-<script src="../data/json-atom2.js"></script>
+<script src="../data/json-atom3.js"></script>
 <script src="../data/layout.js"></script>
 
 <script src="../../node_modules/widget-tester/mocks/gadget-mocks.js"></script>
@@ -60,7 +60,7 @@
 
     server.respondWith("GET", "/components/widget-rss/test/integration/layouts/layout-4x1.html",
       [200, { "Content-Type": "text/html" }, layout]);
-    server.respondWith(JSON.stringify(jsonAtom2));
+    server.respondWith(JSON.stringify(jsonAtom3));
 
     // restore the function
     paramsStub.restore();
@@ -104,11 +104,11 @@
 
       test("should populate headline correctly", function() {
         assert.equal(document.querySelector(".headline a").innerHTML,
-          "Autodesk Graphic");
+          "New Wordpress Blog");
       });
 
       test("should populate timestamp", function() {
-        assert.equal(document.querySelector(".timestamp").innerHTML, "December 29, 2015");
+        assert.equal(document.querySelector(".timestamp").innerHTML, "November 4, 2005");
       });
 
       test("should apply font styling to story", function() {
@@ -121,7 +121,7 @@
 
       test("should populate story correctly", function() {
         assert.equal(document.querySelector(".story").innerHTML,
-          "Treated myself to thisas a late Christmas gift. Just playing around with it I’m pretty happy so far. Between 1990-1999  ...");
+          "I\'ve switched blogging systems and am now blogging via my new Wordpress installation which has its own RSS feed: http:// ...");
       });
     });
 
@@ -135,19 +135,10 @@
         var headlines = document.querySelectorAll(".headline a");
 
         assert.equal(headlines[0].innerHTML,
-          "Autodesk Graphic", "first item displaying");
+          "New Wordpress Blog", "first item displaying");
 
         assert.equal(headlines[1].innerHTML,
-          "Dictionary Attack Suckas", "second item displaying");
-      });
-
-      test("should show image", function() {
-        var images = document.querySelectorAll(".image");
-
-        assert.equal(images[0].src, "http://image.test1/");
-
-        assert.equal(images[1].src, "http://image.test2/");
-
+          "Padding Content Boxes with CSS", "second item displaying");
       });
     });
   });

@@ -24,7 +24,7 @@
 <div id="messageContainer"></div>
 
 <script src="../data/rss-undefined-settings.js"></script>
-<script src="../data/xml-rss.js"></script>
+<script src="../data/json-rss.js"></script>
 <script src="../data/layout.js"></script>
 
 <script src="../../node_modules/widget-tester/mocks/gadget-mocks.js"></script>
@@ -61,7 +61,7 @@
 
     server.respondWith("GET", "/components/widget-rss/test/integration/layouts/layout-4x1.html",
       [200, { "Content-Type": "text/html" }, layout]);
-    server.respondWith(xmlRSS);
+    server.respondWith(JSON.stringify(jsonRSS));
 
     // restore the function
     paramsStub.restore();
@@ -78,7 +78,7 @@
 
     suite("Show Title", function () {
       test("should populate headline", function() {
-        assert.equal(document.querySelector(".headline a").innerHTML, "RSS 2.0 – Entry 1 title");
+        assert.equal(document.querySelector(".headline a").innerHTML, "RSS 2.0 - Entry 1 title");
       });
     });
 
