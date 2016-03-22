@@ -121,7 +121,7 @@
 
       test("should populate story correctly", function() {
         assert.equal(document.querySelector(".story").innerHTML,
-          "Item 1 - Sample description");
+          "Item 1 - Sample description Item 1 - Sample description Item 1 - Sample description Item 1 - Sample description Item 1 - Sample  ...");
       });
 
       test("should apply separator between stories", function () {
@@ -191,7 +191,7 @@
     suite("Story", function() {
       test("should truncate the story", function() {
         var truncatedText = "Jujubes danish wafer toffee. Biscuit lollipop fruitcake liquorice. Bear " +
-          "claw carrot cake soufflé danish apple pie ice  ...";
+          "claw carrot cake soufflé danish apple pie ice cream  ...";
 
         RiseVision.RSS.onRiseRSSRefresh({
           "items": [{

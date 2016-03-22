@@ -1457,8 +1457,8 @@ RiseVision.RSS.Utils = (function () {
   }
 
   /* Truncate text while preserving word boundaries. */
-  function truncate(text) {
-    var maxLength = 120;
+  function truncate(text, length) {
+    var maxLength = (length)? length : 120;
 
     if (text.length > maxLength) {
       text = text.substring(0, maxLength);
@@ -1888,7 +1888,7 @@ RiseVision.RSS.Content = function (prefs, params) {
       story = _utils.stripScripts(story);
 
       if (params.dataSelection.showDescription === "snippet") {
-        $story.html(_utils.truncate($("<div/>").html(story).text()));
+        $story.html(_utils.truncate($("<div/>").html(story).text(), params.dataSelection.snippetLength));
       }
       else {
         $story.html(story);

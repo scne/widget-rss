@@ -24,8 +24,8 @@ RiseVision.RSS.Utils = (function () {
   }
 
   /* Truncate text while preserving word boundaries. */
-  function truncate(text) {
-    var maxLength = 120;
+  function truncate(text, length) {
+    var maxLength = (length)? length : 120;
 
     if (text.length > maxLength) {
       text = text.substring(0, maxLength);

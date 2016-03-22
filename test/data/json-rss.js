@@ -1,7 +1,7 @@
 var jsonRSS = [
   {
     "title": "RSS 2.0 - Entry 1 title",
-    "description": "Item 1 - Sample description",
+    "description": "Item 1 - Sample description Item 1 - Sample description Item 1 - Sample description Item 1 - Sample description Item 1 - Sample description",
     "summary": "Item 1 - Sample description",
     "date": "2003-06-03T09:39:21.000Z",
     "pubdate": "2003-06-03T09:39:21.000Z",

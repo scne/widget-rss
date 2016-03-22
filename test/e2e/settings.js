@@ -92,6 +92,10 @@
         expect(element(by.model("settings.additionalParams.dataSelection.showImage")).isSelected()).to.eventually.be.true;
       });
 
+      it("Should have default value for snippet length", function () {
+        expect(element(by.model("settings.additionalParams.dataSelection.snippetLength")).getAttribute("value")).to.eventually.equal("120");
+      });
+
       it("Should select 'Show Description Snippet'", function () {
         expect(element(by.css("input[type='radio'][value='snippet']")).isSelected()).to.eventually.be.true;
       });
@@ -219,7 +223,8 @@
               "showTimestamp": true,
               "showAuthor": true,
               "showImage": true,
-              "showDescription": "snippet"
+              "showDescription": "snippet",
+              "snippetLength": 120
             },
             "layout": "layout-4x1",
             "layoutUrl": "",
@@ -270,6 +275,11 @@
       expect(element(by.model("settings.additionalParams.separator.color")).isPresent()).to.eventually.be.false;
     });
 
+    it("Should not show snippet length field", function () {
+      element.all(by.model("settings.additionalParams.dataSelection.showDescription")).get(1).click();
+      expect(element(by.id("snippetLength")).isPresent()).to.eventually.be.false;
+    });
+
     it("Should correctly save settings", function () {
       var settings = {
         params: {},
@@ -312,7 +322,8 @@
             "showTimestamp": false,
             "showAuthor": false,
             "showImage": true,
-            "showDescription": "snippet"
+            "showDescription": "full",
+            "snippetLength": 120
           },
           "layout": "layout-4x1",
           "layoutUrl": "",

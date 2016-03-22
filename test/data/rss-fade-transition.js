@@ -81,7 +81,8 @@
         "showTimestamp": true,
         "showAuthor": true,
         "showImage" : true,
-        "showDescription": "snippet"
+        "showDescription": "snippet",
+        "snippetLength": 120
       }
     }
   };
