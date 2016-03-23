@@ -140,10 +140,13 @@ RiseVision.RSS.TransitionNoScroll = function (params, content) {
   }
 
   function _startTransitionTimer() {
+    // legacy, backwards compatibility for duration value
+    var duration = (params.transition.duration / 1000 >= 1) ? params.transition.duration : params.transition.duration * 1000;
+
     if (_transitionIntervalId === null) {
       _transitionIntervalId = setInterval(function () {
         _makeTransition();
-      }, params.transition.duration * 1000);
+      }, duration);
     }
   }
 

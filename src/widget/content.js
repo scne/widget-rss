@@ -3,7 +3,7 @@
 var RiseVision = RiseVision || {};
 RiseVision.RSS = RiseVision.RSS || {};
 
-RiseVision.RSS.Content = function (prefs, params) {
+RiseVision.RSS.Content = function (params) {
 
   "use strict";
 
@@ -22,10 +22,10 @@ RiseVision.RSS.Content = function (prefs, params) {
     var itemsToShow = (_items.length <= params.itemsToShow) ? _items.length : params.itemsToShow;
 
     if (params.separator && params.separator.show) {
-      return prefs.getInt("rsH") / itemsToShow - params.separator.size;
+      return params.height / itemsToShow - params.separator.size;
     }
     else {
-      return prefs.getInt("rsH") / itemsToShow;
+      return params.height / itemsToShow;
     }
   }
 
@@ -92,15 +92,15 @@ RiseVision.RSS.Content = function (prefs, params) {
 
   function _getImageDimensions($image, item) {
     var dimensions = null,
-      paddingWidth = parseInt($image.css("padding-left"), 10) + parseInt($image.css("padding-right"), 10),
-      paddingHeight = parseInt($image.css("padding-top"), 10) + parseInt($image.css("padding-bottom"), 10),
+      marginWidth = parseInt($image.css("margin-left"), 10) + parseInt($image.css("margin-right"), 10),
+      marginHeight = parseInt($image.css("margin-top"), 10) + parseInt($image.css("margin-bottom"), 10),
       ratioX, ratioY, scale;
 
     switch (params.layout) {
       case "layout-4x1":
         dimensions = {};
-        dimensions.width = prefs.getString("rsW") * 0.33;
-        dimensions.height = (prefs.getString("rsH") / params.itemsToShow) - paddingHeight;
+        dimensions.width = params.width * 0.33;
+        dimensions.height = (params.height / params.itemsToShow) - marginHeight;
 
         break;
 
@@ -108,26 +108,26 @@ RiseVision.RSS.Content = function (prefs, params) {
         dimensions = {};
 
         if ($(item).find(".story").length === 0) {
-          dimensions.width = prefs.getString("rsW") - paddingWidth;
+          dimensions.width = params.width - marginWidth;
         }
         else {
-          dimensions.width = prefs.getString("rsW") * 0.5;
+          dimensions.width = params.width * 0.5;
         }
 
-        dimensions.height = (prefs.getString("rsH") / params.itemsToShow) - $(item).find(".textWrapper").outerHeight(true) - paddingHeight;
+        dimensions.height = (params.height / params.itemsToShow) - $(item).find(".textWrapper").outerHeight(true) - marginHeight;
 
         break;
 
       case "layout-16x9":
         dimensions = {};
-        dimensions.width = prefs.getString("rsW") - paddingWidth;
-        dimensions.height = (prefs.getString("rsH") / params.itemsToShow) - paddingHeight;
+        dimensions.width = params.width - marginWidth;
+        dimensions.height = (params.height / params.itemsToShow) - marginHeight;
 
         break;
       case "layout-1x2":
         dimensions = {};
-        dimensions.width = prefs.getString("rsW") - paddingWidth;
-        dimensions.height = ((prefs.getString("rsH") / params.itemsToShow) - paddingHeight) / 2;
+        dimensions.width = params.width - marginWidth;
+        dimensions.height = ((params.height / params.itemsToShow) - marginHeight) / 2;
         break;
     }
 
@@ -281,13 +281,20 @@ RiseVision.RSS.Content = function (prefs, params) {
     _items = feed.items;
 
     if (!_transition) {
-      if (params.transition.type === "none" || params.transition.type === "fade") {
 
+      if (!params.transition) {
+        // legacy, backwards compatible
+        params.transition = {
+          type: "none",
+          duration: 10
+        };
+      }
+
+      if (params.transition.type === "none" || params.transition.type === "fade") {
         _transition = new RiseVision.RSS.TransitionNoScroll(params, this);
       }
       else if (params.transition.type === "scroll" || params.transition.type === "page") {
-        console.log("scroll or page transition to be handled");
-        // TODO: instantiate transitionscroll module
+        _transition = new RiseVision.RSS.TransitionVerticalScroll(params, this);
       }
     }
 

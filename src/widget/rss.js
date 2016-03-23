@@ -169,7 +169,7 @@ RiseVision.RSS = (function (document, gadgets) {
   }
 
   function onRiseRSSInit(feed) {
-    _content = new RiseVision.RSS.Content(_prefs, _additionalParams);
+    _content = new RiseVision.RSS.Content(_additionalParams);
 
     if (feed.items && feed.items.length > 0) {
       // remove a message previously shown
@@ -213,7 +213,7 @@ RiseVision.RSS = (function (document, gadgets) {
       if (_errorFlag) {
         if (!_content) {
           // create content module instance
-          _content = new RiseVision.RSS.Content(_prefs, _additionalParams);
+          _content = new RiseVision.RSS.Content(_additionalParams);
         }
 
         _message.hide();
