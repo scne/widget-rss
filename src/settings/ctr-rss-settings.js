@@ -2,18 +2,6 @@ angular.module("risevision.widget.rss.settings")
   .controller("rssSettingsController", ["$scope", "$log",
     function ($scope/*, $log*/) {
 
-      // converting seconds to milliseconds and vice versa
-      $scope.$watch("duration", function (value){
-        if (typeof value !== "undefined" && value !== "") {
-          $scope.settings.additionalParams.transition.duration = value * 1000;
-        }
-      });
-      $scope.$watch("settings.additionalParams.transition.duration", function (value) {
-        if (typeof value !== "undefined" && value !== "") {
-          $scope.duration = value / 1000;
-        }
-      });
-
       $scope.$watch("settings.additionalParams.dataSelection.showTitle", function (value) {
         if (typeof value !== "undefined" && value !== "" && !value) {
           $scope.settings.additionalParams.headline.fontStyle = {};
@@ -113,10 +101,7 @@ angular.module("risevision.widget.rss.settings")
           "backcolor":"transparent"
         }
       },
-      "transition": {
-        "type": "none",
-        "duration": 10000,
-      },
+      "transition": {},
       "dataSelection": {
         "showTitle": true,
         "showTimestamp": true,

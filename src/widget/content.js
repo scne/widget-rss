@@ -9,32 +9,14 @@ RiseVision.RSS.Content = function (prefs, params) {
 
   var _items = [],
     _utils = RiseVision.RSS.Utils,
-    _images = RiseVision.RSS.Images;
-
-  var _$el;
-
-  var _currentItemIndex = 0;
-
-  var _transitionIntervalId = null;
-
-  var _transition = {
-    "type": "none",
-    duration: 10000
-  };
-
-  var _waitingForUpdate = false;
+    _images = RiseVision.RSS.Images,
+    _transition = null;
 
   var _imageTypes = ["image/bmp", "image/gif", "image/jpeg", "image/jpg", "image/png", "image/tiff"];
 
   /*
    *  Private Methods
    */
-  function _cache() {
-    _$el = {
-      page:           $(".page")
-    };
-  }
-
   function _getItemHeight() {
     // account for not enough items to actually show compared to setting value
     var itemsToShow = (_items.length <= params.itemsToShow) ? _items.length : params.itemsToShow;
@@ -45,40 +27,6 @@ RiseVision.RSS.Content = function (prefs, params) {
     else {
       return prefs.getInt("rsH") / itemsToShow;
     }
-  }
-
-  function _getTransitionConfig(index) {
-    var config = {};
-
-    if ((index + params.itemsToShow) >= (_items.length - 1)) {
-      // account for not enough items to actually show from the feed
-      config.itemsToShow = _items.length - (index + 1);
-      config.currentItemIndex = (_items.length - 1);
-    }
-    else {
-      config.itemsToShow = params.itemsToShow;
-      // value is the index of the last item showing
-      config.currentItemIndex = index + params.itemsToShow;
-    }
-
-    return config;
-  }
-
-  function _getStartConfig() {
-    var config = {};
-
-    if (_items.length <= params.itemsToShow) {
-      // account for not enough items to actually show from the feed
-      config.itemsToShow = _items.length;
-      config.currentItemIndex = (_items.length - 1);
-    }
-    else {
-      config.itemsToShow = params.itemsToShow;
-      // value is the index of the last item showing
-      config.currentItemIndex = (params.itemsToShow - 1);
-    }
-
-    return config;
   }
 
   function _getStory(item) {
@@ -303,32 +251,8 @@ RiseVision.RSS.Content = function (prefs, params) {
     });
   }
 
-  // Fade out and clear content.
-  function _clear(cb) {
-    if (_transition.type === "fade") {
-      $(".item").one("transitionend", function() {
-        _clearPage(cb);
-      });
-
-      $(".item").addClass("fade-out").removeClass("fade-in");
-    }
-    else {
-      _clearPage(cb);
-    }
-  }
-
-  function _clearPage(cb) {
-    _$el.page.empty();
-    if (!cb || typeof cb !== "function") {
-      return;
-    }
-    else {
-      cb();
-    }
-  }
-
   function _showItem(index) {
-    _$el.page.append(_getTemplate(_items[index], index));
+    $(".page").append(_getTemplate(_items[index], index));
 
     _setImageDimensions();
 
@@ -337,12 +261,6 @@ RiseVision.RSS.Content = function (prefs, params) {
     }
 
     $(".item").height(_getItemHeight());
-
-    if (_transition.type === "fade") {
-      $(".item").addClass("fade-in");
-    }
-
-    $(".item").removeClass("hide");
 
     // 16x9 (images only) layout doesn't need truncating, image sizing handled in _setImageDimensions()
     if (params.layout !== "layout-16x9") {
@@ -354,128 +272,79 @@ RiseVision.RSS.Content = function (prefs, params) {
 
   }
 
-  function _makeTransition() {
-    var startConfig = _getStartConfig(),
-      transConfig = _getTransitionConfig(_currentItemIndex),
-      startingIndex;
-
-    if (_currentItemIndex === (_items.length - 1)) {
-
-      _stopTransitionTimer();
-
-      _clear(function() {
-
-        // show the items
-        for (var i = 0; i < startConfig.itemsToShow; i += 1) {
-          _showItem(i);
-        }
-
-        _currentItemIndex = startConfig.currentItemIndex;
-
-        RiseVision.RSS.onContentDone();
-      });
-
-      _waitingForUpdate = false;
-
-      return;
-    }
-
-    if (_waitingForUpdate) {
-      _waitingForUpdate = false;
-
-      // load all images
-      _images.load(_getImageUrls(), function () {
-
-        _clear(function () {
-          for (var i = 0; i < startConfig.itemsToShow; i += 1) {
-            _showItem(i);
-          }
-
-          _currentItemIndex = startConfig.currentItemIndex;
-        });
-
-      });
-
-    }
-    else {
-      startingIndex = _currentItemIndex + 1;
-
-      _currentItemIndex = transConfig.currentItemIndex;
-
-      _clear(function () {
-        for (var i = startingIndex; i < (startingIndex + transConfig.itemsToShow); i += 1) {
-          _showItem(i);
-        }
-      });
-    }
-
-  }
-
-  function _startTransitionTimer() {
-    if (_transitionIntervalId === null) {
-      _transitionIntervalId = setInterval(function () {
-        _makeTransition();
-      }, _transition.duration);
-    }
-  }
-
-  function _stopTransitionTimer() {
-    clearInterval(_transitionIntervalId);
-    _transitionIntervalId = null;
-  }
-
   /*
    *  Public Methods
    */
   function init(feed) {
-    var startConfig;
+    /*jshint validthis:true */
 
     _items = feed.items;
 
-    if(params.transition){
-      _transition = params.transition;
+    if (!_transition) {
+      if (params.transition.type === "none" || params.transition.type === "fade") {
+
+        _transition = new RiseVision.RSS.TransitionNoScroll(params, this);
+      }
+      else if (params.transition.type === "scroll" || params.transition.type === "page") {
+        console.log("scroll or page transition to be handled");
+        // TODO: instantiate transitionscroll module
+      }
     }
 
-    startConfig = _getStartConfig();
+    loadImages(function () {
+      _transition.init(_items);
+    });
+  }
 
-    _currentItemIndex = startConfig.currentItemIndex;
-
+  function loadImages(cb) {
     // load all images
     _images.load(_getImageUrls(), function () {
-      // show the items
-      for (var i = 0; i < startConfig.itemsToShow; i += 1) {
-        _showItem(i);
+      if (cb && typeof cb === "function") {
+        cb();
       }
     });
-
   }
 
   function pause() {
-    _stopTransitionTimer();
+    if (_transition) {
+      _transition.stop();
+    }
   }
 
   function reset() {
-    _stopTransitionTimer();
-    _clear();
+    if (_transition) {
+      _transition.stop();
+      _transition.reset();
+    }
+
     _items = [];
   }
 
   function play() {
-    _startTransitionTimer();
+    if (_transition) {
+      _transition.start();
+    }
+  }
+
+  function showItem(index) {
+    _showItem(index);
   }
 
   function update(feed) {
     _items = feed.items;
-    _waitingForUpdate = true;
-  }
 
-  _cache();
+    if (_transition) {
+      _transition.update(_items);
+    }
+  }
 
   return {
     init: init,
+    loadImages: loadImages,
     pause: pause,
     play: play,
     reset: reset,
+    showItem: showItem,
     update: update
   };
 };

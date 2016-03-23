@@ -5,5 +5,6 @@ angular.module("risevision.widget.rss.settings", [
   "risevision.widget.common.widget-button-toolbar",
   "risevision.widget.common.tooltip",
   "risevision.widget.common.font-setting",
+  "risevision.widget.common.transition-setting",
   "colorpicker.module"
 ]);
