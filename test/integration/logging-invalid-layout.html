@@ -15,7 +15,7 @@
 </head>
 <body>
 
-  <rise-rss id="rss" refresh="1"></rise-rss>
+  <rise-rss id="rss" refresh="1" url="http://feed.xml"></rise-rss>
 
   <div id="container">
     <section class="page"></section>
@@ -24,6 +24,7 @@
   <div id="messageContainer"></div>
 
   <script src="../data/rss-invalid-layout.js"></script>
+  <script src="../data/json-rss.js"></script>
 
   <script src="../../node_modules/widget-tester/mocks/gadget-mocks.js"></script>
   <script src="../../node_modules/widget-tester/mocks/gadgets.io-mock.js"></script>
@@ -46,10 +47,15 @@
   <script src="../../src/widget/main.js"></script>
 
   <script>
-    var paramsStub, spy;
+    var paramsStub, spy, server;
 
     paramsStub = sinon.stub(RiseVision.RSS, "setAdditionalParams", function(additionalParams) {
       spy = sinon.spy(RiseVision.Common.LoggerUtils, "logEvent");
+
+      server = sinon.fakeServer.create();
+      server.respondImmediately = true;
+      server.respondWith("GET", "https://feed-parser.risevision.com/http://feed.xml",
+        [200,  {"Content-Type": "application/json" }, JSON.stringify(jsonRSS)]);
 
       paramsStub.restore();
       RiseVision.RSS.setAdditionalParams(additionalParams);

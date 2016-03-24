@@ -32,6 +32,12 @@ angular.module("risevision.widget.rss.settings")
         }
       });
 
+      $scope.$watch("settings.additionalParams.dataSelection.showDescription", function (value) {
+        if (typeof value !== "undefined" && value !== "snippet") {
+          $scope.settings.additionalParams.dataSelection.snippetLength = 120;
+        }
+      });
+
     }])
   .value("defaultSettings", {
     "params": {},
@@ -109,14 +115,15 @@ angular.module("risevision.widget.rss.settings")
       },
       "transition": {
         "type": "none",
-        "duration": 10000
+        "duration": 10000,
       },
       "dataSelection": {
         "showTitle": true,
         "showTimestamp": true,
         "showAuthor": true,
         "showImage": true,
-        "showDescription": "snippet"
+        "showDescription": "snippet",
+        "snippetLength": 120
       },
       "layout": "layout-4x1",
       "layoutUrl": "",

@@ -87,10 +87,10 @@
           <div class="row">
             <div class="col-md-3">
               <div class="form-group">
-                <label class="control-label" id="transitionHeading">{{"widget-rss.transition.heading" | translate }}</label>
+                <label class="control-label" id="transitionHeading">{{"transition.heading" | translate }}</label>
                 <select id="scroll-by" class="form-control" ng-model="settings.additionalParams.transition.type">
-                  <option value="none" selected>{{"widget-rss.transition.type.none" | translate }}</option>
-                  <option value="fade" >{{"widget-rss.transition.type.fade" | translate }}</option>
+                  <option value="none" selected>{{"transition.type.none" | translate }}</option>
+                  <option value="fade" >{{"transition.type.fade" | translate }}</option>
                   <!--option value="scroll">{{"widget-rss.transition.type.scroll" | translate }}</option-->
                   <!--option value="page">{{"widget-rss.transition.type.page" | translate }}</option-->
                 </select>
@@ -102,7 +102,7 @@
             <div class="fadeDiv box">
               <div class="col-md-3">
                 <div class="form-group">
-                  <label class="control-label">{{"widget-rss.transition.duration" | translate }}</label>
+                  <label class="control-label">{{"transition.duration" | translate }}</label>
                   <div class="input-group">
                     <input id="scroll-horizontal" name="scrollHorizontal" type="number"  class="form-control" ng-model="duration">
                     <span class="input-group-addon">sec</span>
@@ -164,17 +164,31 @@
             <div class="radio">
               <div class="col-md-3">
                 <label class="radio-inline add-bottom">
-                  <input type="radio" ng-model="settings.additionalParams.dataSelection.showDescription" value="full">
-                  {{ "widget-rss.data-selection.showFullDescription" | translate }}
-                </label>
-              </div>
-              <div class="col-md-3">
-                <label class="radio-inline add-bottom">
                   <input type="radio" ng-model="settings.additionalParams.dataSelection.showDescription" value="snippet">
                   {{ "widget-rss.data-selection.showDescriptionSnippet" | translate }}
                 </label>
               </div>
+              <div class="col-md-3">
+                <label class="radio-inline add-bottom">
+                  <input type="radio" ng-model="settings.additionalParams.dataSelection.showDescription" value="full">
+                  {{ "widget-rss.data-selection.showFullDescription" | translate }}
+                </label>
+              </div>
+            </div>
+          </div>
 
+          <div class="row" ng-if="settings.additionalParams.dataSelection.showDescription === 'snippet'">
+            <!--Snippet length-->
+            <div class="fadeDiv box">
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label class="control-label">{{"widget-rss.data-selection.snippetLength" | translate }}</label>
+                  <div class="input-group">
+                    <input id="snippetLength" name="snippetLength" type="number"  class="form-control" ng-model="settings.additionalParams.dataSelection.snippetLength">
+                    <span class="input-group-addon">{{"widget-rss.data-selection.snippetLengthMeasure" | translate }}</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <!-- End Data Selection -->

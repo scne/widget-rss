@@ -269,7 +269,7 @@ RiseVision.RSS.Content = function (prefs, params) {
       story = _utils.stripScripts(story);
 
       if (params.dataSelection.showDescription === "snippet") {
-        $story.html(_utils.truncate($("<div/>").html(story).text()));
+        $story.html(_utils.truncate($("<div/>").html(story).text(), params.dataSelection.snippetLength));
       }
       else {
         $story.html(story);

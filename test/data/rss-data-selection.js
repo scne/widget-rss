@@ -77,7 +77,8 @@
         "showTimestamp": false,
         "showAuthor": false,
         "showImage": false,
-        "showDescription": "snippet"
+        "showDescription": "snippet",
+        "snippetLength": 120
       }
     }
   };

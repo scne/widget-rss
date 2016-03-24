@@ -77,7 +77,8 @@
         "showTimestamp": true,
         "showAuthor": true,
         "showImage" : true,
-        "showDescription": "snippet"
+        "showDescription": "snippet",
+        "snippetLength": 120
       },
       "layout": "custom",
       "layoutUrl": "http://fakeurl.com/custom-layout.html"
