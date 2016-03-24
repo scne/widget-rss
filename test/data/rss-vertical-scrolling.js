@@ -73,8 +73,8 @@
         }
       },
       "transition": {
-        type: "fade",
-        duration: 15,
+        type: "scroll",
+        duration: 10,
         pud: 10,
         resume: 5,
         speed: "medium"

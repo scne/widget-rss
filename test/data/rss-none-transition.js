@@ -73,8 +73,11 @@
         }
       },
       "transition": {
-        "type": "none",
-        "duration": 20000
+        type: "none",
+        duration: 20,
+        pud: 10,
+        resume: 5,
+        speed: "medium"
       },
       "dataSelection": {
         "showTitle": true,

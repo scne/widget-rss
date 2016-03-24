@@ -83,34 +83,8 @@
 
           <hr/>
 
-          <!--Transitions-->
-          <div class="row">
-            <div class="col-md-3">
-              <div class="form-group">
-                <label class="control-label" id="transitionHeading">{{"transition.heading" | translate }}</label>
-                <select id="scroll-by" class="form-control" ng-model="settings.additionalParams.transition.type">
-                  <option value="none" selected>{{"transition.type.none" | translate }}</option>
-                  <option value="fade" >{{"transition.type.fade" | translate }}</option>
-                  <!--option value="scroll">{{"widget-rss.transition.type.scroll" | translate }}</option-->
-                  <!--option value="page">{{"widget-rss.transition.type.page" | translate }}</option-->
-                </select>
-              </div>
-            </div>
-          </div>
-          <div class="row">
-            <!--Duration-->
-            <div class="fadeDiv box">
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label class="control-label">{{"transition.duration" | translate }}</label>
-                  <div class="input-group">
-                    <input id="scroll-horizontal" name="scrollHorizontal" type="number"  class="form-control" ng-model="duration">
-                    <span class="input-group-addon">sec</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <!--Transition-->
+          <transition-setting transition="settings.additionalParams.transition"></transition-setting>
           <hr/>
 
           <!-- Data Selection -->

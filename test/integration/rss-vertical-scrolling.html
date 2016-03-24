@@ -23,17 +23,25 @@
 
 <div id="messageContainer"></div>
 
-<script src="../data/rss-none-transition.js"></script>
+<script src="../data/rss-vertical-scrolling.js"></script>
 <script src="../data/json-rss.js"></script>
 <script src="../data/layout.js"></script>
 
 <script src="../../node_modules/widget-tester/mocks/gadget-mocks.js"></script>
 <script src="../../node_modules/widget-tester/mocks/gadgets.io-mock.js"></script>
 <script src="../../node_modules/widget-tester/mocks/logger-mock.js"></script>
+<script src="../../node_modules/chai-as-promised/lib/chai-as-promised.js"></script>
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
 
+<script src="//s3.amazonaws.com/rise-common/scripts/greensock/ThrowPropsPlugin.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/gsap/1.11.7/TweenLite.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/gsap/1.11.7/plugins/CSSPlugin.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/gsap/1.11.7/utils/Draggable.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/gsap/1.11.7/plugins/ScrollToPlugin.min.js"></script>
+
 <script src="../../src/components/jQuery.dotdotdot/src/jquery.dotdotdot.js"></script>
+<script src="../../src/components/auto-scroll/jquery.auto-scroll.js"></script>
 <script src="../../src/components/widget-common/dist/config.js"></script>
 <script src="../../src/components/widget-common/dist/common.js"></script>
 <script src="../../src/widget/rss.js"></script>
@@ -43,7 +51,7 @@
 <script src="../../test/mocks/images-mock.js"></script>
 
 <script src="../../src/widget/rise-rss.js"></script>
-<script src="../../src/widget/transition-no-scroll.js"></script>
+<script src="../../src/widget/transition-vertical-scroll.js"></script>
 <script src="../../src/widget/content.js"></script>
 <script src="../../src/components/widget-common/dist/message.js"></script>
 <script src="../../src/widget/main.js"></script>
@@ -76,50 +84,23 @@
       server.restore();
     });
 
-    suite("Transitioning", function() {
+    suite("Items showing", function () {
 
-      test("should always transition to next rss item after 20 seconds", function() {
-        assert.equal(document.querySelector(".headline a").innerHTML,
-          "RSS 2.0 - Entry 1 title", "first item displaying");
-
-        clock.tick(20000);
-
-        assert.equal(document.querySelector(".headline a").innerHTML,
-          "RSS 2.0 - Entry 2 title", "second item displaying");
-
+      test("should append all items to page", function() {
+        assert.equal(document.querySelectorAll(".item").length, jsonRSS.length);
       });
 
+    });
 
-      test("should not transition to next rss item before 20 seconds", function() {
-        assert.equal(document.querySelector(".headline a").innerHTML,
-          "RSS 2.0 - Entry 2 title", "second item displaying");
+    suite("auto-scroll instantiation", function () {
 
-        clock.tick(15000);
-
-        assert.equal(document.querySelector(".headline a").innerHTML,
-          "RSS 2.0 - Entry 2 title", "second still item displaying");
-
-        clock.tick(5000);
-
-        assert.equal(document.querySelector(".headline a").innerHTML,
-          "RSS 2.0 - Entry 3 title", "Third item displaying");
-
+      test("should revise HTML markup for auto-scroll purposes", function () {
+        assert.isNotNull(document.querySelector("#container div section.page"));
       });
 
-      test("should eventually transition all items and start over", function() {
-        var contentDoneSpy = sinon.spy(RiseVision.RSS, "onContentDone");
-
-        assert.equal(document.querySelector(".headline a").innerHTML,
-          "RSS 2.0 - Entry 3 title", "Third item currently displaying");
-
-        // move clock enough intervals that last (4th) item has shown for allotted 10 seconds and now time to start over
-        clock.tick(40000);
-
-        assert(contentDoneSpy.calledOnce, "onContentDone called once");
-        assert.equal(document.querySelector(".headline a").innerHTML,
-          "RSS 2.0 - Entry 1 title", "First item displaying again");
-
-        RiseVision.RSS.onContentDone.restore();
+      test("should apply auto-scroll specific css", function () {
+        assert.equal(document.querySelector("#container").style.overflow, "hidden");
+        assert.equal(document.querySelector("#container").style.cursor, "move");
 
       });
 

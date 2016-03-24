@@ -42,12 +42,8 @@
         expect(element(by.css("#author-font .mce-tinymce")).isPresent()).to.eventually.be.true;
       });
 
-      it("Should load Transition", function () {
-        expect(element(by.id("transitionHeading")).isDisplayed()).to.eventually.be.true;
-      });
-
-      it("Should load Transition options", function () {
-        expect(element(by.model("settings.additionalParams.transition.type")).isDisplayed()).to.eventually.be.true;
+      it("Should load Transition component", function () {
+        expect(element(by.css("select[name='transition-by']")).isPresent()).to.eventually.be.true;
       });
 
       it("Should load Separator Color Picker component", function () {
@@ -66,14 +62,6 @@
 
       it("Should set default value for 'Max Items in Queue'", function () {
         expect(element(by.model("settings.additionalParams.itemsInQueue")).getAttribute("value")).to.eventually.equal("5");
-      });
-
-      it("Should set default value for 'Transition'", function () {
-        expect(element(by.model("settings.additionalParams.transition.type")).getAttribute("value")).to.eventually.equal("none");
-      });
-
-      it("Should load duration", function () {
-        expect(element(by.model("duration")).getAttribute("value")).to.eventually.equal("10");
       });
 
       it("Should select 'Show Title'", function () {
@@ -216,7 +204,10 @@
             },
             "transition": {
               "type": "none",
-              "duration": 10000
+              "duration": 10,
+              "pud": 10,
+              "resume": 5,
+              "speed": "medium"
             },
             "dataSelection": {
               "showTitle": true,
@@ -315,7 +306,10 @@
           },
           "transition": {
             "type": "none",
-            "duration": 10000
+            "duration": 10,
+            "pud": 10,
+            "resume": 5,
+            "speed": "medium"
           },
           "dataSelection": {
             "showTitle": false,

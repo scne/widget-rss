@@ -43,6 +43,7 @@
 <script src="../../test/mocks/images-mock.js"></script>
 
 <script src="../../src/widget/rise-rss.js"></script>
+<script src="../../src/widget/transition-no-scroll.js"></script>
 <script src="../../src/widget/content.js"></script>
 <script src="../../src/components/widget-common/dist/message.js"></script>
 <script src="../../src/widget/main.js"></script>
@@ -91,7 +92,7 @@
       });
 
       test("should set item height divided by number of items to show", function() {
-        assert.equal(($("#container").height()/window.gadget.settings.additionalParams.itemsToShow) + "px" , document.querySelector(".item").style.height);
+        assert.equal((($("#container").height()/window.gadget.settings.additionalParams.itemsToShow) - window.gadget.settings.additionalParams.separator.size) + "px" , document.querySelector(".item").style.height);
       });
 
       test("should apply font styling to headline", function() {

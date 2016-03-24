@@ -6,7 +6,7 @@
     "params": {},
     "additionalParams": {
       "url": "http://test.com/feed.rss",
-      "itemsInQueue": 4,
+      "itemsInQueue": 1,
       "itemsToShow": 1,
       "headline": {
         "fontStyle": {
@@ -73,8 +73,8 @@
         }
       },
       "transition": {
-        type: "fade",
-        duration: 15,
+        type: "scroll",
+        duration: 10,
         pud: 10,
         resume: 5,
         speed: "medium"

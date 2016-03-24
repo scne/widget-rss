@@ -750,6 +750,265 @@ jQuery(document).ready(function($) {
 jQuery(window).load(function(){
 	jQuery(".dot-ellipsis.dot-load-update").trigger("update.dot");
 });
+/*
+ *  Project: Auto-Scroll
+ *  Description: Auto-scroll plugin for use with Rise Vision Widgets
+ *  Author: @donnapep
+ *  License: MIT
+ */
+
+;(function ($, window, document, undefined) {
+	"use strict";
+
+	var pluginName = "autoScroll",
+		defaults = {
+			by: "continuous",
+			speed: "medium",
+			duration: 10,
+			pause: 5,
+			click: false,
+			minimumMovement: 3 // Draggable default value - http://greensock.com/docs/#/HTML5/Drag/Draggable/
+		};
+
+
+	function Plugin(element, options) {
+		this.element = element;
+		this.page = $(element).find(".page");
+		this.options = $.extend({}, defaults, options);
+		this._defaults = defaults;
+		this._name = pluginName;
+		this.isLoading = true;
+		this.draggable = null;
+		this.tween = null;
+		this.calculateProgress = null;
+		this.init();
+	}
+
+	Plugin.prototype = {
+		init: function () {
+			var speed, duration;
+			var self = this;
+			var scrollComplete = null;
+			var pageComplete = null;
+			var elementHeight = $(this.element).outerHeight(true);
+			var pauseHeight = elementHeight;
+			var max = this.element.scrollHeight - this.element.offsetHeight;
+
+			function pauseTween() {
+				self.tween.pause();
+
+				TweenLite.killDelayedCallsTo(self.calculateProgress);
+				TweenLite.killDelayedCallsTo(scrollComplete);
+				// Only used when scrolling by page.
+				TweenLite.killDelayedCallsTo(pageComplete);
+			}
+
+			this.calculateProgress = function() {
+				// Set pauseHeight to new value.
+				pauseHeight = $(self.element).scrollTop() +
+					elementHeight;
+
+				self.tween.progress($(self.element).scrollTop() / max)
+					.play();
+			};
+
+			if (this.canScroll()) {
+				// Set scroll speed.
+				if (this.options.by === "page") {
+					if (this.options.speed === "fastest") {
+						speed = 0.4;
+					}
+					else if (this.options.speed === "fast") {
+						speed = 0.8;
+					}
+					else if (this.options.speed === "medium") {
+						speed = 1.2;
+					}
+					else if (this.options.speed === "slow") {
+						speed = 1.6;
+					}
+					else {
+						speed = 2;
+					}
+
+					duration = this.page.outerHeight(true) /
+						$(this.element).outerHeight(true) * speed;
+				}
+				else {  // Continuous or by row
+					if (this.options.speed === "fastest") {
+						speed = 60;
+					}
+					else if (this.options.speed === "fast") {
+						speed = 50;
+					}
+					else if (this.options.speed === "medium") {
+						speed = 40;
+					}
+					else if (this.options.speed === "slow") {
+						speed = 30;
+					}
+					else {
+						speed = 20;
+					}
+
+					duration = Math.abs((this.page.outerHeight(true) -
+						$(this.element).outerHeight(true)) / speed);
+				}
+
+				Draggable.create(this.element, {
+					type: "scrollTop",
+					throwProps: true,
+					edgeResistance: 0.75,
+					minimumMovement: self.options.minimumMovement,
+					onPress: function() {
+						pauseTween();
+					},
+					onRelease: function() {
+						if (self.options.by !== "none") {
+							/* Figure out what the new scroll position is and
+							 translate that into the progress of the tween (0-1)
+							 so that we can calibrate it; otherwise, it'd jump
+							 back to where it paused when we resume(). */
+							TweenLite.delayedCall(self.options.pause, self.calculateProgress);
+						}
+					},
+					onClick: function() {
+						if (self.options.click) {
+							pauseTween();
+							$(self.element).trigger("scrollClick", [this.pointerEvent]);
+						}
+					}
+				});
+
+				this.draggable = Draggable.get(this.element);
+
+				this.tween = TweenLite.to(this.draggable.scrollProxy, duration, {
+					scrollTop: max,
+					ease: Linear.easeNone,
+					delay: (this.options.by === "page") ? this.options.duration : this.options.pause,
+					paused: true,
+					onUpdate: (this.options.by === "page" ? function() {
+						if (Math.abs(self.draggable.scrollProxy.top()) >= pauseHeight) {
+							self.tween.pause();
+
+							// Next height at which to pause scrolling.
+							pauseHeight += elementHeight;
+
+							TweenLite.delayedCall(self.options.duration,
+								pageComplete = function() {
+									self.tween.resume();
+								}
+							);
+						}
+					} : undefined),
+					onComplete: function() {
+						TweenLite.delayedCall((self.options.by === "page") ? self.options.duration : self.options.pause,
+							scrollComplete = function() {
+								TweenLite.to(self.page, 1, {
+									autoAlpha: 0,
+									onComplete: function() {
+										self.tween.seek(0).pause();
+
+										if (self.options.by === "page") {
+											pauseHeight = elementHeight;
+										}
+
+										$(self.element).trigger("done");
+									}
+								});
+							}
+						);
+					}
+				});
+
+				// Hide scrollbar.
+				TweenLite.set(this.element, { overflowY: "hidden" });
+			} else {
+				if (this.options.click) {
+					// Account for content that is to be clicked when content not needed to be scrolled
+					// Leverage Draggable for touch/click event handling
+					Draggable.create(this.element, {
+						type: "scrollTop",
+						throwProps: true,
+						edgeResistance: 0.95,
+						minimumMovement: this.options.minimumMovement,
+						onClick: function() {
+							$(self.element).trigger("scrollClick", [this.pointerEvent]);
+						}
+					});
+
+					this.draggable = Draggable.get(this.element);
+				}
+			}
+		},
+		// Check if content is larger than viewable area and if the scroll settings is set to actually scroll.
+		canScroll: function() {
+			return this.options && (this.page.height() > $(this.element).height());
+		},
+		destroy: function() {
+			$(this.element).removeData();
+			if (this.tween) {
+				this.tween.kill();
+			}
+
+			if (this.draggable) {
+				this.draggable.kill();
+			}
+
+			// Remove elements.
+			this.element = null;
+			this.page = null;
+			this.options = null;
+			this._defaults = null;
+			this.draggable = null;
+			this.tween = null;
+			this.calculateProgress = null;
+		}
+	};
+
+	Plugin.prototype.play = function() {
+		if (this.canScroll() && this.options.by !== "none") {
+			if (this.tween) {
+				if (this.isLoading) {
+					this.tween.play();
+					this.isLoading = false;
+				}
+				else {
+					TweenLite.to(this.page, 1, {autoAlpha: 1});
+					TweenLite.delayedCall((this.options.by === "page") ? this.options.duration : this.options.pause, this.calculateProgress);
+				}
+			}
+		}
+	};
+
+	Plugin.prototype.pause = function() {
+		if (this.tween) {
+			TweenLite.killDelayedCallsTo(this.calculateProgress);
+			this.tween.pause();
+		}
+	};
+
+	Plugin.prototype.stop = function() {
+		if (this.tween) {
+			TweenLite.killDelayedCallsTo(this.calculateProgress);
+			this.tween.kill();
+		}
+
+		this.element = null;
+		this.page = null;
+	};
+
+	// A lightweight plugin wrapper around the constructor that prevents
+	// multiple instantiations.
+	$.fn.autoScroll = function(options) {
+		return this.each(function() {
+			if (!$.data(this, "plugin_" + pluginName)) {
+				$.data(this, "plugin_" + pluginName, new Plugin(this, options));
+			}
+		});
+	};
+})(jQuery, window, document);
+
 var WIDGET_COMMON_CONFIG = {
   AUTH_PATH_URL: "v1/widget/auth",
   LOGGER_CLIENT_ID: "1088527147109-6q1o2vtihn34292pjt4ckhmhck0rk0o7.apps.googleusercontent.com",
@@ -1298,7 +1557,7 @@ RiseVision.RSS = (function (document, gadgets) {
   }
 
   function onRiseRSSInit(feed) {
-    _content = new RiseVision.RSS.Content(_prefs, _additionalParams);
+    _content = new RiseVision.RSS.Content(_additionalParams);
 
     if (feed.items && feed.items.length > 0) {
       // remove a message previously shown
@@ -1342,7 +1601,7 @@ RiseVision.RSS = (function (document, gadgets) {
       if (_errorFlag) {
         if (!_content) {
           // create content module instance
-          _content = new RiseVision.RSS.Content(_prefs, _additionalParams);
+          _content = new RiseVision.RSS.Content(_additionalParams);
         }
 
         _message.hide();
@@ -1617,55 +1876,25 @@ RiseVision.RSS.RiseRSS = function (data) {
   };
 };
 
-/* global _ */
-
 var RiseVision = RiseVision || {};
 RiseVision.RSS = RiseVision.RSS || {};
 
-RiseVision.RSS.Content = function (prefs, params) {
+RiseVision.RSS.TransitionNoScroll = function (params, content) {
 
   "use strict";
 
-  var _items = [],
-    _utils = RiseVision.RSS.Utils,
-    _images = RiseVision.RSS.Images;
-
-  var _$el;
+  var _items = [];
 
   var _currentItemIndex = 0;
 
   var _transitionIntervalId = null;
 
-  var _transition = {
-    "type": "none",
-    duration: 10000
-  };
-
-  var _waitingForUpdate = false;
-
-  var _imageTypes = ["image/bmp", "image/gif", "image/jpeg", "image/jpg", "image/png", "image/tiff"];
+  var _waitingForUpdate = false,
+    _waitingToStart = false;
 
   /*
    *  Private Methods
    */
-  function _cache() {
-    _$el = {
-      page:           $(".page")
-    };
-  }
-
-  function _getItemHeight() {
-    // account for not enough items to actually show compared to setting value
-    var itemsToShow = (_items.length <= params.itemsToShow) ? _items.length : params.itemsToShow;
-
-    if (params.separator && params.separator.show) {
-      return prefs.getInt("rsH") / itemsToShow - params.separator.size;
-    }
-    else {
-      return prefs.getInt("rsH") / itemsToShow;
-    }
-  }
-
   function _getTransitionConfig(index) {
     var config = {};
 
@@ -1698,6 +1927,368 @@ RiseVision.RSS.Content = function (prefs, params) {
     }
 
     return config;
+  }
+
+  function _clearPage(cb) {
+    $(".page").empty();
+
+    if (!cb || typeof cb !== "function") {
+      return;
+    }
+    else {
+      cb();
+    }
+  }
+
+  function _clear(cb) {
+    if (params.transition.type === "fade") {
+      $(".item").one("transitionend", function() {
+        _clearPage(cb);
+      });
+
+      $(".item").addClass("fade-out").removeClass("fade-in");
+    }
+    else {
+      _clearPage(cb);
+    }
+  }
+
+  function _show(index) {
+    content.showItem(index);
+
+    if (params.transition.type === "fade") {
+      $(".item").addClass("fade-in");
+    }
+
+    $(".item").removeClass("hide");
+  }
+
+  function _makeTransition() {
+    var startConfig = _getStartConfig(),
+      transConfig = _getTransitionConfig(_currentItemIndex),
+      startingIndex;
+
+    if (_currentItemIndex === (_items.length - 1)) {
+
+      _stopTransitionTimer();
+
+      _clear(function() {
+
+        // show the items
+        for (var i = 0; i < startConfig.itemsToShow; i += 1) {
+          _show(i);
+        }
+
+        _currentItemIndex = startConfig.currentItemIndex;
+
+        RiseVision.RSS.onContentDone();
+      });
+
+      _waitingForUpdate = false;
+
+      return;
+    }
+
+    if (_waitingForUpdate) {
+      _waitingForUpdate = false;
+
+      content.loadImages(function () {
+        _clear(function () {
+          for (var i = 0; i < startConfig.itemsToShow; i += 1) {
+            _show(i);
+          }
+
+          _currentItemIndex = startConfig.currentItemIndex;
+        });
+      });
+
+    }
+    else {
+      startingIndex = _currentItemIndex + 1;
+
+      _currentItemIndex = transConfig.currentItemIndex;
+
+      _clear(function () {
+        for (var i = startingIndex; i < (startingIndex + transConfig.itemsToShow); i += 1) {
+          _show(i);
+        }
+      });
+    }
+
+  }
+
+  function _startTransitionTimer() {
+    // legacy, backwards compatibility for duration value
+    var duration = (params.transition.duration / 1000 >= 1) ? params.transition.duration : params.transition.duration * 1000;
+
+    if (_transitionIntervalId === null) {
+      _transitionIntervalId = setInterval(function () {
+        _makeTransition();
+      }, duration);
+    }
+  }
+
+  function _stopTransitionTimer() {
+    clearInterval(_transitionIntervalId);
+    _transitionIntervalId = null;
+  }
+
+  /*
+   *  Public Methods
+   */
+  function init(items) {
+    var startConfig;
+
+    _items = items;
+    startConfig = _getStartConfig();
+
+    _currentItemIndex = startConfig.currentItemIndex;
+
+    // show the items
+    for (var i = 0; i < startConfig.itemsToShow; i += 1) {
+      _show(i);
+    }
+
+    if (_waitingToStart) {
+      _waitingToStart = false;
+      start();
+    }
+  }
+
+  function reset() {
+    _clear();
+    _waitingToStart = false;
+    _waitingForUpdate = false;
+    _items = [];
+  }
+
+  function start() {
+    if (_items.length > 0) {
+      _startTransitionTimer();
+    }
+    else {
+      _waitingToStart = true;
+    }
+  }
+
+  function stop() {
+    _waitingToStart = false;
+    _stopTransitionTimer();
+  }
+
+  function update(items) {
+    _items = items;
+    _waitingForUpdate = true;
+  }
+
+  return {
+    init: init,
+    reset: reset,
+    start: start,
+    stop: stop,
+    update: update
+  };
+
+};
+
+var RiseVision = RiseVision || {};
+RiseVision.RSS = RiseVision.RSS || {};
+
+RiseVision.RSS.TransitionVerticalScroll = function (params, content) {
+  "use strict";
+
+  var _items = [];
+
+  var _waitingForUpdate = false,
+    _waitingToStart = false;
+
+  var _pudTimerID = null;
+
+  /*
+   *  Private Methods
+   */
+  function _clearPage() {
+    $(".page").empty();
+  }
+
+  function _getScrollEl() {
+    var $scrollContainer = $("#container");
+
+    if (typeof $scrollContainer.data("plugin_autoScroll") !== "undefined") {
+      return  $scrollContainer.data("plugin_autoScroll");
+    }
+
+    return null;
+  }
+
+  function _removeAutoscroll() {
+    var $scrollContainer = _getScrollEl();
+
+    if ($scrollContainer) {
+      $scrollContainer.destroy();
+
+      // ensure page visibility is back on from possible previous fade out (scroll complete)
+      $(".page").css("visibility", "inherit");
+      $(".page").css("opacity", "1");
+    }
+  }
+
+  function _showItems() {
+    // show all the items
+    for (var i = 0; i < _items.length; i += 1) {
+      content.showItem(i);
+    }
+
+    $(".item").removeClass("hide");
+  }
+
+  function _startPUDTimer() {
+    // If there is not enough content to scroll, use the PUD Failover setting as the trigger
+    // for sending "done".
+    var delay = params.transition.pud  * 1000;
+
+    if (!_pudTimerID) {
+      _pudTimerID = setTimeout(function() {
+
+        _pudTimerID = null;
+        _onScrollDone();
+
+      }, delay);
+    }
+  }
+
+  function _onScrollDone() {
+    if (_waitingForUpdate) {
+      _waitingForUpdate = false;
+
+      _removeAutoscroll();
+
+      content.loadImages(function () {
+        _clearPage();
+        _showItems();
+        _applyAutoScroll();
+
+        RiseVision.RSS.onContentDone();
+      });
+
+    }
+    else {
+      RiseVision.RSS.onContentDone();
+    }
+  }
+
+  function _applyAutoScroll() {
+    var $scrollContainer = $("#container");
+
+    // apply auto scroll
+    $scrollContainer.autoScroll({
+     "by": (params.transition.type === "scroll") ? "continuous" : "page",
+     "speed": params.transition.speed,
+     "pause": params.transition.resume
+    }).on("done", function () {
+      _onScrollDone();
+    });
+  }
+
+  /*
+   *  Public Methods
+   */
+  function init(items) {
+    _items = items;
+
+    _showItems();
+    _applyAutoScroll();
+
+    if (_waitingToStart) {
+      _waitingToStart = false;
+      start();
+    }
+  }
+
+  function reset() {
+    _removeAutoscroll();
+    _clearPage();
+
+    _waitingToStart = false;
+    _items = [];
+  }
+
+  function start() {
+    var $scroll = _getScrollEl();
+
+    if (_items.length > 0) {
+      if ($scroll && $scroll.canScroll()) {
+        $scroll.play();
+      }
+      else {
+        _startPUDTimer();
+      }
+    }
+    else {
+      _waitingToStart = true;
+    }
+  }
+
+  function stop() {
+    var $scroll = _getScrollEl();
+
+    _waitingToStart = false;
+
+    if ($scroll && $scroll.canScroll()) {
+      $scroll.pause();
+    }
+
+    // Clear the PUD timer if the playlist item is not set to PUD.
+    if (_pudTimerID) {
+      clearTimeout(_pudTimerID);
+      _pudTimerID = null;
+    }
+  }
+
+  function update(items) {
+    _items = items;
+    _waitingForUpdate = true;
+  }
+
+  return {
+    init: init,
+    reset: reset,
+    start: start,
+    stop: stop,
+    update: update
+  };
+
+};
+
+/* global _ */
+
+var RiseVision = RiseVision || {};
+RiseVision.RSS = RiseVision.RSS || {};
+
+RiseVision.RSS.Content = function (params) {
+
+  "use strict";
+
+  var _items = [],
+    _utils = RiseVision.RSS.Utils,
+    _images = RiseVision.RSS.Images,
+    _transition = null;
+
+  var _imageTypes = ["image/bmp", "image/gif", "image/jpeg", "image/jpg", "image/png", "image/tiff"];
+
+  /*
+   *  Private Methods
+   */
+  function _getItemHeight() {
+    // account for not enough items to actually show compared to setting value
+    var itemsToShow = (_items.length <= params.itemsToShow) ? _items.length : params.itemsToShow;
+
+    if (params.separator && params.separator.show) {
+      return params.height / itemsToShow - params.separator.size;
+    }
+    else {
+      return params.height / itemsToShow;
+    }
   }
 
   function _getStory(item) {
@@ -1763,15 +2354,15 @@ RiseVision.RSS.Content = function (prefs, params) {
 
   function _getImageDimensions($image, item) {
     var dimensions = null,
-      paddingWidth = parseInt($image.css("padding-left"), 10) + parseInt($image.css("padding-right"), 10),
-      paddingHeight = parseInt($image.css("padding-top"), 10) + parseInt($image.css("padding-bottom"), 10),
+      marginWidth = parseInt($image.css("margin-left"), 10) + parseInt($image.css("margin-right"), 10),
+      marginHeight = parseInt($image.css("margin-top"), 10) + parseInt($image.css("margin-bottom"), 10),
       ratioX, ratioY, scale;
 
     switch (params.layout) {
       case "layout-4x1":
         dimensions = {};
-        dimensions.width = prefs.getString("rsW") * 0.33;
-        dimensions.height = (prefs.getString("rsH") / params.itemsToShow) - paddingHeight;
+        dimensions.width = params.width * 0.33;
+        dimensions.height = (params.height / params.itemsToShow) - marginHeight;
 
         break;
 
@@ -1779,26 +2370,26 @@ RiseVision.RSS.Content = function (prefs, params) {
         dimensions = {};
 
         if ($(item).find(".story").length === 0) {
-          dimensions.width = prefs.getString("rsW") - paddingWidth;
+          dimensions.width = params.width - marginWidth;
         }
         else {
-          dimensions.width = prefs.getString("rsW") * 0.5;
+          dimensions.width = params.width * 0.5;
         }
 
-        dimensions.height = (prefs.getString("rsH") / params.itemsToShow) - $(item).find(".textWrapper").outerHeight(true) - paddingHeight;
+        dimensions.height = (params.height / params.itemsToShow) - $(item).find(".textWrapper").outerHeight(true) - marginHeight;
 
         break;
 
       case "layout-16x9":
         dimensions = {};
-        dimensions.width = prefs.getString("rsW") - paddingWidth;
-        dimensions.height = (prefs.getString("rsH") / params.itemsToShow) - paddingHeight;
+        dimensions.width = params.width - marginWidth;
+        dimensions.height = (params.height / params.itemsToShow) - marginHeight;
 
         break;
       case "layout-1x2":
         dimensions = {};
-        dimensions.width = prefs.getString("rsW") - paddingWidth;
-        dimensions.height = ((prefs.getString("rsH") / params.itemsToShow) - paddingHeight) / 2;
+        dimensions.width = params.width - marginWidth;
+        dimensions.height = ((params.height / params.itemsToShow) - marginHeight) / 2;
         break;
     }
 
@@ -1922,32 +2513,8 @@ RiseVision.RSS.Content = function (prefs, params) {
     });
   }
 
-  // Fade out and clear content.
-  function _clear(cb) {
-    if (_transition.type === "fade") {
-      $(".item").one("transitionend", function() {
-        _clearPage(cb);
-      });
-
-      $(".item").addClass("fade-out").removeClass("fade-in");
-    }
-    else {
-      _clearPage(cb);
-    }
-  }
-
-  function _clearPage(cb) {
-    _$el.page.empty();
-    if (!cb || typeof cb !== "function") {
-      return;
-    }
-    else {
-      cb();
-    }
-  }
-
   function _showItem(index) {
-    _$el.page.append(_getTemplate(_items[index], index));
+    $(".page").append(_getTemplate(_items[index], index));
 
     _setImageDimensions();
 
@@ -1956,12 +2523,6 @@ RiseVision.RSS.Content = function (prefs, params) {
     }
 
     $(".item").height(_getItemHeight());
-
-    if (_transition.type === "fade") {
-      $(".item").addClass("fade-in");
-    }
-
-    $(".item").removeClass("hide");
 
     // 16x9 (images only) layout doesn't need truncating, image sizing handled in _setImageDimensions()
     if (params.layout !== "layout-16x9") {
@@ -1973,128 +2534,86 @@ RiseVision.RSS.Content = function (prefs, params) {
 
   }
 
-  function _makeTransition() {
-    var startConfig = _getStartConfig(),
-      transConfig = _getTransitionConfig(_currentItemIndex),
-      startingIndex;
-
-    if (_currentItemIndex === (_items.length - 1)) {
-
-      _stopTransitionTimer();
-
-      _clear(function() {
-
-        // show the items
-        for (var i = 0; i < startConfig.itemsToShow; i += 1) {
-          _showItem(i);
-        }
-
-        _currentItemIndex = startConfig.currentItemIndex;
-
-        RiseVision.RSS.onContentDone();
-      });
-
-      _waitingForUpdate = false;
-
-      return;
-    }
-
-    if (_waitingForUpdate) {
-      _waitingForUpdate = false;
-
-      // load all images
-      _images.load(_getImageUrls(), function () {
-
-        _clear(function () {
-          for (var i = 0; i < startConfig.itemsToShow; i += 1) {
-            _showItem(i);
-          }
-
-          _currentItemIndex = startConfig.currentItemIndex;
-        });
-
-      });
-
-    }
-    else {
-      startingIndex = _currentItemIndex + 1;
-
-      _currentItemIndex = transConfig.currentItemIndex;
-
-      _clear(function () {
-        for (var i = startingIndex; i < (startingIndex + transConfig.itemsToShow); i += 1) {
-          _showItem(i);
-        }
-      });
-    }
-
-  }
-
-  function _startTransitionTimer() {
-    if (_transitionIntervalId === null) {
-      _transitionIntervalId = setInterval(function () {
-        _makeTransition();
-      }, _transition.duration);
-    }
-  }
-
-  function _stopTransitionTimer() {
-    clearInterval(_transitionIntervalId);
-    _transitionIntervalId = null;
-  }
-
   /*
    *  Public Methods
    */
   function init(feed) {
-    var startConfig;
+    /*jshint validthis:true */
 
     _items = feed.items;
 
-    if(params.transition){
-      _transition = params.transition;
+    if (!_transition) {
+
+      if (!params.transition) {
+        // legacy, backwards compatible
+        params.transition = {
+          type: "none",
+          duration: 10
+        };
+      }
+
+      if (params.transition.type === "none" || params.transition.type === "fade") {
+        _transition = new RiseVision.RSS.TransitionNoScroll(params, this);
+      }
+      else if (params.transition.type === "scroll" || params.transition.type === "page") {
+        _transition = new RiseVision.RSS.TransitionVerticalScroll(params, this);
+      }
     }
 
-    startConfig = _getStartConfig();
+    loadImages(function () {
+      _transition.init(_items);
+    });
+  }
 
-    _currentItemIndex = startConfig.currentItemIndex;
-
+  function loadImages(cb) {
     // load all images
     _images.load(_getImageUrls(), function () {
-      // show the items
-      for (var i = 0; i < startConfig.itemsToShow; i += 1) {
-        _showItem(i);
+      if (cb && typeof cb === "function") {
+        cb();
       }
     });
-
   }
 
   function pause() {
-    _stopTransitionTimer();
+    if (_transition) {
+      _transition.stop();
+    }
   }
 
   function reset() {
-    _stopTransitionTimer();
-    _clear();
+    if (_transition) {
+      _transition.stop();
+      _transition.reset();
+    }
+
     _items = [];
   }
 
   function play() {
-    _startTransitionTimer();
+    if (_transition) {
+      _transition.start();
+    }
+  }
+
+  function showItem(index) {
+    _showItem(index);
   }
 
   function update(feed) {
     _items = feed.items;
-    _waitingForUpdate = true;
-  }
 
-  _cache();
+    if (_transition) {
+      _transition.update(_items);
+    }
+  }
 
   return {
     init: init,
+    loadImages: loadImages,
     pause: pause,
     play: play,
     reset: reset,
+    showItem: showItem,
     update: update
   };
 };
