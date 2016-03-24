@@ -2126,6 +2126,10 @@ RiseVision.RSS.TransitionVerticalScroll = function (params, content) {
 
     if ($scrollContainer) {
       $scrollContainer.destroy();
+
+      // ensure page visibility is back on from possible previous fade out (scroll complete)
+      $(".page").css("visibility", "inherit");
+      $(".page").css("opacity", "1");
     }
   }
 
