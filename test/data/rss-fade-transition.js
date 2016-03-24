@@ -73,8 +73,11 @@
         }
       },
       "transition": {
-        "type": "fade",
-        "duration": 15000
+        type: "fade",
+        duration: 15,
+        pud: 10,
+        resume: 5,
+        speed: "medium"
       },
       "dataSelection": {
         "showTitle": true,

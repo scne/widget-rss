@@ -72,6 +72,13 @@
           "backcolor": "transparent"
         }
       },
+      "transition": {
+        type: "none",
+        duration: 10,
+        pud: 10,
+        resume: 5,
+        speed: "medium"
+      },
       "dataSelection": {
         "showTitle": true,
         "showTimestamp": true,
