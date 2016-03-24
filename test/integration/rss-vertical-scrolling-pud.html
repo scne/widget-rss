@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RSS Widget</title>
+
+  <link rel="stylesheet" type="text/css" href="../../src/widget/css/rss.css">
+  <link rel="stylesheet" href="../../src/components/widget-common/dist/css/message.css">
+
+  <script src="../../src/components/webcomponentsjs/webcomponents-lite.min.js"></script>
+  <script src="../../src/components/web-component-tester/browser.js"></script>
+
+  <link rel="import" href="../../src/components/rise-rss/rise-rss.html">
+</head>
+<body>
+
+<rise-rss id="rss" refresh="1"></rise-rss>
+
+<div id="container">
+  <section class="page"></section>
+</div>
+
+<div id="messageContainer"></div>
+
+<script src="../data/rss-vertical-scrolling-pud.js"></script>
+<script src="../data/json-rss.js"></script>
+<script src="../data/layout.js"></script>
+
+<script src="../../node_modules/widget-tester/mocks/gadget-mocks.js"></script>
+<script src="../../node_modules/widget-tester/mocks/gadgets.io-mock.js"></script>
+<script src="../../node_modules/widget-tester/mocks/logger-mock.js"></script>
+<script src="../../node_modules/chai-as-promised/lib/chai-as-promised.js"></script>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+
+<script src="//s3.amazonaws.com/rise-common/scripts/greensock/ThrowPropsPlugin.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/gsap/1.11.7/TweenLite.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/gsap/1.11.7/plugins/CSSPlugin.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/gsap/1.11.7/utils/Draggable.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/gsap/1.11.7/plugins/ScrollToPlugin.min.js"></script>
+
+<script src="../../src/components/jQuery.dotdotdot/src/jquery.dotdotdot.js"></script>
+<script src="../../src/components/auto-scroll/jquery.auto-scroll.js"></script>
+<script src="../../src/components/widget-common/dist/config.js"></script>
+<script src="../../src/components/widget-common/dist/common.js"></script>
+<script src="../../src/widget/rss.js"></script>
+<script src="../../src/widget/utils.js"></script>
+
+<!-- mock the image loader -->
+<script src="../../test/mocks/images-mock.js"></script>
+
+<script src="../../src/widget/rise-rss.js"></script>
+<script src="../../src/widget/transition-vertical-scroll.js"></script>
+<script src="../../src/widget/content.js"></script>
+<script src="../../src/components/widget-common/dist/message.js"></script>
+<script src="../../src/widget/main.js"></script>
+
+<script>
+
+  var clock, paramsStub, server;
+
+  paramsStub = sinon.stub(RiseVision.RSS, "setAdditionalParams", function (names, values) {
+    // need to set the fake timer clock before any of the code within setAdditionalParams is executed
+    clock = sinon.useFakeTimers();
+
+    server = sinon.fakeServer.create();
+    server.respondImmediately = true;
+
+    server.respondWith("GET", "/components/widget-rss/test/integration/layouts/layout-4x1.html",
+      [200, { "Content-Type": "text/html" }, layout]);
+    server.respondWith(JSON.stringify(jsonRSS));
+
+    // restore the function
+    paramsStub.restore();
+    // call it again with the params
+    RiseVision.RSS.setAdditionalParams(names, values);
+  });
+
+  suite("RSS Content", function() {
+
+    suiteTeardown(function() {
+      clock.restore();
+      server.restore();
+    });
+
+    suite("auto-scroll instantiation", function () {
+
+      test("should not revise HTML markup due to not enough content to scroll", function () {
+        assert.isNull(document.querySelector("#container div section.page"));
+      });
+
+      test("should not apply auto-scroll specific css for scrolling", function () {
+        assert.equal(document.querySelector("#container").style.overflow, "");
+        assert.equal(document.querySelector("#container").style.cursor, "");
+
+      });
+
+    });
+
+    suite("PUD timer", function () {
+
+      test("should send Done based on PUD value", function() {
+        var contentDoneSpy = sinon.spy(RiseVision.RSS, "onContentDone");
+
+        // move clock next interval so that the displayed 3rd and 4th items have shown for allotted 10 seconds
+        clock.tick(window.gadget.settings.additionalParams.transition.pud * 1000);
+
+        assert(contentDoneSpy.calledOnce, "onContentDone called once");
+
+        RiseVision.RSS.onContentDone.restore();
+
+      });
+
+    });
+
+    suite("Feed refresh", function () {
+
+      test("should refresh content after PUD timer complete", function () {
+        assert.equal(document.querySelector(".headline a").innerHTML,
+          "RSS 2.0 - Entry 1 title", "first item displaying");
+
+        RiseVision.RSS.onRiseRSSRefresh({
+          "items": [{
+            "title": "Refreshed Content",
+            "description": "Testing the refreshed content"
+          }]
+        });
+
+        clock.tick(window.gadget.settings.additionalParams.transition.pud * 1000);
+
+        assert.equal(document.querySelector(".headline a").innerHTML,
+          "Refreshed Content", "refreshed item displaying");
+      });
+
+    });
+
+  });
+
+</script>
+
+</body>
+</html>
