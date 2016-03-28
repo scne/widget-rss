@@ -139,7 +139,7 @@ RiseVision.RSS.TransitionNoScroll = function (params, content) {
 
   }
 
-  function _startTransitionTimer(item, _currentItemIndex) {
+  function _startTransitionTimer(items, _currentItemIndex) {
     // legacy, backwards compatibility for duration value
     /*var duration = (params.transition.duration / 1000 >= 1) ? params.transition.duration : params.transition.duration * 1000;
 
@@ -150,21 +150,21 @@ RiseVision.RSS.TransitionNoScroll = function (params, content) {
     }*/
 
     jwplayer("video").setup({
-      playlist: item[_currentItemIndex].enclosures[0].url,
+      playlist: items[_currentItemIndex].enclosures[0].url,
       //primary: "flash",
       controls: false,
       mute: false,
       debug: false,
-      primary: 'HTML5'
+      primary: "HTML5"
     });
 
-    jwplayer().play(true);
+    jwplayer().play();
 
     if (_transitionIntervalId === null) {
       _transitionIntervalId = setInterval(function () {
-        jwplayer().play(false);
         _makeTransition();
       }, jwplayer().getDuration());
+    }
 
   }
 
@@ -191,7 +191,7 @@ RiseVision.RSS.TransitionNoScroll = function (params, content) {
 
     if (_waitingToStart) {
       _waitingToStart = false;
-      start(item, _currentItemIndex);
+      start(items, _currentItemIndex);
     }
   }
 

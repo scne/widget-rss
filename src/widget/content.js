@@ -81,7 +81,7 @@ RiseVision.RSS.Content = function (params) {
     var video = {};
 
     if (item.enclosures[0] && (_.contains(_videoTypes, item.enclosures[0].type))) {
-      video.url = item.enclosures[0].url;
+        video.url = item.enclosures[0].url;
       video.type = item.enclosures[0].type;
       video.position = 0;
     }
