@@ -13,7 +13,7 @@ RiseVision.RSS.Content = function (params) {
     _transition = null;
 
   var _imageTypes = ["image/bmp", "image/gif", "image/jpeg", "image/jpg", "image/png", "image/tiff"];
-  var _videoTypes = ["video/mp4", "video/webm", "video/ogg"];
+  //var _videoTypes = ["video/mp4", "video/webm", "video/ogg"];
 
   /*
    *  Private Methods
@@ -77,7 +77,7 @@ RiseVision.RSS.Content = function (params) {
     return urls;
   }
 
-  function _getVideo(item){
+  /*function _getVideo(item){
     var video = {};
 
     if (item.enclosures[0] && (_.contains(_videoTypes, item.enclosures[0].type))) {
@@ -95,7 +95,7 @@ RiseVision.RSS.Content = function (params) {
     for (var i = 0; i < _items.length; i += 1) {
       videos.push(_getVideo(_items[i]));
     }
-  }
+  }*/
 
   function _getDate(item) {
     var pubdate = item.date, formattedDate = null;

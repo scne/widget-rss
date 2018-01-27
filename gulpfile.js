@@ -71,7 +71,7 @@
       .pipe(jshint.reporter("fail"));
   });
 
-  gulp.task("source", ["lint"], function () {
+  gulp.task("source", function () {
     var isProd = (env === "prod");
 
     return gulp.src(htmlFiles)
@@ -136,7 +136,9 @@
       "src/components/polymer/*.*{html,js}",
       "src/components/promise-polyfill/promise-polyfill-lite.html",
       "src/components/iron-ajax/iron-ajax.html",
-      "src/components/iron-ajax/iron-request.html"
+      "src/components/iron-ajax/iron-request.html",
+      "src/components/jwplayer/jwplayer.js",
+      "src/components/jwplayer/jwplayer.html5.js"
     ], {base: "./src/"})
       .pipe(gulp.dest("dist/"));
   });
